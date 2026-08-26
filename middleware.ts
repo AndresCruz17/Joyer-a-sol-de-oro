@@ -1,25 +1,25 @@
-export function middleware(request: Request) {
-  const url = new URL(request.url);
-  const cookieHeader = request.headers.get('cookie') || '';
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-  // Detecta si existe la cookie de sesión de Supabase
-  const hasSupabaseSession =
-    cookieHeader.includes('auth-token') || cookieHeader.includes('sb-');
+export function middleware(request: NextRequest) {
+  const allCookies = request.cookies.getAll();
 
-  const isLoginPage = url.pathname === '/admin/login';
-  const isAdminRoute = url.pathname.startsWith('/admin');
+  const hasSupabaseSession = allCookies.some((cookie) =>
+    cookie.name.includes('auth-token') || cookie.name.startsWith('sb-')
+  );
 
-  // Si intenta acceder al admin sin sesión -> Redirigir al Login
+  const isLoginPage = request.nextUrl.pathname === '/admin/login';
+  const isAdminRoute = request.nextUrl.pathname.startsWith('/admin');
+
   if (isAdminRoute && !isLoginPage && !hasSupabaseSession) {
-    return Response.redirect(new URL('/admin/login', request.url));
+    return NextResponse.redirect(new URL('/admin/login', request.url));
   }
 
-  // Si ya tiene sesión e intenta ir al Login -> Redirigir al Panel Admin
   if (isLoginPage && hasSupabaseSession) {
-    return Response.redirect(new URL('/admin', request.url));
+    return NextResponse.redirect(new URL('/admin', request.url));
   }
 
-  return;
+  return NextResponse.next();
 }
 
 export const config = {
