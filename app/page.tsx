@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { getCategories, getFeaturedProducts } from '@/lib/supabase/queries';
 import WhatsAppButton from '@/components/layout/WhatsAppButton';
 
+export const dynamic = 'force-dynamic';
+
 export default async function HomePage() {
   // Manejo de errores seguro con fallbacks vacíos ([])
   let categories: any[] = [];
