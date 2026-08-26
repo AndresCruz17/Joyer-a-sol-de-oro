@@ -3,8 +3,20 @@ import { getCategories, getFeaturedProducts } from '@/lib/supabase/queries';
 import WhatsAppButton from '@/components/layout/WhatsAppButton';
 
 export default async function HomePage() {
-  const categories = await getCategories();
-  const featuredProducts = await getFeaturedProducts();
+  // Manejo de errores seguro con fallbacks vacíos ([])
+  let categories: any[] = [];
+  let featuredProducts: any[] = [];
+
+  try {
+    const [catData, prodData] = await Promise.all([
+      getCategories(),
+      getFeaturedProducts(),
+    ]);
+    categories = catData || [];
+    featuredProducts = prodData || [];
+  } catch (error) {
+    console.error('Error al cargar datos en HomePage:', error);
+  }
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
@@ -31,53 +43,57 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* CATEGORÍAS (SEO / NAVEGACIÓN RÁPIDA) */}
-      <section className="max-w-7xl mx-auto px-6 py-16">
-        <h2 className="text-2xl font-bold text-amber-400 mb-8">Categorías Principales</h2>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          {categories.map((cat) => (
-            <Link
-              key={cat.id}
-              href={`/catalogo/${cat.slug}`}
-              className="p-6 bg-slate-900 border border-slate-800 rounded-xl hover:border-amber-500/50 transition-all text-center group"
-            >
-              <h3 className="font-semibold text-slate-200 group-hover:text-amber-400 transition-colors">
-                {cat.name}
-              </h3>
-            </Link>
-          ))}
-        </div>
-      </section>
+      {/* CATEGORÍAS */}
+      {categories.length > 0 && (
+        <section className="max-w-7xl mx-auto px-6 py-16">
+          <h2 className="text-2xl font-bold text-amber-400 mb-8">Categorías Principales</h2>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            {categories.map((cat) => (
+              <Link
+                key={cat.id}
+                href={`/catalogo/${cat.slug}`}
+                className="p-6 bg-slate-900 border border-slate-800 rounded-xl hover:border-amber-500/50 transition-all text-center group"
+              >
+                <h3 className="font-semibold text-slate-200 group-hover:text-amber-400 transition-colors">
+                  {cat.name}
+                </h3>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
-      {/* JOYAS DESTACADAS CON COTIZACIÓN DIRECTA */}
-      <section className="max-w-7xl mx-auto px-6 py-12">
-        <h2 className="text-2xl font-bold text-slate-100 mb-8">Diseños Destacados</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {featuredProducts.map((product) => (
-            <div
-              key={product.id}
-              className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden flex flex-col justify-between"
-            >
-              <div className="p-6">
-                <span className="text-xs text-amber-400 font-medium">{product.categories?.name}</span>
-                <h3 className="text-xl font-bold mt-1 text-white">{product.name}</h3>
-                <p className="text-slate-400 text-sm mt-2 line-clamp-2">{product.description}</p>
-                {product.price && (
-                  <p className="text-lg font-semibold text-amber-300 mt-4">
-                    ${Number(product.price).toLocaleString('es-CO')} COP
-                  </p>
-                )}
+      {/* JOYAS DESTACADAS */}
+      {featuredProducts.length > 0 && (
+        <section className="max-w-7xl mx-auto px-6 py-12">
+          <h2 className="text-2xl font-bold text-slate-100 mb-8">Diseños Destacados</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {featuredProducts.map((product) => (
+              <div
+                key={product.id}
+                className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden flex flex-col justify-between"
+              >
+                <div className="p-6">
+                  <span className="text-xs text-amber-400 font-medium">{product.categories?.name}</span>
+                  <h3 className="text-xl font-bold mt-1 text-white">{product.name}</h3>
+                  <p className="text-slate-400 text-sm mt-2 line-clamp-2">{product.description}</p>
+                  {product.price && (
+                    <p className="text-lg font-semibold text-amber-300 mt-4">
+                      ${Number(product.price).toLocaleString('es-CO')} COP
+                    </p>
+                  )}
+                </div>
+                <div className="p-6 pt-0">
+                  <WhatsAppButton
+                    productName={product.name}
+                    productPrice={product.price}
+                  />
+                </div>
               </div>
-              <div className="p-6 pt-0">
-                <WhatsAppButton
-                  productName={product.name}
-                  productPrice={product.price}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      )}
     </main>
   );
 }
