@@ -1,70 +1,34 @@
 'use client';
 
-import React from 'react';
-import { MessageCircle } from 'lucide-react';
-
-// ─────────────────────────────────────────────────────────────
-// Types
-// ─────────────────────────────────────────────────────────────
-
 interface WhatsAppButtonProps {
-  /** Número de teléfono en formato internacional sin +. Ej: "573001234567" */
   phoneNumber?: string;
-  /** Nombre del producto a cotizar */
   productName?: string;
-  /** Precio del producto en COP */
-  productPrice?: number;
+  productPrice?: number | string;
 }
-
-// ─────────────────────────────────────────────────────────────
-// Component
-// ─────────────────────────────────────────────────────────────
 
 export default function WhatsAppButton({
   phoneNumber = '573001234567',
   productName,
   productPrice,
 }: WhatsAppButtonProps) {
-  // ───────────────────────────────────────────────────────────
-  // Helpers
-  // ───────────────────────────────────────────────────────────
+  // Construcción segura del mensaje sin lanzar TypeErrors si los datos son undefined
+  const message = productName
+    ? `Hola, estoy interesado en la joya: ${productName}${
+        productPrice ? ` ($${Number(productPrice).toLocaleString('es-CO')} COP)` : ''
+      }`
+    : 'Hola, me gustaría recibir asesoría sobre su joyería.';
 
-  const buildWhatsAppMessage = (): string => {
-    const defaultMessage = '¡Hola! Me gustaría recibir información sobre su joyería.';
-
-    if (!productName) {
-      return defaultMessage;
-    }
-
-    const formattedPrice = productPrice
-      ? ` ($${productPrice.toLocaleString('es-CO')} COP)`
-      : '';
-
-    return `¡Hola! Me interesa solicitar una cotización de la joya: *${productName}*${formattedPrice}. ¿Podrían darme más detalles?`;
-  };
-
-  const getWhatsAppLink = (): string => {
-    const message = buildWhatsAppMessage();
-    return `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
-  };
-
-  // ───────────────────────────────────────────────────────────
-  // Render
-  // ───────────────────────────────────────────────────────────
+  const cleanPhone = phoneNumber.replace(/[^0-9]/g, '');
+  const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
 
   return (
     <a
-      href={getWhatsAppLink()}
+      href={whatsappUrl}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label="Contactar por WhatsApp"
-      className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-[#25D366] hover:bg-[#20ba5a] text-white font-medium px-4 py-3 rounded-full shadow-lg transition-all duration-300 hover:scale-105 group"
+      className="inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2 px-4 rounded-lg transition-colors"
     >
-      <MessageCircle className="w-6 h-6 fill-current" />
-
-      <span className="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs transition-all duration-500 ease-in-out text-sm">
-        Cotizar por WhatsApp
-      </span>
+      Contactar por WhatsApp
     </a>
   );
 }
