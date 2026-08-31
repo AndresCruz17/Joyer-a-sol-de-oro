@@ -5,21 +5,30 @@ import { useState } from 'react';
 interface WhatsAppButtonProps {
   phoneNumber?: string;
   message?: string;
+  productName?: string;
+  productPrice?: number | string;
 }
 
 export default function WhatsAppButton({
-  phoneNumber = "573001234567", // Reemplaza con tu número real de Colombia / país
-  message = "Hola, me gustaría recibir asesoría personalizada sobre sus joyas en Oro 18K"
+  phoneNumber = "573001234567",
+  message = "Hola, me gustaría recibir asesoría personalizada sobre sus joyas en Oro 18K",
+  productName,
+  productPrice
 }: WhatsAppButtonProps) {
   const [isHovered, setIsHovered] = useState(false);
 
-  const encodedMessage = encodeURIComponent(message);
+  // Genera un mensaje automático si el botón está en la página de un producto específico
+  const finalMessage = productName
+    ? `Hola, estoy interesado/a en la joya "${productName}"${productPrice ? ` (Precio: $${productPrice})` : ''}. ¿Me podrías brindar más detalles?`
+    : message;
+
+  const encodedMessage = encodeURIComponent(finalMessage);
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex items-center group">
       
-      {/* 1. Tarjeta Flotante Informativa (Aparece al pasar el cursor) */}
+      {/* Tarjeta Flotante Informativa */}
       <div
         className={`mr-3 px-4 py-2.5 rounded-2xl bg-stone-900/95 border border-amber-500/30 text-stone-200 text-xs shadow-2xl backdrop-blur-md transition-all duration-300 pointer-events-none hidden sm:flex items-center gap-2.5 whitespace-nowrap ${
           isHovered
@@ -28,11 +37,15 @@ export default function WhatsAppButton({
         }`}
       >
         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        <span className="font-semibold text-amber-300 tracking-wide">Atención al Cliente</span>
-        <span className="text-stone-400">| ¿En qué podemos ayudarte?</span>
+        <span className="font-semibold text-amber-300 tracking-wide">
+          {productName ? 'Cotizar esta joya' : 'Atención al Cliente'}
+        </span>
+        <span className="text-stone-400">
+          {productName ? `| ${productName}` : '| ¿En qué podemos ayudarte?'}
+        </span>
       </div>
 
-      {/* 2. Botón Circular Flotante */}
+      {/* Botón Circular Flotante */}
       <a
         href={whatsappUrl}
         target="_blank"
@@ -42,13 +55,9 @@ export default function WhatsAppButton({
         className="relative flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-emerald-600 via-emerald-500 to-emerald-400 text-white shadow-[0_0_25px_rgba(16,185,129,0.5)] border border-emerald-300/40 hover:shadow-[0_0_35px_rgba(16,185,129,0.8)] hover:scale-110 active:scale-95 transition-all duration-300"
         aria-label="Asesoría por WhatsApp"
       >
-        {/* Anillo animado de pulso continuo */}
         <span className="absolute inset-0 rounded-full bg-emerald-400/30 animate-ping pointer-events-none"></span>
-
-        {/* Punto verde de Estado "En línea" */}
         <span className="absolute top-0.5 right-0.5 w-4 h-4 bg-emerald-400 border-2 border-stone-950 rounded-full shadow-md z-10"></span>
 
-        {/* Ícono Oficial de WhatsApp */}
         <svg
           className="w-7 h-7 sm:w-8 sm:h-8 fill-current relative z-10 drop-shadow-md"
           xmlns="http://www.w3.org/2000/svg"
