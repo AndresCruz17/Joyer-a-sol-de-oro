@@ -8,21 +8,22 @@ interface PageProps {
 
 export default async function CategoryPage({ params }: PageProps) {
   const { slug } = await params;
+  const decodedSlug = decodeURIComponent(slug);
   const supabase = await createClient();
 
-  // 1. Obtener los detalles de la categoría actual por su slug
-  const { data: category } = await supabase
+  // 1. Obtener la categoría por su slug (insensible a mayúsculas y acentos en la URL)
+  const { data: category, error: categoryError } = await supabase
     .from('categories')
     .select('*')
-    .eq('slug', slug)
-    .single();
+    .ilike('slug', decodedSlug)
+    .maybeSingle();
 
-  // Si la categoría no existe en la BD, mostrar 404
-  if (!category) {
+  // Si hay error o no se encuentra la categoría, mostrar 404
+  if (categoryError || !category) {
     notFound();
   }
 
-  // 2. Obtener solo los productos asociados a esta categoría
+  // 2. Obtener los productos asociados a esta categoría
   const { data: products } = await supabase
     .from('products')
     .select('*')
@@ -59,7 +60,6 @@ export default async function CategoryPage({ params }: PageProps) {
 
       {/* Header Banner de la Categoría */}
       <header className="relative py-16 sm:py-24 px-6 border-b border-stone-800/80 overflow-hidden">
-        {/* Imagen de Fondo Difuminada si la categoría tiene foto */}
         {category.image_url && (
           <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
             <img
@@ -83,7 +83,7 @@ export default async function CategoryPage({ params }: PageProps) {
             </p>
           )}
           <div className="inline-block px-4 py-1.5 rounded-full border border-stone-800 bg-stone-900/60 text-xs font-mono text-stone-400">
-            {productList.length} {productList.length === 1 ? 'piezas disponibles' : 'piezas disponibles'}
+            {productList.length} {productList.length === 1 ? 'pieza disponible' : 'piezas disponibles'}
           </div>
         </div>
       </header>
@@ -111,14 +111,13 @@ export default async function CategoryPage({ params }: PageProps) {
               const whatsappMessage = encodeURIComponent(
                 `Hola Sol de Oro, estoy interesado en cotizar la joya "${item.name}" de la categoría ${category.name}.`
               );
-              const whatsappUrl = `https://wa.me/573000000000?text=${whatsappMessage}`; // Cambiar número de WhatsApp por el real
+              const whatsappUrl = `https://wa.me/573000000000?text=${whatsappMessage}`;
 
               return (
                 <div
                   key={item.id}
                   className="group rounded-2xl bg-stone-900/40 border border-stone-800/80 hover:border-amber-500/60 transition-all duration-300 overflow-hidden flex flex-col"
                 >
-                  {/* Foto del Producto */}
                   <div className="relative aspect-square w-full overflow-hidden bg-stone-950">
                     {item.image_url ? (
                       <img
@@ -136,7 +135,6 @@ export default async function CategoryPage({ params }: PageProps) {
                     </span>
                   </div>
 
-                  {/* Detalles del Producto */}
                   <div className="p-6 flex-1 flex flex-col justify-between">
                     <div>
                       <h3 className="font-serif text-xl text-stone-100 group-hover:text-amber-300 transition-colors mb-2">
