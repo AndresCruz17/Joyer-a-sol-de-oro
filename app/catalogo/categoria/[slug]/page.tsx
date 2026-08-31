@@ -1,29 +1,77 @@
 import { createClient } from '@/lib/supabase/server';
-import { notFound } from 'next/navigation';
 import Link from 'next/link';
 
 interface PageProps {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string }> | { slug: string };
 }
 
 export default async function CategoryPage({ params }: PageProps) {
-  const { slug } = await params;
-  const decodedSlug = decodeURIComponent(slug);
+  // Soporte de compatibilidad para Next.js 14 y 15
+  const resolvedParams = await params;
+  const rawSlug = resolvedParams.slug;
+  const slug = decodeURIComponent(rawSlug);
+
   const supabase = await createClient();
 
-  // 1. Obtener la categoría por su slug (insensible a mayúsculas y acentos en la URL)
+  // 1. Intentar buscar la categoría
   const { data: category, error: categoryError } = await supabase
     .from('categories')
     .select('*')
-    .ilike('slug', decodedSlug)
+    .ilike('slug', slug)
     .maybeSingle();
 
-  // Si hay error o no se encuentra la categoría, mostrar 404
-  if (categoryError || !category) {
-    notFound();
+  // 2. MODO DIAGNÓSTICO: Si no se encuentra la categoría, mostramos la causa exacta en pantalla
+  if (!category) {
+    const { data: allCategories } = await supabase
+      .from('categories')
+      .select('id, name, slug');
+
+    return (
+      <div className="min-h-screen bg-stone-950 text-stone-100 p-6 md:p-12 font-mono text-xs">
+        <div className="max-w-2xl mx-auto border border-amber-500/40 bg-stone-900/90 p-6 rounded-2xl space-y-4 shadow-2xl">
+          <h1 className="text-amber-400 font-bold text-base flex items-center gap-2">
+            ⚠️ Modo Diagnóstico // Categoría no encontrada
+          </h1>
+          
+          <div className="bg-stone-950 p-3 rounded-xl border border-stone-800">
+            <span className="text-stone-400 block mb-1">Slug recibido en la URL:</span>
+            <p className="text-amber-300 font-bold text-sm">"{slug}"</p>
+          </div>
+
+          {categoryError && (
+            <div className="bg-red-950/40 border border-red-900/50 p-3 rounded-xl">
+              <span className="text-red-400 block mb-1">Error de Supabase:</span>
+              <p className="text-red-200">{categoryError.message}</p>
+            </div>
+          )}
+
+          <div>
+            <span className="text-stone-400 block mb-2">Slugs guardados actualmente en la base de datos:</span>
+            <div className="bg-stone-950 p-3 rounded-xl border border-stone-800 space-y-2 max-h-60 overflow-y-auto">
+              {allCategories && allCategories.length > 0 ? (
+                allCategories.map((c) => (
+                  <div key={c.id} className="border-b border-stone-800/80 pb-1.5 flex justify-between items-center">
+                    <span className="text-stone-300">Nombre: <strong>{c.name}</strong></span>
+                    <span className="text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                      slug: "{c.slug || 'NULL'}"
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-stone-500 italic">No se encontraron registros en la tabla 'categories' o la seguridad RLS bloquea la lectura.</p>
+              )}
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-stone-800">
+            <Link href="/" className="text-amber-400 underline hover:text-amber-300">← Volver al Inicio</Link>
+          </div>
+        </div>
+      </div>
+    );
   }
 
-  // 2. Obtener los productos asociados a esta categoría
+  // 3. Si se encuentra la categoría, cargar los productos asociados
   const { data: products } = await supabase
     .from('products')
     .select('*')
@@ -88,7 +136,7 @@ export default async function CategoryPage({ params }: PageProps) {
         </div>
       </header>
 
-      {/* Grid de Productos Filtrados */}
+      {/* Grid de Productos */}
       <main className="max-w-7xl mx-auto px-6 py-12">
         {productList.length === 0 ? (
           <div className="text-center py-20 border border-stone-800/60 rounded-3xl bg-stone-900/20">
