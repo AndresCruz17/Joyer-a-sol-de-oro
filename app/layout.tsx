@@ -16,8 +16,8 @@ export default function RootLayout({
     <html lang="es-CO">
       <body className="antialiased bg-stone-950 text-stone-100 relative min-h-screen">
         {children}
-        {/* Botón Flotante Global de WhatsApp */}
-        <WhatsAppButton phoneNumber="573001234567" />
+        {/* Botón Flotante Global Persistente */}
+        <WhatsAppButton phoneNumber="573001234567" /> 
       </body>
     </html>
   );
