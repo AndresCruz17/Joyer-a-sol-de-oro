@@ -1,5 +1,39 @@
 @import "tailwindcss";
 
+@keyframes goldPulse {
+
+    0%,
+    100% {
+        opacity: 0.25;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.55;
+        transform: scale(1.1);
+    }
+}
+
+@keyframes floatSlow {
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+.animate-gold-pulse {
+    animation: goldPulse 7s ease-in-out infinite;
+}
+
+.animate-float-slow {
+    animation: floatSlow 5s ease-in-out infinite;
+}
+
 html {
     scroll-behavior: smooth;
 }
