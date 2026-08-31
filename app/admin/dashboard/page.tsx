@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 
 export default async function AdminDashboardPage() {
     const supabase = await createClient();
@@ -94,9 +95,12 @@ export default async function AdminDashboardPage() {
                                         <td className="p-4 text-amber-400 font-mono">${item.price?.toLocaleString('es-CO')}</td>
                                         <td className="p-4 font-mono">{item.weight_grams ? `${item.weight_grams}g` : 'N/A'}</td>
                                         <td className="p-4 text-right space-x-2">
-                                            <button className="px-3 py-1 rounded border border-stone-700 hover:border-amber-500 hover:text-amber-300 transition-colors">
+                                            <Link
+                                                href={`/admin/productos/editar/${item.id}`}
+                                                className="inline-block px-3 py-1 rounded border border-stone-700 hover:border-amber-500 hover:text-amber-300 transition-colors"
+                                            >
                                                 Editar
-                                            </button>
+                                            </Link>
                                         </td>
                                     </tr>
                                 ))}
