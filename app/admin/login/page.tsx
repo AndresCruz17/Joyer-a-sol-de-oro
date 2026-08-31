@@ -4,79 +4,99 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
-export const dynamic = 'force-dynamic';
-
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const supabase = createClient();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
+    setLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const supabase = createClient();
+    const { error: authError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (error) {
-      setError('Credenciales inválidas. Verifica tu correo y contraseña.');
+    if (authError) {
+      setError(authError.message === 'Invalid login credentials' 
+        ? 'Credenciales incorrectas. Verifica correo y contraseña.' 
+        : authError.message);
       setLoading(false);
-    } else {
-      router.push('/admin');
-      router.refresh();
+      return;
     }
+
+    router.push('/admin/dashboard');
+    router.refresh();
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6 text-slate-100">
-      <div className="w-full max-w-md bg-slate-900 border border-slate-800 p-8 rounded-2xl shadow-xl">
-        <h1 className="text-2xl font-bold text-amber-400 text-center mb-6">Panel Administrador</h1>
-        
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm p-3 rounded-lg mb-4 text-center">
-            {error}
-          </div>
-        )}
+    <div className="min-h-screen bg-stone-950 text-stone-100 flex items-center justify-center p-4">
+      {/* Luz ambiental */}
+      <div className="absolute w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-        <form onSubmit={handleLogin} className="space-y-4">
+      <div className="w-full max-w-md bg-stone-900/80 border border-stone-800 rounded-2xl p-8 backdrop-blur-xl shadow-2xl relative z-10">
+        
+        {/* Encabezado */}
+        <div className="text-center mb-8">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-amber-600 to-yellow-300 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-amber-500/20">
+            <span className="text-stone-950 font-serif font-bold text-xl">SO</span>
+          </div>
+          <h1 className="font-serif text-2xl text-stone-100 font-light">
+            Panel <span className="text-amber-400 italic">Administrativo</span>
+          </h1>
+          <p className="text-xs text-stone-400 mt-1">Ingresa tus credenciales autorizadas</p>
+        </div>
+
+        {/* Formulario */}
+        <form onSubmit={handleLogin} className="space-y-5">
+          {error && (
+            <div className="p-3 text-xs rounded-lg bg-red-950/50 border border-red-800/50 text-red-300 text-center">
+              {error}
+            </div>
+          )}
+
           <div>
-            <label className="block text-xs font-semibold text-slate-400 mb-1">Correo Electrónico</label>
+            <label className="block text-xs font-mono text-stone-400 mb-1 uppercase tracking-wider">
+              Correo Electrónico
+            </label>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-amber-500"
-              placeholder="admin@tujoyeria.com"
+              placeholder="admin@soldeoro.com"
+              className="w-full bg-stone-950/80 border border-stone-800 rounded-xl px-4 py-3 text-sm text-stone-100 focus:outline-none focus:border-amber-500 transition-colors"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-400 mb-1">Contraseña</label>
+            <label className="block text-xs font-mono text-stone-400 mb-1 uppercase tracking-wider">
+              Contraseña
+            </label>
             <input
               type="password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-amber-500"
               placeholder="••••••••"
+              className="w-full bg-stone-950/80 border border-stone-800 rounded-xl px-4 py-3 text-sm text-stone-100 focus:outline-none focus:border-amber-500 transition-colors"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded-lg transition-colors duration-200 mt-2"
+            className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 text-stone-950 font-bold text-sm hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-amber-500/20 disabled:opacity-50"
           >
-            {loading ? 'Ingresando...' : 'Iniciar Sesión'}
+            {loading ? 'Verificando...' : 'Iniciar Sesión'}
           </button>
         </form>
+
       </div>
     </div>
   );
