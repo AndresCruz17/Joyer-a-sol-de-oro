@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { notFound } from 'next/navigation';
 import Link from 'next/link';
 
 interface PageProps {
@@ -6,72 +7,31 @@ interface PageProps {
 }
 
 export default async function CategoryPage({ params }: PageProps) {
-  // Soporte de compatibilidad para Next.js 14 y 15
   const resolvedParams = await params;
-  const rawSlug = resolvedParams.slug;
-  const slug = decodeURIComponent(rawSlug);
+  const slug = decodeURIComponent(resolvedParams.slug);
 
   const supabase = await createClient();
 
-  // 1. Intentar buscar la categoría
+  // 1. Obtener la categoría actual por su slug
   const { data: category, error: categoryError } = await supabase
     .from('categories')
     .select('*')
     .ilike('slug', slug)
     .maybeSingle();
 
-  // 2. MODO DIAGNÓSTICO: Si no se encuentra la categoría, mostramos la causa exacta en pantalla
-  if (!category) {
-    const { data: allCategories } = await supabase
-      .from('categories')
-      .select('id, name, slug');
-
-    return (
-      <div className="min-h-screen bg-stone-950 text-stone-100 p-6 md:p-12 font-mono text-xs">
-        <div className="max-w-2xl mx-auto border border-amber-500/40 bg-stone-900/90 p-6 rounded-2xl space-y-4 shadow-2xl">
-          <h1 className="text-amber-400 font-bold text-base flex items-center gap-2">
-            ⚠️ Modo Diagnóstico // Categoría no encontrada
-          </h1>
-          
-          <div className="bg-stone-950 p-3 rounded-xl border border-stone-800">
-            <span className="text-stone-400 block mb-1">Slug recibido en la URL:</span>
-            <p className="text-amber-300 font-bold text-sm">"{slug}"</p>
-          </div>
-
-          {categoryError && (
-            <div className="bg-red-950/40 border border-red-900/50 p-3 rounded-xl">
-              <span className="text-red-400 block mb-1">Error de Supabase:</span>
-              <p className="text-red-200">{categoryError.message}</p>
-            </div>
-          )}
-
-          <div>
-            <span className="text-stone-400 block mb-2">Slugs guardados actualmente en la base de datos:</span>
-            <div className="bg-stone-950 p-3 rounded-xl border border-stone-800 space-y-2 max-h-60 overflow-y-auto">
-              {allCategories && allCategories.length > 0 ? (
-                allCategories.map((c) => (
-                  <div key={c.id} className="border-b border-stone-800/80 pb-1.5 flex justify-between items-center">
-                    <span className="text-stone-300">Nombre: <strong>{c.name}</strong></span>
-                    <span className="text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
-                      slug: "{c.slug || 'NULL'}"
-                    </span>
-                  </div>
-                ))
-              ) : (
-                <p className="text-stone-500 italic">No se encontraron registros en la tabla 'categories' o la seguridad RLS bloquea la lectura.</p>
-              )}
-            </div>
-          </div>
-
-          <div className="pt-4 border-t border-stone-800">
-            <Link href="/" className="text-amber-400 underline hover:text-amber-300">← Volver al Inicio</Link>
-          </div>
-        </div>
-      </div>
-    );
+  if (categoryError || !category) {
+    notFound();
   }
 
-  // 3. Si se encuentra la categoría, cargar los productos asociados
+  // 2. Obtener TODAS las categorías para la barra de navegación rápida
+  const { data: allCategories } = await supabase
+    .from('categories')
+    .select('id, name, slug')
+    .order('name');
+
+  const categoriesList = allCategories || [];
+
+  // 3. Obtener solo los productos asociados a esta categoría
   const { data: products } = await supabase
     .from('products')
     .select('*')
@@ -84,7 +44,7 @@ export default async function CategoryPage({ params }: PageProps) {
     <div className="min-h-screen bg-stone-950 text-stone-100 font-sans selection:bg-amber-500 selection:text-stone-950">
       
       {/* Navegación Superior */}
-      <nav className="border-b border-stone-800/80 bg-stone-950/80 backdrop-blur-md sticky top-0 z-50 px-6 py-4">
+      <nav className="border-b border-stone-800/80 bg-stone-950/90 backdrop-blur-md sticky top-0 z-50 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <Link
             href="/"
@@ -98,16 +58,16 @@ export default async function CategoryPage({ params }: PageProps) {
           </span>
 
           <Link
-            href="/#catalogo"
+            href="/catalogo"
             className="text-xs font-mono text-stone-400 hover:text-stone-200 transition-colors hidden sm:block"
           >
-            Todo el Catálogo
+            Ver Todo el Catálogo
           </Link>
         </div>
       </nav>
 
-      {/* Header Banner de la Categoría */}
-      <header className="relative py-16 sm:py-24 px-6 border-b border-stone-800/80 overflow-hidden">
+      {/* Header Banner de la Categoría Actual */}
+      <header className="relative py-12 sm:py-16 px-6 border-b border-stone-800/80 overflow-hidden">
         {category.image_url && (
           <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
             <img
@@ -119,39 +79,66 @@ export default async function CategoryPage({ params }: PageProps) {
         )}
 
         <div className="max-w-7xl mx-auto relative z-10 text-center max-w-2xl">
-          <span className="text-xs font-mono text-amber-400 uppercase tracking-widest block mb-3">
+          <span className="text-xs font-mono text-amber-400 uppercase tracking-widest block mb-2">
             Colección Exclusiva // Oro 18K
           </span>
-          <h1 className="font-serif text-4xl sm:text-5xl font-light text-stone-100 mb-4 capitalize">
+          <h1 className="font-serif text-3xl sm:text-5xl font-light text-stone-100 mb-3 capitalize">
             {category.name}
           </h1>
           {category.description && (
-            <p className="text-sm text-stone-400 font-light leading-relaxed mb-6">
+            <p className="text-sm text-stone-400 font-light leading-relaxed mb-4">
               {category.description}
             </p>
           )}
-          <div className="inline-block px-4 py-1.5 rounded-full border border-stone-800 bg-stone-900/60 text-xs font-mono text-stone-400">
+          <div className="inline-block px-3.5 py-1 rounded-full border border-stone-800 bg-stone-900/60 text-[11px] font-mono text-stone-400">
             {productList.length} {productList.length === 1 ? 'pieza disponible' : 'piezas disponibles'}
           </div>
         </div>
       </header>
 
-      {/* Grid de Productos */}
+      {/* Selector Rápido de Categorías (Barra Deslizable de Filtros) */}
+      <div className="border-b border-stone-800/80 bg-stone-900/40 sticky top-[57px] z-40 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center gap-2 overflow-x-auto scrollbar-none">
+          <span className="text-[10px] font-mono text-stone-500 uppercase tracking-wider mr-2 shrink-0 hidden sm:inline-block">
+            Explorar:
+          </span>
+          {categoriesList.map((cat) => {
+            const isActive = cat.id === category.id;
+            return (
+              <Link
+                key={cat.id}
+                href={`/categoria/${cat.slug}`}
+                className={`px-4 py-1.5 rounded-full text-xs font-mono transition-all shrink-0 border ${
+                  isActive
+                    ? 'bg-amber-500/20 border-amber-500 text-amber-300 font-semibold shadow-[0_0_15px_rgba(245,158,11,0.2)]'
+                    : 'bg-stone-950/60 border-stone-800 text-stone-400 hover:border-stone-700 hover:text-stone-200 hover:bg-stone-900'
+                }`}
+              >
+                {cat.name}
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Grid de Productos Filtrados */}
       <main className="max-w-7xl mx-auto px-6 py-12">
         {productList.length === 0 ? (
-          <div className="text-center py-20 border border-stone-800/60 rounded-3xl bg-stone-900/20">
+          <div className="text-center py-20 border border-stone-800/60 rounded-3xl bg-stone-900/20 max-w-xl mx-auto">
             <p className="font-serif text-xl text-stone-400 mb-2">
-              Aún no hay joyas registradas en esta colección.
+              Aún no hay joyas en la categoría "{category.name}"
             </p>
             <p className="text-xs text-stone-500 font-mono mb-6">
-              El administrador agregará nuevos diseños próximamente.
+              El administrador agregará nuevos diseños a esta colección próximamente.
             </p>
-            <Link
-              href="/"
-              className="inline-block px-6 py-3 rounded-xl bg-amber-500 text-stone-950 font-bold text-xs hover:bg-amber-400 transition-colors"
-            >
-              Explorar otras colecciones
-            </Link>
+            <div className="flex justify-center gap-3">
+              <Link
+                href="/catalogo"
+                className="px-5 py-2.5 rounded-xl bg-amber-500 text-stone-950 font-bold text-xs hover:bg-amber-400 transition-colors"
+              >
+                Ver Todo el Catálogo
+              </Link>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -166,6 +153,7 @@ export default async function CategoryPage({ params }: PageProps) {
                   key={item.id}
                   className="group rounded-2xl bg-stone-900/40 border border-stone-800/80 hover:border-amber-500/60 transition-all duration-300 overflow-hidden flex flex-col"
                 >
+                  {/* Foto del Producto */}
                   <div className="relative aspect-square w-full overflow-hidden bg-stone-950">
                     {item.image_url ? (
                       <img
@@ -183,6 +171,7 @@ export default async function CategoryPage({ params }: PageProps) {
                     </span>
                   </div>
 
+                  {/* Detalles del Producto */}
                   <div className="p-6 flex-1 flex flex-col justify-between">
                     <div>
                       <h3 className="font-serif text-xl text-stone-100 group-hover:text-amber-300 transition-colors mb-2">
