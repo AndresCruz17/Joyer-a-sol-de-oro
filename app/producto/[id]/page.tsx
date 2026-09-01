@@ -28,25 +28,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         };
     }
 
-    const categoryName = product.categories?.name ? `Colección ${product.categories.name}` : 'Alta Joyería';
+    const categoryName = product.categories?.name ? `Colección ${product.categories.name}` : 'Alta Joyería 18K';
     const priceFormatted = product.price ? `$${product.price.toLocaleString('es-CO')} COP` : '';
-    const weightText = product.weight_grams ? `• Peso: ${product.weight_grams}g` : '';
+    const weightText = product.weight_grams ? `• ${product.weight_grams}g` : '';
 
-    const title = `${product.name} — ${priceFormatted} | Sol de Oro 18K`;
-    const description = product.description
-        ? `${categoryName} ${weightText}. ${product.description}`
-        : `${categoryName} ${weightText}. Joya exclusiva esculpida en Oro Nacional de 18K. Garante de por vida.`;
+    const title = `${product.name} ${priceFormatted ? `— ${priceFormatted}` : ''} | Sol de Oro`;
+    const description = `${categoryName} ${weightText}. Joya exclusiva esculpida en Oro Nacional de 18K. Garante de por vida.`;
 
-    const images = product.image_url
-        ? [
-            {
-                url: product.image_url,
-                width: 800,
-                height: 800,
-                alt: product.name,
-            },
-        ]
-        : [];
+    const imageUrl = product.image_url || '';
 
     return {
         title,
@@ -55,18 +44,27 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
             title,
             description,
             siteName: 'Sol de Oro — Joyería Fina 18K',
-            type: 'article',
-            images,
+            type: 'website',
+            images: imageUrl
+                ? [
+                    {
+                        url: imageUrl,
+                        secureUrl: imageUrl,
+                        width: 800,
+                        height: 800,
+                        alt: product.name,
+                    },
+                ]
+                : [],
         },
         twitter: {
             card: 'summary_large_image',
             title,
             description,
-            images: product.image_url ? [product.image_url] : [],
+            images: imageUrl ? [imageUrl] : [],
         },
     };
 }
-
 // ==========================================
 // 2. COMPONENTE DE LA PÁGINA
 // ==========================================
