@@ -129,7 +129,7 @@ export default function EditProductPage() {
 
             if (updateError) throw updateError;
 
-            router.push('/admin/productos');
+            router.push('/admin');
             router.refresh();
         } catch (err: any) {
             console.error(err);
