@@ -1,256 +1,291 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import Link from 'next/link';
+import { slugify } from '@/lib/seo/slugify';
+import { useRouter, useParams } from 'next/navigation';
 
-interface Category {
-    id: string;
-    name: string;
-}
-
-export default function EditarProductoPage({ params }: { params: Promise<{ id: string }> }) {
-    const resolvedParams = use(params);
-    const productId = resolvedParams.id;
-    const router = useRouter();
+export default function EditProductPage() {
     const supabase = createClient();
+    const router = useRouter();
+    const params = useParams();
+    const productId = params?.id as string;
 
-    const [categories, setCategories] = useState<Category[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [fetching, setFetching] = useState(true);
-    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [categories, setCategories] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [message, setMessage] = useState<string | null>(null);
 
-    const [formData, setFormData] = useState({
-        name: '',
-        description: '',
-        price: '',
-        weight_grams: '',
-        category_id: '',
-        image_url: '',
-        is_featured: false,
-    });
+    // Campos
+    const [name, setName] = useState('');
+    const [categoryId, setCategoryId] = useState('');
+    const [price, setPrice] = useState('');
+    const [weightGrams, setWeightGrams] = useState('');
+    const [description, setDescription] = useState('');
+    const [isFeatured, setIsFeatured] = useState(false);
+
+    // Galería de fotos
+    const [existingImages, setExistingImages] = useState<string[]>([]);
+    const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
 
     useEffect(() => {
         async function loadData() {
-            // 1. Cargar categorías
-            const { data: catData } = await supabase.from('categories').select('id, name').order('name');
+            // 1. Cargar Categorías
+            const { data: catData } = await supabase.from('categories').select('*').order('name');
             if (catData) setCategories(catData);
 
-            // 2. Cargar datos del producto a editar
-            const { data: product, error } = await supabase
-                .from('products')
-                .select('*')
-                .eq('id', productId)
-                .single();
+            // 2. Cargar datos de la Joya
+            if (productId) {
+                const { data: prod, error } = await supabase
+                    .from('products')
+                    .select('*')
+                    .eq('id', productId)
+                    .single();
 
-            if (error || !product) {
-                alert('No se encontró el producto solicitado.');
-                router.push('/admin/dashboard');
-                return;
+                if (prod) {
+                    setName(prod.name || '');
+                    setCategoryId(prod.category_id || '');
+                    setPrice(prod.price ? prod.price.toString() : '');
+                    setWeightGrams(prod.weight_grams ? prod.weight_grams.toString() : '');
+                    setDescription(prod.description || '');
+                    setIsFeatured(prod.is_featured || false);
+
+                    const imgs = Array.from(
+                        new Set([prod.image_url, ...(prod.images || [])].filter(Boolean) as string[])
+                    );
+                    setExistingImages(imgs);
+                }
             }
-
-            setFormData({
-                name: product.name || '',
-                description: product.description || '',
-                price: product.price ? product.price.toString() : '',
-                weight_grams: product.weight_grams ? product.weight_grams.toString() : '',
-                category_id: product.category_id || '',
-                image_url: product.image_url || '',
-                is_featured: product.is_featured || false,
-            });
-
-            setFetching(false);
+            setLoading(false);
         }
 
         loadData();
     }, [productId]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        const { name, value, type } = e.target;
-        if (type === 'checkbox') {
-            const checked = (e.target as HTMLInputElement).checked;
-            setFormData((prev) => ({ ...prev, [name]: checked }));
-        } else {
-            setFormData((prev) => ({ ...prev, [name]: value }));
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            const selected = Array.from(e.target.files);
+            setNewImageFiles((prev) => [...prev, ...selected]);
         }
+    };
+
+    const handleRemoveExistingImage = (urlToRemove: string) => {
+        setExistingImages((prev) => prev.filter((url) => url !== urlToRemove));
+    };
+
+    const handleRemoveNewFile = (indexToRemove: number) => {
+        setNewImageFiles((prev) => prev.filter((_, idx) => idx !== indexToRemove));
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true);
+        setSaving(true);
+        setMessage(null);
 
         try {
-            let finalImageUrl = formData.image_url;
+            const newlyUploadedUrls: string[] = [];
 
-            // Si subió una nueva imagen
-            if (imageFile) {
-                const fileExt = imageFile.name.split('.').pop();
-                const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-                const filePath = `items/${fileName}`;
+            // Subir fotos nuevas
+            if (newImageFiles.length > 0) {
+                for (const file of newImageFiles) {
+                    const fileExt = file.name.split('.').pop();
+                    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+                    const filePath = `products/${fileName}`;
 
-                const { error: uploadError } = await supabase.storage
-                    .from('products')
-                    .upload(filePath, imageFile);
+                    const { error: uploadError } = await supabase.storage
+                        .from('products')
+                        .upload(filePath, file);
 
-                if (uploadError) throw uploadError;
+                    if (uploadError) throw uploadError;
 
-                const { data: publicUrlData } = supabase.storage
-                    .from('products')
-                    .getPublicUrl(filePath);
+                    const { data: publicUrlData } = supabase.storage
+                        .from('products')
+                        .getPublicUrl(filePath);
 
-                finalImageUrl = publicUrlData.publicUrl;
+                    if (publicUrlData?.publicUrl) {
+                        newlyUploadedUrls.push(publicUrlData.publicUrl);
+                    }
+                }
             }
 
-            // Actualizar producto en Supabase
+            const finalImages = [...existingImages, ...newlyUploadedUrls];
+            const primaryImageUrl = finalImages[0] || null;
+            const productSlug = slugify(name);
+
             const { error: updateError } = await supabase
                 .from('products')
                 .update({
-                    name: formData.name,
-                    description: formData.description,
-                    price: parseFloat(formData.price),
-                    weight_grams: formData.weight_grams ? parseFloat(formData.weight_grams) : null,
-                    category_id: formData.category_id || null,
-                    image_url: finalImageUrl,
-                    is_featured: formData.is_featured,
+                    name,
+                    slug: productSlug,
+                    category_id: categoryId || null,
+                    price: price ? parseFloat(price) : null,
+                    weight_grams: weightGrams ? parseFloat(weightGrams) : null,
+                    description,
+                    is_featured: isFeatured,
+                    image_url: primaryImageUrl,
+                    images: finalImages,
                 })
                 .eq('id', productId);
 
             if (updateError) throw updateError;
 
-            router.push('/admin/dashboard');
+            router.push('/admin/productos');
             router.refresh();
         } catch (err: any) {
-            alert(`Error al actualizar: ${err.message}`);
-        } finally {
-            setLoading(false);
+            console.error(err);
+            setMessage(`Error: ${err.message || 'No se pudo actualizar la joya.'}`);
+            setSaving(false);
         }
     };
 
-    if (fetching) {
-        return (
-            <div className="min-h-screen bg-stone-950 text-stone-100 flex items-center justify-center text-sm font-mono text-amber-400">
-                Cargando datos del producto...
-            </div>
-        );
+    if (loading) {
+        return <div className="p-12 text-center text-slate-400 font-mono text-sm">Cargando joya...</div>;
     }
 
     return (
-        <div className="min-h-screen bg-stone-950 text-stone-100 p-6 md:p-12">
-            <div className="max-w-3xl mx-auto">
-                <div className="flex items-center justify-between mb-8 pb-6 border-b border-stone-800">
+        <div className="max-w-3xl mx-auto p-6 text-slate-100">
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold text-amber-400">✏️ Editar Joya</h1>
+                <button onClick={() => router.back()} className="text-xs text-slate-400 hover:text-white font-mono">
+                    ← Cancelar
+                </button>
+            </div>
+
+            {message && (
+                <div className="p-4 mb-6 bg-red-500/10 border border-red-500/30 text-red-300 rounded-xl text-xs font-mono">
+                    {message}
+                </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="bg-slate-900 border border-slate-800 p-8 rounded-2xl space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <Link href="/admin/dashboard" className="text-xs text-amber-400 font-mono hover:underline mb-2 block">
-                            ← Volver al Dashboard
-                        </Link>
-                        <h1 className="font-serif text-3xl font-light">
-                            Editar <span className="italic text-amber-400">Joya</span>
-                        </h1>
+                        <label className="block text-xs font-semibold text-slate-400 mb-2">Nombre de la Joya *</label>
+                        <input
+                            type="text"
+                            required
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white text-sm focus:border-amber-500 focus:outline-none"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-xs font-semibold text-slate-400 mb-2">Categoría *</label>
+                        <select
+                            required
+                            value={categoryId}
+                            onChange={(e) => setCategoryId(e.target.value)}
+                            className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white text-sm focus:border-amber-500 focus:outline-none"
+                        >
+                            <option value="">Selecciona categoría</option>
+                            {categories.map((cat) => (
+                                <option key={cat.id} value={cat.id}>{cat.name}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-xs font-semibold text-slate-400 mb-2">Precio Estimado (COP)</label>
+                        <input
+                            type="number"
+                            value={price}
+                            onChange={(e) => setPrice(e.target.value)}
+                            className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white text-sm focus:border-amber-500 focus:outline-none"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-xs font-semibold text-slate-400 mb-2">Peso en Gramos (g)</label>
+                        <input
+                            type="number"
+                            step="0.01"
+                            value={weightGrams}
+                            onChange={(e) => setWeightGrams(e.target.value)}
+                            className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white text-sm focus:border-amber-500 focus:outline-none"
+                        />
                     </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-6 bg-stone-900/50 border border-stone-800 p-8 rounded-2xl backdrop-blur-md">
-                    <div>
-                        <label className="block text-xs font-mono uppercase text-stone-400 mb-2">Nombre de la Joya *</label>
-                        <input
-                            type="text"
-                            name="name"
-                            required
-                            value={formData.name}
-                            onChange={handleChange}
-                            className="w-full bg-stone-950 border border-stone-800 rounded-xl p-3 text-sm text-stone-100 focus:outline-none focus:border-amber-500"
-                        />
-                    </div>
+                <div>
+                    <label className="block text-xs font-semibold text-slate-400 mb-2">Descripción</label>
+                    <textarea
+                        rows={3}
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white text-sm focus:border-amber-500 focus:outline-none"
+                    />
+                </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div>
-                            <label className="block text-xs font-mono uppercase text-stone-400 mb-2">Categoría *</label>
-                            <select
-                                name="category_id"
-                                required
-                                value={formData.category_id}
-                                onChange={handleChange}
-                                className="w-full bg-stone-950 border border-stone-800 rounded-xl p-3 text-sm text-stone-100 focus:outline-none focus:border-amber-500"
-                            >
-                                <option value="">Selecciona una...</option>
-                                {categories.map((cat) => (
-                                    <option key={cat.id} value={cat.id}>
-                                        {cat.name}
-                                    </option>
+                {/* Galería (Conservar viejas + Agregar nuevas) */}
+                <div className="space-y-3">
+                    <label className="block text-xs font-semibold text-slate-400">Agregar Nuevas Fotos</label>
+                    <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleFileChange}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-slate-400 text-sm focus:outline-none file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:bg-slate-800 file:text-slate-300"
+                    />
+
+                    {(existingImages.length > 0 || newImageFiles.length > 0) && (
+                        <div className="p-3 bg-slate-950 border border-slate-800 rounded-xl space-y-2">
+                            <p className="text-[11px] font-mono text-amber-400">
+                                Fotos totales ({existingImages.length + newImageFiles.length}):
+                            </p>
+                            <div className="flex flex-wrap gap-3">
+                                {/* Existentes */}
+                                {existingImages.map((url, idx) => (
+                                    <div key={`ex-${idx}`} className="relative w-16 h-16 rounded-lg overflow-hidden border border-slate-700">
+                                        <img src={url} alt="Guardada" className="w-full h-full object-cover" />
+                                        <button
+                                            type="button"
+                                            onClick={() => handleRemoveExistingImage(url)}
+                                            className="absolute top-0 right-0 bg-red-600 text-white text-[10px] w-5 h-5 flex items-center justify-center font-bold"
+                                        >
+                                            ✕
+                                        </button>
+                                        <span className="absolute bottom-0 left-0 right-0 bg-slate-950/80 text-[8px] text-center text-slate-400">Guardada</span>
+                                    </div>
                                 ))}
-                            </select>
-                        </div>
-
-                        <div>
-                            <label className="block text-xs font-mono uppercase text-stone-400 mb-2">Precio (COP) *</label>
-                            <input
-                                type="number"
-                                name="price"
-                                required
-                                step="1000"
-                                value={formData.price}
-                                onChange={handleChange}
-                                className="w-full bg-stone-950 border border-stone-800 rounded-xl p-3 text-sm text-stone-100 focus:outline-none focus:border-amber-500 font-mono"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-xs font-mono uppercase text-stone-400 mb-2">Peso en Gramos (18K)</label>
-                            <input
-                                type="number"
-                                name="weight_grams"
-                                step="0.01"
-                                value={formData.weight_grams}
-                                onChange={handleChange}
-                                className="w-full bg-stone-950 border border-stone-800 rounded-xl p-3 text-sm text-stone-100 focus:outline-none focus:border-amber-500 font-mono"
-                            />
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="block text-xs font-mono uppercase text-stone-400 mb-2">Cambiar Imagen (Opcional)</label>
-                        {formData.image_url && (
-                            <div className="mb-3 flex items-center gap-3">
-                                <img src={formData.image_url} alt="Vista previa" className="w-12 h-12 object-cover rounded-lg border border-stone-800" />
-                                <span className="text-xs text-stone-500">Imagen actual guardada</span>
+                                {/* Nuevas */}
+                                {newImageFiles.map((file, idx) => (
+                                    <div key={`new-${idx}`} className="relative w-16 h-16 rounded-lg overflow-hidden border border-amber-500">
+                                        <img src={URL.createObjectURL(file)} alt="Nueva" className="w-full h-full object-cover" />
+                                        <button
+                                            type="button"
+                                            onClick={() => handleRemoveNewFile(idx)}
+                                            className="absolute top-0 right-0 bg-red-600 text-white text-[10px] w-5 h-5 flex items-center justify-center font-bold"
+                                        >
+                                            ✕
+                                        </button>
+                                        <span className="absolute bottom-0 left-0 right-0 bg-amber-500 text-[8px] text-center text-slate-950 font-bold">Por Subir</span>
+                                    </div>
+                                ))}
                             </div>
-                        )}
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => setImageFile(e.target.files?.[0] || null)}
-                            className="w-full text-xs text-stone-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:bg-amber-500/10 file:text-amber-400 hover:file:bg-amber-500/20 file:cursor-pointer cursor-pointer border border-stone-800 rounded-xl p-2 bg-stone-950"
-                        />
-                    </div>
+                        </div>
+                    )}
+                </div>
 
-                    <div>
-                        <label className="block text-xs font-mono uppercase text-stone-400 mb-2">Descripción</label>
-                        <textarea
-                            name="description"
-                            rows={4}
-                            value={formData.description}
-                            onChange={handleChange}
-                            className="w-full bg-stone-950 border border-stone-800 rounded-xl p-3 text-sm text-stone-100 focus:outline-none focus:border-amber-500"
-                        ></textarea>
-                    </div>
+                <div className="flex items-center gap-3">
+                    <input
+                        type="checkbox"
+                        id="isFeatured"
+                        checked={isFeatured}
+                        onChange={(e) => setIsFeatured(e.target.checked)}
+                        className="w-4 h-4 accent-amber-500 rounded"
+                    />
+                    <label htmlFor="isFeatured" className="text-sm text-slate-300">Destacar en Inicio</label>
+                </div>
 
-                    <div className="pt-4 border-t border-stone-800 flex justify-end gap-4">
-                        <Link
-                            href="/admin/dashboard"
-                            className="px-6 py-3 rounded-xl border border-stone-800 text-stone-400 text-xs font-medium hover:bg-stone-900 transition-all"
-                        >
-                            Cancelar
-                        </Link>
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="px-8 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 text-stone-950 text-xs font-bold hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-amber-500/20 disabled:opacity-50"
-                        >
-                            {loading ? 'Guardando Cambios...' : 'Actualizar Producto'}
-                        </button>
-                    </div>
-                </form>
-            </div>
+                <button
+                    type="submit"
+                    disabled={saving}
+                    className="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3.5 rounded-xl transition-colors text-sm"
+                >
+                    {saving ? 'Guardando Cambios...' : 'Actualizar Joya'}
+                </button>
+            </form>
         </div>
     );
 }
