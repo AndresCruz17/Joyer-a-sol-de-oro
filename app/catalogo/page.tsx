@@ -1,8 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
+
+const PHONE_WHATSAPP = process.env.NEXT_PUBLIC_WHATSAPP || '573000000000';
 
 interface Category {
   id: string;
@@ -22,16 +25,19 @@ interface Product {
   created_at: string;
 }
 
-export default function CatalogoPage() {
+function CatalogoContent() {
   const supabase = createClient();
+  const searchParams = useSearchParams();
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Estados para filtros
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  // Estados para filtros con soporte de inicialización por URL
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
+  const [selectedCategory, setSelectedCategory] = useState<string>(
+    searchParams.get('categoria') || 'all'
+  );
   const [sortBy, setSortBy] = useState<'newest' | 'price-asc' | 'price-desc'>('newest');
 
   useEffect(() => {
@@ -59,6 +65,14 @@ export default function CatalogoPage() {
     fetchData();
   }, []);
 
+  // Synchronize category if query param changes dynamically
+  useEffect(() => {
+    const catParam = searchParams.get('categoria');
+    const qParam = searchParams.get('q');
+    if (catParam) setSelectedCategory(catParam);
+    if (qParam) setSearchQuery(qParam);
+  }, [searchParams]);
+
   // Filtrado y Ordenamiento dinámico
   const filteredProducts = products
     .filter((item) => {
@@ -74,7 +88,7 @@ export default function CatalogoPage() {
     })
     .sort((a, b) => {
       if (sortBy === 'price-asc') return (a.price || 0) - (b.price || 0);
-      if (sortBy === 'price-desc') return (b.price || 0) - (a.price || 0);
+      if (sortBy === 'price-desc') return (a.price || 0) - (b.price || 0);
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
 
@@ -93,7 +107,7 @@ export default function CatalogoPage() {
           </Link>
 
           <a
-            href="https://wa.me/?text=Hola,%20quisiera%20asesoria%20sobre%20joyas%20en%20Oro%2018K"
+            href={`https://wa.me/${PHONE_WHATSAPP}?text=${encodeURIComponent('Hola, quisiera asesoría sobre joyas en Oro de 18K')}`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-xs font-mono text-stone-300 hover:text-amber-400 transition-colors hidden sm:block"
@@ -119,7 +133,7 @@ export default function CatalogoPage() {
       </header>
 
       {/* BARRA DE BÚSQUEDA Y FILTROS */}
-      <section className="max-w-7xl mx-auto px-6 py-8 border-b border-stone-800/80 sticky top-[57px] z-40 bg-stone-950/90 backdrop-blur-md">
+      <section className="max-w-7xl mx-auto px-6 py-6 border-b border-stone-800/80 sticky top-[57px] z-40 bg-stone-950/90 backdrop-blur-md">
         <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
 
           {/* Buscador */}
@@ -157,7 +171,7 @@ export default function CatalogoPage() {
         </div>
 
         {/* Categorías (Pills) */}
-        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pt-4 mt-2">
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pt-4 mt-1">
           <button
             onClick={() => setSelectedCategory('all')}
             className={`px-4 py-1.5 rounded-full text-xs font-mono transition-all shrink-0 border ${selectedCategory === 'all'
@@ -191,8 +205,21 @@ export default function CatalogoPage() {
       {/* GRID DE PRODUCTOS */}
       <main className="max-w-7xl mx-auto px-6 py-12">
         {loading ? (
-          <div className="text-center py-20 font-mono text-xs text-stone-500">
-            Cargando piezas exclusivas...
+          /* SKELETON LOADER ANIMADO */
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="rounded-2xl bg-stone-900/30 border border-stone-800/60 overflow-hidden animate-pulse">
+                <div className="aspect-square bg-stone-900" />
+                <div className="p-6 space-y-3">
+                  <div className="h-5 bg-stone-900 rounded w-3/4" />
+                  <div className="h-3 bg-stone-900 rounded w-1/2" />
+                  <div className="pt-4 border-t border-stone-800/60 flex justify-between items-center">
+                    <div className="h-6 bg-stone-900 rounded w-1/3" />
+                    <div className="h-8 bg-stone-900 rounded w-20" />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         ) : filteredProducts.length === 0 ? (
           <div className="text-center py-20 border border-stone-800/60 rounded-3xl bg-stone-900/20 max-w-md mx-auto">
@@ -228,7 +255,7 @@ export default function CatalogoPage() {
                 (itemImage ? `\n🖼️ *Ver Foto:* ${itemImage}\n\n` : '\n') +
                 `Hola, me interesa recibir más información sobre esta joya.`;
 
-              const whatsappUrl = `https://wa.me/573000000000?text=${encodeURIComponent(whatsappText)}`;
+              const whatsappUrl = `https://wa.me/${PHONE_WHATSAPP}?text=${encodeURIComponent(whatsappText)}`;
 
               return (
                 <div
@@ -241,6 +268,7 @@ export default function CatalogoPage() {
                       <img
                         src={item.image_url}
                         alt={item.name}
+                        loading="lazy"
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     ) : (
@@ -276,8 +304,16 @@ export default function CatalogoPage() {
                             Peso: {item.weight_grams}g
                           </span>
                         )}
+                        {/* Renderizado seguro del precio */}
                         <span className="font-mono text-lg text-amber-400 font-semibold">
-                          ${item.price?.toLocaleString('es-CO')} <span className="text-[10px] text-stone-400">COP</span>
+                          {item.price ? (
+                            <>
+                              ${item.price.toLocaleString('es-CO')}{' '}
+                              <span className="text-[10px] text-stone-400">COP</span>
+                            </>
+                          ) : (
+                            <span className="text-xs text-stone-400 font-normal">A consultar</span>
+                          )}
                         </span>
                       </div>
 
@@ -305,5 +341,17 @@ export default function CatalogoPage() {
       </footer>
 
     </div>
+  );
+}
+
+export default function CatalogoPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-stone-950 text-stone-500 flex items-center justify-center font-mono text-xs">
+        Cargando catálogo...
+      </div>
+    }>
+      <CatalogoContent />
+    </Suspense>
   );
 }

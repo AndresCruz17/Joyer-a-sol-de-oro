@@ -2,22 +2,32 @@ import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { cache } from 'react';
 import ProductGallery from '@/components/product/ProductGallery';
+
+// Teléfono oficial (puedes pasarlo a .env.local como NEXT_PUBLIC_WHATSAPP)
+const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP || '573000000000';
 
 interface PageProps {
     params: Promise<{ id: string }> | { id: string };
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-    const resolvedParams = await params;
-    const productId = resolvedParams.id;
+// 💡 OPTIMIZACIÓN: Función cacheada para evitar doble llamada a Supabase entre Metadata y Page
+const getProduct = cache(async (productId: string) => {
     const supabase = await createClient();
-
-    const { data: product } = await supabase
+    const { data: product, error } = await supabase
         .from('products')
-        .select('*, categories(name)')
+        .select('*, categories(name, slug)')
         .eq('id', productId)
         .maybeSingle();
+
+    if (error || !product) return null;
+    return product;
+});
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+    const resolvedParams = await params;
+    const product = await getProduct(resolvedParams.id);
 
     if (!product) {
         return {
@@ -31,9 +41,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const weightText = product.weight_grams ? `• Peso: ${product.weight_grams}g` : '';
 
     const title = `${product.name} ${priceFormatted ? `— ${priceFormatted}` : ''} | Sol de Oro`;
-    const description = `${categoryName} ${weightText}. Joya exclusiva esculpida en Oro Nacional de 18K. Garante de por vida.`;
+    const description = `${categoryName} ${weightText}. Joya exclusiva esculpida en Oro Nacional de 18K. Garantía de por vida.`;
 
-    // Consolidar imágenes para la tarjeta de previsualización
     const allImages = Array.from(
         new Set([product.image_url, ...(product.images || [])].filter(Boolean) as string[])
     );
@@ -67,20 +76,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ProductDetailPage({ params }: PageProps) {
     const resolvedParams = await params;
-    const productId = resolvedParams.id;
+    const product = await getProduct(resolvedParams.id);
 
-    const supabase = await createClient();
-
-    const { data: product, error } = await supabase
-        .from('products')
-        .select('*, categories(name, slug)')
-        .eq('id', productId)
-        .maybeSingle();
-
-    if (error || !product) {
+    if (!product) {
         notFound();
     }
 
+    const supabase = await createClient();
+
+    // Productos relacionados de la misma categoría
     const { data: relatedProducts } = await supabase
         .from('products')
         .select('*')
@@ -105,7 +109,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
         (imageUrl ? `\n🖼️ *Ver Foto:* ${imageUrl}\n\n` : '\n') +
         `Hola, quisiera confirmar disponibilidad, tiempo de entrega y métodos de pago para esta pieza. ¡Muchas gracias!`;
 
-    const whatsappUrl = `https://wa.me/573000000000?text=${encodeURIComponent(whatsappText)}`;
+    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(whatsappText)}`;
 
     return (
         <div className="min-h-screen bg-stone-950 text-stone-100 font-sans selection:bg-amber-500 selection:text-stone-950">
@@ -155,10 +159,10 @@ export default async function ProductDetailPage({ params }: PageProps) {
                             </h1>
 
                             <div className="flex items-baseline gap-3 mb-6">
+                                {/* FIX: Renderizado seguro si no hay precio */}
                                 <span className="font-mono text-3xl sm:text-4xl text-amber-400 font-bold">
-                                    ${product.price?.toLocaleString('es-CO')}
+                                    {priceText}
                                 </span>
-                                <span className="text-xs font-mono text-stone-400">COP</span>
                             </div>
 
                             {product.description && (
@@ -237,7 +241,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                                             {rel.name}
                                         </h3>
                                         <p className="text-xs font-mono text-amber-400 mt-1">
-                                            ${rel.price?.toLocaleString('es-CO')} COP
+                                            {rel.price ? `$${rel.price.toLocaleString('es-CO')} COP` : 'A consultar'}
                                         </p>
                                     </div>
                                 </Link>
