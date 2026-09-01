@@ -50,7 +50,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
         (imageUrl ? `\n🖼️ *Ver Foto:* ${imageUrl}\n\n` : '\n') +
         `Hola, quisiera confirmar disponibilidad, tiempo de entrega y métodos de pago para esta pieza. ¡Muchas gracias!`;
 
-    const whatsappUrl = `https://wa.me/573000000000?text=${encodeURIComponent(whatsappText)}`; // Reemplazar con el número real de WhatsApp
+    const whatsappUrl = `https://wa.me/573104993406?text=${encodeURIComponent(whatsappText)}`; // Reemplazar con el número real de WhatsApp
 
     return (
         <div className="min-h-screen bg-stone-950 text-stone-100 font-sans selection:bg-amber-500 selection:text-stone-950">

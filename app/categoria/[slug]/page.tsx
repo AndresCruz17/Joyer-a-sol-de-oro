@@ -156,7 +156,7 @@ export default async function CategoryPage({ params }: PageProps) {
                 (itemImage ? `\n🖼️ *Ver Foto:* ${itemImage}\n\n` : '\n') +
                 `Hola, me interesa recibir más información sobre esta joya.`;
 
-              const whatsappUrl = `https://wa.me/573000000000?text=${encodeURIComponent(whatsappText)}`;
+              const whatsappUrl = `https://wa.me/573104993406?text=${encodeURIComponent(whatsappText)}`;
 
               return (
                 <div
