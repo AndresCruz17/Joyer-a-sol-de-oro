@@ -37,3 +37,24 @@
 html {
     scroll-behavior: smooth;
 }
+
+@keyframes marquee {
+    0% {
+        transform: translateX(0%);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+.animate-marquee {
+    display: flex;
+    width: max-content;
+    animation: marquee 25s linear infinite;
+}
+
+/* Pausa suave cuando el usuario pasa el mouse por encima para leer */
+.animate-marquee:hover {
+    animation-play-state: paused;
+}

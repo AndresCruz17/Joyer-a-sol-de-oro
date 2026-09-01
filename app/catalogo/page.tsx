@@ -121,7 +121,7 @@ function CatalogoContent() {
       <header className="py-12 sm:py-16 px-6 text-center border-b border-stone-800/80 bg-gradient-to-b from-stone-900/40 to-stone-950">
         <div className="max-w-3xl mx-auto">
           <span className="text-xs font-mono text-amber-400 uppercase tracking-widest block mb-3">
-            Colección Completa // Oro Nacional 18K
+            Colección Completa // Oro Nacional e Italiano 18K
           </span>
           <h1 className="font-serif text-3xl sm:text-5xl font-light text-stone-100 mb-4">
             Catálogo de <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500">Alta Joyería</span>
