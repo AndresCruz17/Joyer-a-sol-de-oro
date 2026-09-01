@@ -23,7 +23,7 @@ export default async function CategoryPage({ params }: PageProps) {
     notFound();
   }
 
-  // 2. Obtener TODAS las categorías para la barra de navegación rápida
+  // 2. Obtener TODAS las categorías para el selector rápido
   const { data: allCategories } = await supabase
     .from('categories')
     .select('id, name, slug')
@@ -31,7 +31,7 @@ export default async function CategoryPage({ params }: PageProps) {
 
   const categoriesList = allCategories || [];
 
-  // 3. Obtener solo los productos asociados a esta categoría
+  // 3. Obtener los productos asociados a esta categoría
   const { data: products } = await supabase
     .from('products')
     .select('*')
@@ -42,7 +42,7 @@ export default async function CategoryPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-stone-950 text-stone-100 font-sans selection:bg-amber-500 selection:text-stone-950">
-      
+
       {/* Navegación Superior */}
       <nav className="border-b border-stone-800/80 bg-stone-950/90 backdrop-blur-md sticky top-0 z-50 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -66,7 +66,7 @@ export default async function CategoryPage({ params }: PageProps) {
         </div>
       </nav>
 
-      {/* Header Banner de la Categoría Actual */}
+      {/* Header Banner */}
       <header className="relative py-12 sm:py-16 px-6 border-b border-stone-800/80 overflow-hidden">
         {category.image_url && (
           <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
@@ -96,7 +96,7 @@ export default async function CategoryPage({ params }: PageProps) {
         </div>
       </header>
 
-      {/* Selector Rápido de Categorías (Barra Deslizable de Filtros) */}
+      {/* Selector Rápido de Categorías */}
       <div className="border-b border-stone-800/80 bg-stone-900/40 sticky top-[57px] z-40 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6 py-3 flex items-center gap-2 overflow-x-auto scrollbar-none">
           <span className="text-[10px] font-mono text-stone-500 uppercase tracking-wider mr-2 shrink-0 hidden sm:inline-block">
@@ -108,11 +108,10 @@ export default async function CategoryPage({ params }: PageProps) {
               <Link
                 key={cat.id}
                 href={`/categoria/${cat.slug}`}
-                className={`px-4 py-1.5 rounded-full text-xs font-mono transition-all shrink-0 border ${
-                  isActive
+                className={`px-4 py-1.5 rounded-full text-xs font-mono transition-all shrink-0 border ${isActive
                     ? 'bg-amber-500/20 border-amber-500 text-amber-300 font-semibold shadow-[0_0_15px_rgba(245,158,11,0.2)]'
                     : 'bg-stone-950/60 border-stone-800 text-stone-400 hover:border-stone-700 hover:text-stone-200 hover:bg-stone-900'
-                }`}
+                  }`}
               >
                 {cat.name}
               </Link>
@@ -121,7 +120,7 @@ export default async function CategoryPage({ params }: PageProps) {
         </div>
       </div>
 
-      {/* Grid de Productos Filtrados */}
+      {/* Grid de Productos */}
       <main className="max-w-7xl mx-auto px-6 py-12">
         {productList.length === 0 ? (
           <div className="text-center py-20 border border-stone-800/60 rounded-3xl bg-stone-900/20 max-w-xl mx-auto">
@@ -143,18 +142,29 @@ export default async function CategoryPage({ params }: PageProps) {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {productList.map((item) => {
-              const whatsappMessage = encodeURIComponent(
-                `Hola Sol de Oro, estoy interesado en cotizar la joya "${item.name}" de la categoría ${category.name}.`
-              );
-              const whatsappUrl = `https://wa.me/573000000000?text=${whatsappMessage}`;
+              const itemWeight = item.weight_grams ? `${item.weight_grams}g` : 'A consultar';
+              const itemPrice = item.price ? `$${item.price.toLocaleString('es-CO')} COP` : 'A consultar';
+              const itemImage = item.image_url || '';
+
+              const whatsappText =
+                `✨ *COTIZACIÓN RÁPIDA // SOL DE ORO* ✨\n\n` +
+                `📌 *Joya:* ${item.name}\n` +
+                `🏷️ *Colección:* ${category.name}\n` +
+                `⚖️ *Peso aprox:* ${itemWeight}\n` +
+                `💰 *Precio:* ${itemPrice}\n` +
+                `👑 *Material:* Oro 18K\n` +
+                (itemImage ? `\n🖼️ *Ver Foto:* ${itemImage}\n\n` : '\n') +
+                `Hola, me interesa recibir más información sobre esta joya.`;
+
+              const whatsappUrl = `https://wa.me/573000000000?text=${encodeURIComponent(whatsappText)}`;
 
               return (
                 <div
                   key={item.id}
                   className="group rounded-2xl bg-stone-900/40 border border-stone-800/80 hover:border-amber-500/60 transition-all duration-300 overflow-hidden flex flex-col"
                 >
-                  {/* Foto del Producto */}
-                  <div className="relative aspect-square w-full overflow-hidden bg-stone-950">
+                  {/* Foto con enlace a Detalle */}
+                  <Link href={`/producto/${item.id}`} className="relative aspect-square w-full overflow-hidden bg-stone-950 block">
                     {item.image_url ? (
                       <img
                         src={item.image_url}
@@ -169,14 +179,16 @@ export default async function CategoryPage({ params }: PageProps) {
                     <span className="absolute top-3 left-3 text-[10px] font-mono bg-stone-950/80 backdrop-blur-md text-amber-400 border border-amber-500/30 px-2.5 py-1 rounded-full uppercase">
                       Oro 18K
                     </span>
-                  </div>
+                  </Link>
 
                   {/* Detalles del Producto */}
                   <div className="p-6 flex-1 flex flex-col justify-between">
                     <div>
-                      <h3 className="font-serif text-xl text-stone-100 group-hover:text-amber-300 transition-colors mb-2">
-                        {item.name}
-                      </h3>
+                      <Link href={`/producto/${item.id}`}>
+                        <h3 className="font-serif text-xl text-stone-100 group-hover:text-amber-300 transition-colors mb-2">
+                          {item.name}
+                        </h3>
+                      </Link>
                       {item.description && (
                         <p className="text-xs text-stone-400 font-light line-clamp-2 mb-4 leading-relaxed">
                           {item.description}
