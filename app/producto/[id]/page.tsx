@@ -2,14 +2,12 @@ import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import ProductGallery from '@/components/product/ProductGallery';
 
 interface PageProps {
     params: Promise<{ id: string }> | { id: string };
 }
 
-// ==========================================
-// 1. GENERACIÓN DE METADATOS PARA SEO & WHATSAPP
-// ==========================================
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
     const resolvedParams = await params;
     const productId = resolvedParams.id;
@@ -28,14 +26,25 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         };
     }
 
-    const categoryName = product.categories?.name ? `Colección ${product.categories.name}` : 'Alta Joyería 18K';
+    const categoryName = product.categories?.name ? `Colección ${product.categories.name}` : 'Alta Joyería';
     const priceFormatted = product.price ? `$${product.price.toLocaleString('es-CO')} COP` : '';
-    const weightText = product.weight_grams ? `• ${product.weight_grams}g` : '';
+    const weightText = product.weight_grams ? `• Peso: ${product.weight_grams}g` : '';
 
     const title = `${product.name} ${priceFormatted ? `— ${priceFormatted}` : ''} | Sol de Oro`;
     const description = `${categoryName} ${weightText}. Joya exclusiva esculpida en Oro Nacional de 18K. Garante de por vida.`;
 
-    const imageUrl = product.image_url || '';
+    // Consolidar imágenes para la tarjeta de previsualización
+    const allImages = Array.from(
+        new Set([product.image_url, ...(product.images || [])].filter(Boolean) as string[])
+    );
+
+    const ogImages = allImages.map((url) => ({
+        url,
+        secureUrl: url,
+        width: 800,
+        height: 800,
+        alt: product.name,
+    }));
 
     return {
         title,
@@ -45,36 +54,23 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
             description,
             siteName: 'Sol de Oro — Joyería Fina 18K',
             type: 'website',
-            images: imageUrl
-                ? [
-                    {
-                        url: imageUrl,
-                        secureUrl: imageUrl,
-                        width: 800,
-                        height: 800,
-                        alt: product.name,
-                    },
-                ]
-                : [],
+            images: ogImages,
         },
         twitter: {
             card: 'summary_large_image',
             title,
             description,
-            images: imageUrl ? [imageUrl] : [],
+            images: allImages,
         },
     };
 }
-// ==========================================
-// 2. COMPONENTE DE LA PÁGINA
-// ==========================================
+
 export default async function ProductDetailPage({ params }: PageProps) {
     const resolvedParams = await params;
     const productId = resolvedParams.id;
 
     const supabase = await createClient();
 
-    // Obtener la información completa del producto junto con su categoría
     const { data: product, error } = await supabase
         .from('products')
         .select('*, categories(name, slug)')
@@ -85,7 +81,6 @@ export default async function ProductDetailPage({ params }: PageProps) {
         notFound();
     }
 
-    // Obtener productos relacionados de la misma categoría (máximo 3)
     const { data: relatedProducts } = await supabase
         .from('products')
         .select('*')
@@ -96,12 +91,10 @@ export default async function ProductDetailPage({ params }: PageProps) {
     const categoryName = product.categories?.name || 'Joyería';
     const categorySlug = product.categories?.slug;
 
-    // Variables para la cotización
     const imageUrl = product.image_url || '';
     const weightText = product.weight_grams ? `${product.weight_grams}g` : 'A consultar';
     const priceText = product.price ? `$${product.price.toLocaleString('es-CO')} COP` : 'A consultar';
 
-    // Mensaje estructurado profesional para WhatsApp
     const whatsappText =
         `✨ *SOLICITUD DE COTIZACIÓN // SOL DE ORO* ✨\n\n` +
         `📌 *Joya:* ${product.name}\n` +
@@ -112,12 +105,12 @@ export default async function ProductDetailPage({ params }: PageProps) {
         (imageUrl ? `\n🖼️ *Ver Foto:* ${imageUrl}\n\n` : '\n') +
         `Hola, quisiera confirmar disponibilidad, tiempo de entrega y métodos de pago para esta pieza. ¡Muchas gracias!`;
 
-    const whatsappUrl = `https://wa.me/573000000000?text=${encodeURIComponent(whatsappText)}`; // Reemplazar con el número real de WhatsApp
+    const whatsappUrl = `https://wa.me/573000000000?text=${encodeURIComponent(whatsappText)}`;
 
     return (
         <div className="min-h-screen bg-stone-950 text-stone-100 font-sans selection:bg-amber-500 selection:text-stone-950">
 
-            {/* Navegación Superior */}
+            {/* NAV */}
             <nav className="border-b border-stone-800/80 bg-stone-950/90 backdrop-blur-md sticky top-0 z-50 px-6 py-4">
                 <div className="max-w-7xl mx-auto flex items-center justify-between">
                     <Link
@@ -132,7 +125,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                     </Link>
 
                     <Link
-                        href="/#catalogo"
+                        href="/catalogo"
                         className="text-xs font-mono text-stone-400 hover:text-stone-200 transition-colors hidden sm:block"
                     >
                         Catálogo Completo
@@ -140,30 +133,18 @@ export default async function ProductDetailPage({ params }: PageProps) {
                 </div>
             </nav>
 
-            {/* Contenido Principal del Producto */}
+            {/* DETALLE Y GALERÍA */}
             <main className="max-w-7xl mx-auto px-6 py-10 md:py-16">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
 
-                    {/* Foto Principal */}
-                    <div className="relative rounded-3xl overflow-hidden border border-stone-800 bg-stone-900/40 aspect-square shadow-2xl">
-                        {product.image_url ? (
-                            <img
-                                src={product.image_url}
-                                alt={product.name}
-                                className="w-full h-full object-cover"
-                            />
-                        ) : (
-                            <div className="w-full h-full flex items-center justify-center text-stone-700 font-serif text-2xl">
-                                Fotografía no disponible
-                            </div>
-                        )}
+                    {/* Componente Galería Interactivo */}
+                    <ProductGallery
+                        mainImageUrl={product.image_url}
+                        images={product.images}
+                        productName={product.name}
+                    />
 
-                        <span className="absolute top-4 left-4 text-xs font-mono bg-stone-950/80 backdrop-blur-md text-amber-400 border border-amber-500/30 px-3 py-1 rounded-full uppercase">
-                            Oro Nacional 18K
-                        </span>
-                    </div>
-
-                    {/* Ficha Técnica y Cotización */}
+                    {/* Ficha Técnica */}
                     <div className="flex flex-col justify-between space-y-8">
                         <div>
                             <span className="text-xs font-mono text-amber-400 uppercase tracking-widest block mb-2">
@@ -186,7 +167,6 @@ export default async function ProductDetailPage({ params }: PageProps) {
                                 </p>
                             )}
 
-                            {/* Especificaciones de la Joya */}
                             <div className="grid grid-cols-2 gap-4 mb-8">
                                 <div className="p-4 rounded-2xl bg-stone-900/50 border border-stone-800">
                                     <span className="text-[10px] font-mono text-stone-400 uppercase block mb-1">Material</span>
@@ -212,7 +192,6 @@ export default async function ProductDetailPage({ params }: PageProps) {
                             </div>
                         </div>
 
-                        {/* CTA Cotizar por WhatsApp */}
                         <div className="space-y-3 pt-4 border-t border-stone-800/80">
                             <a
                                 href={whatsappUrl}

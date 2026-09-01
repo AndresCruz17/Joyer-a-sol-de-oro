@@ -19,7 +19,9 @@ export default function AdminDashboardPage() {
   const [price, setPrice] = useState('');
   const [description, setDescription] = useState('');
   const [isFeatured, setIsFeatured] = useState(false);
-  const [imageFile, setImageFile] = useState<File | null>(null);
+
+  // Soporte para múltiples archivos de imagen
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
 
   useEffect(() => {
     // Cargar categorías disponibles para el selector
@@ -36,26 +38,30 @@ export default function AdminDashboardPage() {
     setMessage(null);
 
     try {
-      let imageUrl = '';
+      const uploadedUrls: string[] = [];
 
-      // 1. Subir imagen a Supabase Storage si se seleccionó una
-      if (imageFile) {
-        const fileExt = imageFile.name.split('.').pop();
-        const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
-        const filePath = `products/${fileName}`;
+      // 1. Subir cada imagen seleccionada a Supabase Storage
+      if (imageFiles.length > 0) {
+        for (const file of imageFiles) {
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+          const filePath = `products/${fileName}`;
 
-        const { error: uploadError } = await supabase.storage
-          .from('products')
-          .upload(filePath, imageFile);
+          const { error: uploadError } = await supabase.storage
+            .from('products')
+            .upload(filePath, file);
 
-        if (uploadError) throw uploadError;
+          if (uploadError) throw uploadError;
 
-        // Obtener URL pública de la foto
-        const { data: publicUrlData } = supabase.storage
-          .from('products')
-          .getPublicUrl(filePath);
+          // Obtener URL pública de cada foto
+          const { data: publicUrlData } = supabase.storage
+            .from('products')
+            .getPublicUrl(filePath);
 
-        imageUrl = publicUrlData.publicUrl;
+          if (publicUrlData?.publicUrl) {
+            uploadedUrls.push(publicUrlData.publicUrl);
+          }
+        }
       }
 
       // 2. Insertar producto en la base de datos con Slug SEO
@@ -68,19 +74,21 @@ export default function AdminDashboardPage() {
         price: price ? parseFloat(price) : null,
         description,
         is_featured: isFeatured,
-        images: imageUrl ? [imageUrl] : [],
+        image_url: uploadedUrls[0] || null, // Foto principal (portada)
+        images: uploadedUrls,              // Arreglo completo de imágenes para la galería
         is_active: true,
       });
 
       if (insertError) throw insertError;
 
-      setMessage('¡Joya registrada exitosamente con URL optimizada para SEO!');
+      setMessage(`¡Joya registrada exitosamente con ${uploadedUrls.length} ${uploadedUrls.length === 1 ? 'foto' : 'fotos'}!`);
+
       // Resetear formulario
       setName('');
       setPrice('');
       setDescription('');
       setIsFeatured(false);
-      setImageFile(null);
+      setImageFiles([]);
     } catch (err: any) {
       console.error(err);
       setMessage(`Error: ${err.message || 'No se pudo guardar la joya.'}`);
@@ -98,7 +106,7 @@ export default function AdminDashboardPage() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 p-6 md:p-12">
       <div className="max-w-4xl mx-auto space-y-8">
-        
+
         {/* CABECERA ADMIN */}
         <div className="flex justify-between items-center border-b border-slate-800 pb-6">
           <div>
@@ -126,7 +134,7 @@ export default function AdminDashboardPage() {
 
           <form onSubmit={handleCreateProduct} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              
+
               <div>
                 <label className="block text-xs font-semibold text-slate-400 mb-2">
                   Nombre de la Joya *
@@ -178,16 +186,26 @@ export default function AdminDashboardPage() {
                 />
               </div>
 
+              {/* SELECTOR MULTI-FOTO */}
               <div>
                 <label className="block text-xs font-semibold text-slate-400 mb-2">
-                  Foto de la Joya
+                  Fotos de la Joya (puedes seleccionar varias)
                 </label>
                 <input
                   type="file"
                   accept="image/*"
-                  onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                  multiple // 👈 Permite selección múltiple
+                  onChange={(e) =>
+                    setImageFiles(e.target.files ? Array.from(e.target.files) : [])
+                  }
                   className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-slate-400 text-sm focus:outline-none file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:bg-slate-800 file:text-slate-300"
                 />
+                {imageFiles.length > 0 && (
+                  <p className="text-[11px] text-amber-400/90 mt-1.5 font-mono">
+                    ✓ {imageFiles.length}{' '}
+                    {imageFiles.length === 1 ? 'fotografía seleccionada' : 'fotografías seleccionadas'}
+                  </p>
+                )}
               </div>
 
             </div>
