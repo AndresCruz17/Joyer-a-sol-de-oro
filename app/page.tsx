@@ -1,230 +1,481 @@
-import { createClient } from '@/lib/supabase/server';
-import CustomCursor from '@/components/ui/CustomCursor';
-import CategoryCarousel from '@/components/home/CategoryCarousel';
-import Image from 'next/image';
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
-export default async function HomePage() {
-  const supabase = await createClient();
+// ==========================================
+// CONFIGURA AQUÍ TUS DATOS Y REDES SOCIALES
+// ==========================================
+const CONFIG = {
+  phoneWhatsapp: process.env.NEXT_PUBLIC_WHATSAPP || '573000000000',
+  facebookUrl: 'https://facebook.com/tu-pagina-facebook', // Cambiar por tu URL de Facebook
+  tiktokUrl: 'https://tiktok.com/@tu-usuario-tiktok',    // Cambiar por tu URL de TikTok
+  instagramUrl: 'https://instagram.com/tu-usuario-instagram', // Opcional
+  address: 'Calle Ficticia # 12-34, Local 101, Centro Comercial El Dorado', // Dirección de tu local
+  city: 'Medellín, Colombia',
+  googleMapsUrl: 'https://maps.google.com/?q=Sol+de+Oro+Joyeria', // Link directo a Google Maps
+};
 
-  // 1. Obtener categorías
-  const { data: categories } = await supabase
-    .from('categories')
-    .select('*')
-    .order('name', { ascending: true });
+// Frases para la animación de máquina de escribir
+const TYPEWRITER_PHRASES = [
+  'Oro de 18 Kilates Certificado',
+  'Diseños Exclusivos a Medida',
+  'Garantía de por Vida en la Pureza',
+  'Elegancia que Trasciende el Tiempo',
+];
 
-  // 2. Obtener productos creados con su categoría
-  const { data: products } = await supabase
-    .from('products')
-    .select('*, categories(name)')
-    .order('created_at', { ascending: false });
+export default function HomePage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const categoryList = categories || [];
-  const productList = products || [];
+  // EFECTO MÁQUINA DE ESCRIBIR
+  const [textIndex, setTextIndex] = useState(0);
+  const [charIndex, setCharIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [currentText, setCurrentText] = useState('');
+
+  useEffect(() => {
+    const targetPhrase = TYPEWRITER_PHRASES[textIndex];
+    const typingSpeed = isDeleting ? 40 : 80;
+
+    const timeout = setTimeout(() => {
+      if (!isDeleting && charIndex < targetPhrase.length) {
+        setCurrentText(targetPhrase.substring(0, charIndex + 1));
+        setCharIndex((prev) => prev + 1);
+      } else if (!isDeleting && charIndex === targetPhrase.length) {
+        setTimeout(() => setIsDeleting(true), 1800); // Pausa antes de borrar
+      } else if (isDeleting && charIndex > 0) {
+        setCurrentText(targetPhrase.substring(0, charIndex - 1));
+        setCharIndex((prev) => prev - 1);
+      } else if (isDeleting && charIndex === 0) {
+        setIsDeleting(false);
+        setTextIndex((prev) => (prev + 1) % TYPEWRITER_PHRASES.length);
+      }
+    }, typingSpeed);
+
+    return () => clearTimeout(timeout);
+  }, [charIndex, isDeleting, textIndex]);
+
+  const whatsappHeroUrl = `https://wa.me/${CONFIG.phoneWhatsapp}?text=${encodeURIComponent('Hola Sol de Oro, quisiera solicitar asesoría personalizada sobre sus joyas en Oro 18K.')}`;
 
   return (
-    <div className="min-h-screen bg-stone-950 text-stone-100 font-sans selection:bg-amber-500 selection:text-stone-950 overflow-x-hidden relative">
-      
-      <CustomCursor />
+    <div className="min-h-screen bg-stone-950 text-stone-100 font-sans selection:bg-amber-500 selection:text-stone-950 scroll-smooth">
 
-      {/* HEADER */}
-      <header className="sticky top-0 z-40 backdrop-blur-xl bg-stone-950/70 border-b border-amber-500/15">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <div className="flex items-center space-x-3 cursor-pointer group">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-600 via-amber-400 to-yellow-200 flex items-center justify-center shadow-[0_0_20px_rgba(245,158,11,0.3)] group-hover:rotate-180 transition-transform duration-700">
-              <span className="text-stone-950 font-serif font-bold text-lg">SO</span>
-            </div>
-            <span className="font-serif text-xl sm:text-2xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500">
-              SOL DE ORO
+      {/* HALOS DORADOS AMBIENTALES DE FONDO */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute -top-40 -left-40 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-1/2 -right-40 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
+      </div>
+
+      {/* NAVBAR NAVEGACIÓN */}
+      <nav className="border-b border-stone-800/80 bg-stone-950/90 backdrop-blur-md sticky top-0 z-50 px-6 py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+
+          {/* LOGO */}
+          <Link href="/" className="flex items-center gap-2 group">
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-400 group-hover:scale-125 transition-transform shadow-[0_0_10px_rgba(245,158,11,0.8)]" />
+            <span className="font-serif italic text-2xl font-light tracking-wide text-amber-300">
+              Sol de Oro
             </span>
+          </Link>
+
+          {/* LINKS DE ESCRITORIO */}
+          <div className="hidden lg:flex items-center gap-8 text-xs font-mono tracking-wider text-stone-300 uppercase">
+            <a href="#colecciones" className="hover:text-amber-400 transition-colors">Colecciones</a>
+            <a href="#destacados" className="hover:text-amber-400 transition-colors">Joyas Fina</a>
+            <a href="#personalizados" className="hover:text-amber-400 transition-colors">Personalizados</a>
+            <a href="#garantias" className="hover:text-amber-400 transition-colors">Garantía</a>
+            <a href="#nosotros" className="hover:text-amber-400 transition-colors">Sobre Nosotros</a>
+            <a href="#ubicacion" className="hover:text-amber-400 transition-colors">Ubicación</a>
           </div>
 
-          <nav className="hidden md:flex space-x-8 text-sm font-medium text-stone-300">
-            <a href="#coleccion" className="hover:text-amber-400 transition-colors py-1">Colecciones</a>
-            <a href="#catalogo" className="hover:text-amber-400 transition-colors py-1">Joyería Fina</a>
-            <a href="#personalizado" className="hover:text-amber-400 transition-colors py-1">Personalizados</a>
-          </nav>
-
-          <a
-            href="https://wa.me/?text=Hola,%20quisiera%20asesoria%20sobre%20joyas%20en%20Oro%2018K"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center px-5 py-2.5 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-300 text-xs sm:text-sm font-medium hover:bg-amber-500 hover:text-stone-950 hover:shadow-[0_0_25px_rgba(245,158,11,0.5)] transition-all duration-300"
-          >
-            WhatsApp Directo
-          </a>
-        </div>
-      </header>
-
-      {/* HERO */}
-      <section className="relative pt-24 pb-28 md:pt-36 md:pb-40 bg-gradient-to-b from-stone-950 via-stone-900 to-stone-950">
-        <div className="max-w-5xl mx-auto px-4 text-center relative z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-widest text-amber-300 bg-amber-500/10 border border-amber-500/30 mb-8 uppercase backdrop-blur-md">
-            Alta Orfebrería Colombiana
-          </div>
-
-          <h1 className="font-serif text-5xl sm:text-7xl md:text-8xl font-light tracking-tight leading-[1.08] mb-8">
-            Elegancia en <br />
-            <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500 drop-shadow-[0_0_35px_rgba(245,158,11,0.3)]">
-              Oro de 18K
-            </span>
-          </h1>
-
-          <p className="max-w-2xl mx-auto text-stone-400 text-base sm:text-lg mb-12 font-light leading-relaxed">
-            Piezas exclusivas diseñadas para capturar momentos inolvidables con la máxima pureza y sofisticación.
-          </p>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
-            <a
-              href="#catalogo"
-              className="w-full sm:w-auto px-9 py-4 rounded-full bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 text-stone-950 font-bold text-sm hover:shadow-[0_0_30px_rgba(245,158,11,0.6)] hover:scale-105 transition-all duration-300"
+          {/* BOTÓN CATÁLOGO PRINCIPAL & WHATSAPP */}
+          <div className="hidden sm:flex items-center gap-3">
+            <Link
+              href="/catalogo"
+              className="px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/40 text-amber-300 text-xs font-mono hover:bg-amber-500 hover:text-stone-950 transition-all duration-300"
             >
               Ver Catálogo
-            </a>
-            <a
-              href="#personalizado"
-              className="w-full sm:w-auto px-9 py-4 rounded-full border border-stone-700/80 bg-stone-900/40 text-stone-300 font-medium text-sm hover:border-amber-500/50 hover:text-amber-300 transition-all duration-300"
+            </Link>
+          </div>
+
+          {/* BOTÓN MENÚ MÓVIL */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="lg:hidden p-2 text-stone-400 hover:text-amber-400 transition-colors"
+            aria-label="Abrir menú"
+          >
+            {mobileMenuOpen ? '✕' : '☰'}
+          </button>
+        </div>
+
+        {/* MENÚ DESPLEGABLE MÓVIL */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden pt-4 pb-2 border-t border-stone-800/80 mt-3 flex flex-col gap-3 text-xs font-mono uppercase text-stone-300">
+            <a href="#colecciones" onClick={() => setMobileMenuOpen(false)} className="py-2 hover:text-amber-400">Colecciones</a>
+            <a href="#destacados" onClick={() => setMobileMenuOpen(false)} className="py-2 hover:text-amber-400">Joyería Fina</a>
+            <a href="#personalizados" onClick={() => setMobileMenuOpen(false)} className="py-2 hover:text-amber-400">Personalizados</a>
+            <a href="#garantias" onClick={() => setMobileMenuOpen(false)} className="py-2 hover:text-amber-400">Garantía</a>
+            <a href="#nosotros" onClick={() => setMobileMenuOpen(false)} className="py-2 hover:text-amber-400">Sobre Nosotros</a>
+            <a href="#ubicacion" onClick={() => setMobileMenuOpen(false)} className="py-2 hover:text-amber-400">Ubicación & Contacto</a>
+            <Link
+              href="/catalogo"
+              className="mt-2 text-center py-2.5 rounded-xl bg-amber-500 text-stone-950 font-semibold"
             >
-              Diseños Exclusivos
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* CARRUSEL DE CATEGORÍAS */}
-      <section id="coleccion" className="max-w-7xl mx-auto px-4 py-16 relative">
-        <CategoryCarousel categories={categoryList} />
-      </section>
-
-      {/* SECCIÓN DE PRODUCTOS PUBLICADOS */}
-      <section id="catalogo" className="max-w-7xl mx-auto px-4 py-20 relative">
-        <div className="text-center mb-16">
-          <span className="text-xs font-mono text-amber-400 uppercase tracking-widest block mb-2">
-            02 // Piezas Disponibles
-          </span>
-          <h2 className="font-serif text-3xl sm:text-5xl font-light text-stone-100">
-            Catálogo de <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-yellow-500">Alta Joyería</span>
-          </h2>
-        </div>
-
-        {productList.length === 0 ? (
-          <div className="text-center py-16 px-4 rounded-2xl bg-stone-900/40 border border-stone-800 text-stone-400 text-sm">
-            Próximamente nuevas piezas exclusivas. Agrega productos desde el panel administrador.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {productList.map((item) => {
-              const categoryName = item.categories?.name || 'Joyería';
-              const itemWeight = item.weight_grams ? `${item.weight_grams}g` : 'A consultar';
-              const itemPrice = item.price ? `$${item.price.toLocaleString('es-CO')} COP` : 'A consultar';
-              const itemImage = item.image_url || '';
-
-              // Mensaje estructurado para WhatsApp
-              const whatsappText =
-                `✨ *COTIZACIÓN RÁPIDA // SOL DE ORO* ✨\n\n` +
-                `📌 *Joya:* ${item.name}\n` +
-                `🏷️ *Colección:* ${categoryName}\n` +
-                `⚖️ *Peso aprox:* ${itemWeight}\n` +
-                `💰 *Precio:* ${itemPrice}\n` +
-                `👑 *Material:* Oro 18K\n` +
-                (itemImage ? `\n🖼️ *Ver Foto:* ${itemImage}\n\n` : '\n') +
-                `Hola, me interesa recibir más información sobre esta joya.`;
-
-              const whatsappUrl = `https://wa.me/573000000000?text=${encodeURIComponent(whatsappText)}`; // Reemplazar con el número real de WhatsApp
-
-              return (
-                <div
-                  key={item.id}
-                  className="group rounded-2xl bg-gradient-to-b from-stone-900/80 to-stone-950 border border-stone-800/80 hover:border-amber-500/50 overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_15px_35px_rgba(245,158,11,0.15)] flex flex-col justify-between"
-                >
-                  <div>
-                    {/* Foto de la Joya (Clic para ver detalle) */}
-                    <Link href={`/producto/${item.id}`} className="relative h-64 w-full bg-stone-950 overflow-hidden block">
-                      {item.image_url ? (
-                        <img
-                          src={item.image_url}
-                          alt={item.name}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-stone-600 text-xs font-mono">
-                          [ Sin Imagen ]
-                        </div>
-                      )}
-                      <div className="absolute top-3 right-3 bg-stone-950/80 backdrop-blur-md border border-amber-500/30 text-amber-300 text-[10px] font-mono px-2.5 py-1 rounded-full uppercase">
-                        {item.categories?.name || 'Oro 18K'}
-                      </div>
-                    </Link>
-
-                    {/* Detalles */}
-                    <div className="p-6">
-                      {/* Nombre con Enlace al detalle del producto */}
-                      <Link href={`/producto/${item.id}`}>
-                        <h3 className="font-serif text-2xl text-stone-100 mb-2 group-hover:text-amber-300 transition-colors">
-                          {item.name}
-                        </h3>
-                      </Link>
-
-                      {item.weight_grams && (
-                        <p className="text-xs font-mono text-amber-400/90 mb-3">
-                          Peso aproximado: {item.weight_grams}g en Oro 18K
-                        </p>
-                      )}
-
-                      <p className="text-stone-400 text-sm font-light line-clamp-2 mb-6">
-                        {item.description || 'Joya artesanal con certificación de pureza en oro de 18 kilates.'}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Pie con Precio y WhatsApp Estructurado */}
-                  <div className="p-6 pt-0 flex items-center justify-between border-t border-stone-800/60 mt-auto">
-                    <div>
-                      <span className="text-[10px] font-mono text-stone-500 uppercase block">Precio COP</span>
-                      <span className="font-mono text-xl font-bold text-amber-400">
-                        ${item.price?.toLocaleString('es-CO')}
-                      </span>
-                    </div>
-
-                    <a
-                      href={whatsappUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-4 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-medium hover:bg-amber-500 hover:text-stone-950 transition-all"
-                    >
-                      Cotizar Joya
-                    </a>
-                  </div>
-                </div>
-              );
-            })}
+              Ir al Catálogo Completo
+            </Link>
           </div>
         )}
-      </section>
+      </nav>
 
-      {/* CTA & FOOTER */}
-      <section id="personalizado" className="max-w-7xl mx-auto px-4 pb-28">
-        <div className="rounded-3xl bg-gradient-to-r from-stone-900 via-stone-900/90 to-stone-900 border border-amber-500/30 p-8 sm:p-16 text-center relative overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)]">
-          <h2 className="font-serif text-3xl sm:text-5xl text-stone-100 mb-4 font-light">
-            ¿Buscas una pieza <span className="text-amber-400 italic">a la medida</span>?
-          </h2>
-          <p className="text-stone-300 text-sm sm:text-base mb-10 font-light max-w-xl mx-auto">
-            Fabricamos argollas de matrimonio, anillos de compromiso y dijes con tu diseño personalizado.
+      {/* HERO SECTION */}
+      <section className="relative z-10 py-20 sm:py-32 px-6 text-center max-w-5xl mx-auto flex flex-col items-center">
+
+        {/* Insignia Superior */}
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono uppercase tracking-widest mb-6">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
+          Joyeros Artesanales // Colombia
+        </div>
+
+        {/* Título Principal */}
+        <h1 className="font-serif text-4xl sm:text-6xl md:text-7xl font-light text-stone-100 leading-tight mb-6">
+          El Arte de la Expresión en <br />
+          <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500">
+            Oro Nacional 18K
+          </span>
+        </h1>
+
+        {/* MÁQUINA DE ESCRIBIR */}
+        <div className="h-8 flex items-center justify-center mb-8">
+          <p className="text-stone-300 font-mono text-sm sm:text-base border-r-2 border-amber-400 pr-1 animate-pulse">
+            {currentText}
           </p>
-          <a
-            href="https://wa.me/?text=Hola,%20quiero%20cotizar%20un%20diseno%20personalizado"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center px-9 py-4 rounded-full bg-amber-500 text-stone-950 font-bold text-sm hover:bg-amber-400 hover:shadow-[0_0_30px_rgba(245,158,11,0.5)] hover:scale-105 transition-all duration-300"
+        </div>
+
+        <p className="text-stone-400 text-sm sm:text-base font-light max-w-2xl leading-relaxed mb-10">
+          Diseñamos y elaboramos piezas de alta joyería con acabados impecables, oro puro certificado y garantía permanente de por vida.
+        </p>
+
+        {/* BOTONES PRINCIPALES DE ACCIÓN */}
+        <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+          <Link
+            href="/catalogo"
+            className="px-8 py-4 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-stone-950 font-semibold text-sm font-mono tracking-wider hover:brightness-110 shadow-[0_0_25px_rgba(245,158,11,0.3)] transition-all duration-300 text-center"
           >
-            Hablar con un Orfebre
+            EXPLORAR CATÁLOGO COMPLETO
+          </Link>
+          <a
+            href="#destacados"
+            className="px-8 py-4 rounded-xl bg-stone-900 border border-stone-800 text-stone-200 hover:border-amber-500/60 hover:text-amber-300 font-mono text-sm tracking-wider transition-all duration-300 text-center"
+          >
+            VER PIEZAS DESTACADAS
           </a>
         </div>
       </section>
 
+      {/* SECCIÓN 1: COLECCIONES RÁPIDAS */}
+      <section id="colecciones" className="py-16 px-6 border-t border-stone-800/60 bg-stone-900/30">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-10">
+            <div>
+              <span className="text-xs font-mono text-amber-400 uppercase tracking-widest block mb-2">Categorías</span>
+              <h2 className="font-serif text-3xl text-stone-100">Explora por Colección</h2>
+            </div>
+            <Link href="/catalogo" className="text-xs font-mono text-amber-400 hover:text-amber-300 mt-4 md:mt-0 inline-flex items-center gap-1">
+              Ver todas las categorías →
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            {[
+              { name: 'Anillos & Argollas', query: 'anillo' },
+              { name: 'Cadenas & Tejidos', query: 'cadena' },
+              { name: 'Dijes Exclusivos', query: 'dije' },
+              { name: 'Pulseras & Manillas', query: 'pulsera' },
+              { name: 'Aretes & Topos', query: 'arete' },
+            ].map((cat, idx) => (
+              <Link
+                key={idx}
+                href={`/catalogo?q=${cat.query}`}
+                className="group p-6 rounded-2xl bg-stone-900/50 border border-stone-800/80 hover:border-amber-500/60 hover:bg-stone-900 transition-all text-center flex flex-col items-center justify-center"
+              >
+                <div className="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-300 group-hover:scale-110 transition-transform mb-3 font-serif">
+                  ✦
+                </div>
+                <h3 className="font-serif text-sm text-stone-200 group-hover:text-amber-300 transition-colors">
+                  {cat.name}
+                </h3>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* SECCIÓN 2: JOYERÍA FINA / DESTACADOS */}
+      <section id="destacados" className="py-20 px-6 border-t border-stone-800/60">
+        <div className="max-w-7xl mx-auto text-center mb-12">
+          <span className="text-xs font-mono text-amber-400 uppercase tracking-widest block mb-2">Selección Especial</span>
+          <h2 className="font-serif text-3xl sm:text-4xl text-stone-100 mb-4">Piezas Destacadas</h2>
+          <p className="text-stone-400 text-xs sm:text-sm font-light max-w-xl mx-auto">
+            Cada pieza refleja la maestría de la orfebrería en oro de 18 kilates.
+          </p>
+        </div>
+
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+          {[
+            {
+              title: 'Anillos de Compromiso & Matrimonio',
+              desc: 'Diseñados para sellar momentos inolvidables en oro amarillo, blanco o rosado 18K.',
+              badge: 'Edición Especial',
+            },
+            {
+              title: 'Cadenas con Tejidos Especiales',
+              desc: 'Tejido Chino, Cubano, Carti, 3x1 y más. Solidez y brillo incomparable.',
+              badge: 'Alta Demanda',
+            },
+            {
+              title: 'Dijes y Medallas Personalizadas',
+              desc: 'Grabados láser de alta precisión y engaste de piedras preciosas.',
+              badge: 'Hecho a Mano',
+            },
+          ].map((item, index) => (
+            <div
+              key={index}
+              className="group p-8 rounded-2xl bg-stone-900/40 border border-stone-800 hover:border-amber-500/60 transition-all flex flex-col justify-between"
+            >
+              <div>
+                <span className="text-[10px] font-mono uppercase bg-amber-500/10 text-amber-400 border border-amber-500/30 px-3 py-1 rounded-full">
+                  {item.badge}
+                </span>
+                <h3 className="font-serif text-2xl text-stone-100 mt-6 mb-3 group-hover:text-amber-300 transition-colors">
+                  {item.title}
+                </h3>
+                <p className="text-stone-400 text-xs font-light leading-relaxed mb-6">
+                  {item.desc}
+                </p>
+              </div>
+
+              <Link
+                href="/catalogo"
+                className="text-xs font-mono text-amber-400 hover:text-amber-300 inline-flex items-center gap-2 pt-4 border-t border-stone-800/60"
+              >
+                Ver disponibilidad en catálogo →
+              </Link>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* SECCIÓN 3: DISEÑOS PERSONALIZADOS */}
+      <section id="personalizados" className="py-20 px-6 border-t border-stone-800/60 bg-gradient-to-b from-stone-900/40 to-stone-950">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+          <div>
+            <span className="text-xs font-mono text-amber-400 uppercase tracking-widest block mb-2">Servicio Bespoke</span>
+            <h2 className="font-serif text-3xl sm:text-4xl text-stone-100 mb-6">
+              ¿Tienes una idea en mente? <br />
+              <span className="italic text-amber-400">La fabricamos en Oro 18K</span>
+            </h2>
+            <p className="text-stone-400 text-xs sm:text-sm font-light leading-relaxed mb-6">
+              Si buscas un diseño único que no encuentras en catálogo, nuestros orfebres materializan tu idea. Envíanos una foto, boceto o referencia y te cotizamos de inmediato.
+            </p>
+
+            <ul className="space-y-3 text-xs font-mono text-stone-300 mb-8">
+              <li className="flex items-center gap-2">
+                <span className="text-amber-400">✓</span> Selección de gramaje y color de oro
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="text-amber-400">✓</span> Asesoría personalizada en presupuesto
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="text-amber-400">✓</span> Render o muestra antes de fundición
+              </li>
+            </ul>
+
+            <a
+              href={`https://wa.me/${CONFIG.phoneWhatsapp}?text=${encodeURIComponent('Hola, me gustaría cotizar un diseño personalizado en Oro 18K')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-amber-500 text-stone-950 font-semibold text-xs font-mono hover:bg-amber-400 transition-all"
+            >
+              <span>Diseñar mi Joya por WhatsApp</span>
+              <span>→</span>
+            </a>
+          </div>
+
+          <div className="p-8 rounded-3xl bg-stone-900/80 border border-stone-800 text-center relative overflow-hidden">
+            <div className="text-amber-400 text-4xl mb-4">💎</div>
+            <h3 className="font-serif text-xl text-stone-200 mb-2">Compromiso & Calidad</h3>
+            <p className="text-xs text-stone-400 font-light leading-relaxed mb-6">
+              Fabricación 100% colombiana respaldada por joyeros con décadas de tradición.
+            </p>
+            <div className="inline-block bg-stone-950 px-4 py-2 rounded-xl border border-stone-800 text-[11px] font-mono text-amber-300">
+              Entrega Segura & Certificado Incluido
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECCIÓN 4: GARANTÍAS Y RESPALDO */}
+      <section id="garantias" className="py-20 px-6 border-t border-stone-800/60">
+        <div className="max-w-7xl mx-auto text-center mb-12">
+          <span className="text-xs font-mono text-amber-400 uppercase tracking-widest block mb-2">Tranquilidad Total</span>
+          <h2 className="font-serif text-3xl sm:text-4xl text-stone-100">Nuestras Garantías</h2>
+        </div>
+
+        <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[
+            {
+              icon: '📜',
+              title: 'Oro 18K Certificado',
+              desc: 'Certificamos la pureza exacta del metal (750 milésimas) en cada joya.',
+            },
+            {
+              icon: '♾️',
+              title: 'Garantía Permanente',
+              desc: 'Garantía de por vida respecto al material y pureza del oro.',
+            },
+            {
+              icon: '🚚',
+              title: 'Envíos Asegurados',
+              desc: 'Despachos con seguro de transporte a nivel nacional.',
+            },
+            {
+              icon: '✨',
+              title: 'Mantenimiento',
+              desc: 'Servicio de limpieza y brillado para conservar el esplendor de tus piezas.',
+            },
+          ].map((g, idx) => (
+            <div key={idx} className="p-6 rounded-2xl bg-stone-900/30 border border-stone-800 text-center">
+              <div className="text-3xl mb-3">{g.icon}</div>
+              <h3 className="font-serif text-lg text-stone-200 mb-2">{g.title}</h3>
+              <p className="text-xs text-stone-400 font-light leading-relaxed">{g.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* SECCIÓN 5: SOBRE NOSOTROS */}
+      <section id="nosotros" className="py-20 px-6 border-t border-stone-800/60 bg-stone-900/20">
+        <div className="max-w-4xl mx-auto text-center">
+          <span className="text-xs font-mono text-amber-400 uppercase tracking-widest block mb-2">Nuestra Historia</span>
+          <h2 className="font-serif text-3xl sm:text-4xl text-stone-100 mb-6">Sobre Sol de Oro</h2>
+          <p className="text-stone-300 text-sm sm:text-base font-light leading-relaxed mb-6">
+            En <span className="text-amber-300 font-normal">Sol de Oro</span> nacimos con la pasión de transformar el metal más preciado del mundo en legados familiares. Creemos que una joya no es solo un accesorio, sino un símbolo de logros, amor y momentos memorables.
+          </p>
+          <p className="text-stone-400 text-xs sm:text-sm font-light leading-relaxed">
+            Trabajamos exclusivamente con Oro Ley 750 (18 Kilates), fusionando técnicas tradicionales de orfebrería con acabados contemporáneos de máxima calidad.
+          </p>
+        </div>
+      </section>
+
+      {/* SECCIÓN 6: UBICACIÓN Y REDES SOCIALES */}
+      <section id="ubicacion" className="py-20 px-6 border-t border-stone-800/60">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+
+          {/* Tarjeta de Ubicación */}
+          <div className="p-8 rounded-3xl bg-stone-900/60 border border-stone-800">
+            <span className="text-xs font-mono text-amber-400 uppercase tracking-widest block mb-2">Visítanos en Persona</span>
+            <h2 className="font-serif text-3xl text-stone-100 mb-4">Nuestro Local Fisico</h2>
+            <p className="text-stone-400 text-xs sm:text-sm font-light mb-6">
+              Te invitamos a conocer nuestras colecciones en vivo, probar el peso de las joyas y recibir atención personalizada.
+            </p>
+
+            <div className="space-y-4 text-xs font-mono text-stone-300 mb-8">
+              <div className="flex items-start gap-3">
+                <span className="text-amber-400 text-base">📍</span>
+                <div>
+                  <strong className="block text-stone-100">Dirección:</strong>
+                  <span>{CONFIG.address}</span>
+                  <span className="block text-stone-500">{CONFIG.city}</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <span className="text-amber-400 text-base">📱</span>
+                <div>
+                  <strong className="block text-stone-100">Atención WhatsApp:</strong>
+                  <span>+{CONFIG.phoneWhatsapp}</span>
+                </div>
+              </div>
+            </div>
+
+            <a
+              href={CONFIG.googleMapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-xl bg-amber-500/10 border border-amber-500/40 text-amber-300 font-mono text-xs hover:bg-amber-500 hover:text-stone-950 transition-all font-semibold"
+            >
+              <span>🗺️ Abrir en Google Maps (Cómo llegar)</span>
+            </a>
+          </div>
+
+          {/* Tarjeta de Redes Sociales */}
+          <div className="flex flex-col justify-center">
+            <span className="text-xs font-mono text-amber-400 uppercase tracking-widest block mb-2">Comunidad</span>
+            <h2 className="font-serif text-3xl text-stone-100 mb-4">Síguenos en Redes</h2>
+            <p className="text-stone-400 text-xs sm:text-sm font-light mb-8">
+              Descubre vídeos en vivo, nuevos ingresos diarios y testimonios de nuestros clientes.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* WhatsApp */}
+              <a
+                href={whatsappHeroUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-5 rounded-2xl bg-stone-900 border border-stone-800 hover:border-emerald-500/60 hover:text-emerald-400 text-center transition-all group"
+              >
+                <div className="text-2xl mb-2 group-hover:scale-110 transition-transform">💬</div>
+                <div className="font-mono text-xs font-semibold">WhatsApp</div>
+                <div className="text-[10px] text-stone-500 font-mono">Chat Directo</div>
+              </a>
+
+              {/* Facebook */}
+              <a
+                href={CONFIG.facebookUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-5 rounded-2xl bg-stone-900 border border-stone-800 hover:border-blue-500/60 hover:text-blue-400 text-center transition-all group"
+              >
+                <div className="text-2xl mb-2 group-hover:scale-110 transition-transform">📘</div>
+                <div className="font-mono text-xs font-semibold">Facebook</div>
+                <div className="text-[10px] text-stone-500 font-mono">Página Oficial</div>
+              </a>
+
+              {/* TikTok */}
+              <a
+                href={CONFIG.tiktokUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-5 rounded-2xl bg-stone-900 border border-stone-800 hover:border-pink-500/60 hover:text-pink-400 text-center transition-all group"
+              >
+                <div className="text-2xl mb-2 group-hover:scale-110 transition-transform">🎵</div>
+                <div className="font-mono text-xs font-semibold">TikTok</div>
+                <div className="text-[10px] text-stone-500 font-mono">Vídeos & Joyas</div>
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* FOOTER */}
       <footer className="border-t border-stone-900 bg-stone-950 py-12 text-stone-500 text-xs text-center">
-        <p className="font-serif text-sm text-amber-200/80 tracking-widest mb-2 uppercase">SOL DE ORO</p>
-        <p>© {new Date().getFullYear()} Sol de Oro. Todos los derechos reservados.</p>
+        <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <Link href="/" className="font-serif text-lg text-amber-300">
+            Sol de Oro
+          </Link>
+
+          <p>© {new Date().getFullYear()} Sol de Oro Joyería. Todos los derechos reservados.</p>
+
+          <a
+            href={whatsappHeroUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-stone-400 hover:text-amber-400 font-mono"
+          >
+            Contacto WhatsApp
+          </a>
+        </div>
       </footer>
 
     </div>
