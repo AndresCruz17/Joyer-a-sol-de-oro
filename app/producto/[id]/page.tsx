@@ -1,18 +1,82 @@
 import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import type { Metadata } from 'next';
 
 interface PageProps {
     params: Promise<{ id: string }> | { id: string };
 }
 
+// ==========================================
+// 1. GENERACIÓN DE METADATOS PARA SEO & WHATSAPP
+// ==========================================
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+    const resolvedParams = await params;
+    const productId = resolvedParams.id;
+    const supabase = await createClient();
+
+    const { data: product } = await supabase
+        .from('products')
+        .select('*, categories(name)')
+        .eq('id', productId)
+        .maybeSingle();
+
+    if (!product) {
+        return {
+            title: 'Joya no encontrada | Sol de Oro',
+            description: 'La pieza consultada no está disponible en nuestro catálogo.',
+        };
+    }
+
+    const categoryName = product.categories?.name ? `Colección ${product.categories.name}` : 'Alta Joyería';
+    const priceFormatted = product.price ? `$${product.price.toLocaleString('es-CO')} COP` : '';
+    const weightText = product.weight_grams ? `• Peso: ${product.weight_grams}g` : '';
+
+    const title = `${product.name} — ${priceFormatted} | Sol de Oro 18K`;
+    const description = product.description
+        ? `${categoryName} ${weightText}. ${product.description}`
+        : `${categoryName} ${weightText}. Joya exclusiva esculpida en Oro Nacional de 18K. Garante de por vida.`;
+
+    const images = product.image_url
+        ? [
+            {
+                url: product.image_url,
+                width: 800,
+                height: 800,
+                alt: product.name,
+            },
+        ]
+        : [];
+
+    return {
+        title,
+        description,
+        openGraph: {
+            title,
+            description,
+            siteName: 'Sol de Oro — Joyería Fina 18K',
+            type: 'article',
+            images,
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title,
+            description,
+            images: product.image_url ? [product.image_url] : [],
+        },
+    };
+}
+
+// ==========================================
+// 2. COMPONENTE DE LA PÁGINA
+// ==========================================
 export default async function ProductDetailPage({ params }: PageProps) {
     const resolvedParams = await params;
     const productId = resolvedParams.id;
 
     const supabase = await createClient();
 
-    // 1. Obtener la información completa del producto junto con su categoría
+    // Obtener la información completa del producto junto con su categoría
     const { data: product, error } = await supabase
         .from('products')
         .select('*, categories(name, slug)')
@@ -23,7 +87,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
         notFound();
     }
 
-    // 2. Obtener productos relacionados de la misma categoría (máximo 3)
+    // Obtener productos relacionados de la misma categoría (máximo 3)
     const { data: relatedProducts } = await supabase
         .from('products')
         .select('*')
@@ -50,7 +114,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
         (imageUrl ? `\n🖼️ *Ver Foto:* ${imageUrl}\n\n` : '\n') +
         `Hola, quisiera confirmar disponibilidad, tiempo de entrega y métodos de pago para esta pieza. ¡Muchas gracias!`;
 
-    const whatsappUrl = `https://wa.me/573104993406?text=${encodeURIComponent(whatsappText)}`; // Reemplazar con el número real de WhatsApp
+    const whatsappUrl = `https://wa.me/573000000000?text=${encodeURIComponent(whatsappText)}`; // Reemplazar con el número real de WhatsApp
 
     return (
         <div className="min-h-screen bg-stone-950 text-stone-100 font-sans selection:bg-amber-500 selection:text-stone-950">
@@ -59,7 +123,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
             <nav className="border-b border-stone-800/80 bg-stone-950/90 backdrop-blur-md sticky top-0 z-50 px-6 py-4">
                 <div className="max-w-7xl mx-auto flex items-center justify-between">
                     <Link
-                        href={categorySlug ? `/categoria/${categorySlug}` : '/catalogo'}
+                        href={categorySlug ? `/categoria/${categorySlug}` : '/#catalogo'}
                         className="inline-flex items-center gap-2 text-xs font-mono text-amber-400 hover:text-amber-300 transition-colors"
                     >
                         <span>←</span> Volver a {categoryName}
@@ -70,7 +134,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                     </Link>
 
                     <Link
-                        href="/catalogo"
+                        href="/#catalogo"
                         className="text-xs font-mono text-stone-400 hover:text-stone-200 transition-colors hidden sm:block"
                     >
                         Catálogo Completo

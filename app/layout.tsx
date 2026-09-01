@@ -3,8 +3,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Sol de Oro — Joyería Fina en Oro 18K",
-  description: "Diseños exclusivos de joyería en oro de 18 kilates.",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://soldeoro.com'),
+  title: 'Sol de Oro — Alta Joyería en Oro 18K',
+  description: 'Piezas exclusivas en Oro de 18K con certificación y garantía de por vida.',
 };
 
 export default function RootLayout({
