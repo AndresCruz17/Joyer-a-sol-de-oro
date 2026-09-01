@@ -91,7 +91,7 @@ export default function NewProductPage() {
 
             if (insertError) throw insertError;
 
-            router.push('/admin');
+            router.push('/admin/dashboard');
             router.refresh();
         } catch (err: any) {
             console.error(err);
