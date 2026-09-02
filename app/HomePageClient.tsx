@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 
 const CONFIG = {
     logoUrl: '/logo.png',
-    storeHeroBgUrl: '/local.jpg',
+    storeHeroBgUrl: '/local.png',
     phoneWhatsapp: process.env.NEXT_PUBLIC_WHATSAPP || '573126249176',
     facebookUrl: 'https://www.facebook.com/profile.php?id=61582655280439',
     tiktokUrl: 'https://www.tiktok.com/@compraventa_soldeoro',
