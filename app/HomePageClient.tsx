@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 
 const CONFIG = {
@@ -391,11 +392,11 @@ export default function HomePageClient() {
                         onMouseLeave={() => setIsHoveredCarousel(false)}
                         onTouchStart={() => setIsHoveredCarousel(true)}
                         onTouchEnd={() => setIsHoveredCarousel(false)}
-                        className="flex gap-6 overflow-x-auto scrollbar-none py-4 select-none flex-nowrap"
+                        className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-none py-4 select-none flex-nowrap snap-x snap-mandatory scroll-smooth"
                     >
                         {loading ? (
                             [1, 2, 3, 4].map((n) => (
-                                <div key={n} className="min-w-[280px] sm:min-w-[340px] h-[420px] rounded-3xl bg-stone-900 animate-pulse border border-stone-800 shrink-0" />
+                                <div key={n} className="w-[260px] xs:w-[280px] sm:w-[340px] h-[390px] sm:h-[450px] aspect-[3/4] rounded-3xl bg-stone-900 animate-pulse border border-stone-800 shrink-0 snap-start" />
                             ))
                         ) : categories.length > 0 ? (
                             <>
@@ -404,14 +405,16 @@ export default function HomePageClient() {
                                     <Link
                                         key={cat.id}
                                         href={`/catalogo?categoria=${cat.id}`}
-                                        className="group relative min-w-[280px] sm:min-w-[340px] h-[420px] rounded-3xl overflow-hidden border border-stone-800/80 hover:border-amber-500/80 transition-all duration-500 shrink-0 shadow-lg bg-stone-900"
+                                        className="group relative w-[260px] xs:w-[280px] sm:w-[340px] h-[390px] sm:h-[450px] aspect-[3/4] rounded-3xl overflow-hidden border border-stone-800/80 hover:border-amber-500/80 transition-all duration-500 shrink-0 shadow-lg bg-stone-900 snap-start"
                                     >
                                         {cat.image_url ? (
-                                            <img
+                                            <Image
                                                 src={cat.image_url}
                                                 alt={`Colección ${cat.name} - Sol de Oro`}
-                                                loading="lazy"
-                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 brightness-90"
+                                                fill
+                                                sizes="(max-width: 640px) 260px, (max-width: 1024px) 340px, 340px"
+                                                quality={85}
+                                                className="object-cover group-hover:scale-110 transition-transform duration-700 brightness-90"
                                             />
                                         ) : (
                                             <div className="w-full h-full flex flex-col items-center justify-center bg-stone-900 text-stone-600">
@@ -421,11 +424,11 @@ export default function HomePageClient() {
 
                                         <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/40 to-transparent opacity-90 group-hover:opacity-85 transition-opacity" />
 
-                                        <div className="absolute inset-0 p-8 flex flex-col justify-end">
+                                        <div className="absolute inset-0 p-6 sm:p-8 flex flex-col justify-end z-10">
                                             <span className="text-[10px] font-mono text-amber-400 uppercase tracking-widest mb-1 block">
                                                 Colección Oro 18K
                                             </span>
-                                            <h3 className="font-serif text-2xl text-stone-100 group-hover:text-amber-300 transition-colors mb-4">
+                                            <h3 className="font-serif text-xl sm:text-2xl text-stone-100 group-hover:text-amber-300 transition-colors mb-3 sm:mb-4">
                                                 {cat.name}
                                             </h3>
 
@@ -444,14 +447,16 @@ export default function HomePageClient() {
                                         href={`/catalogo?categoria=${cat.id}`}
                                         aria-hidden="true"
                                         tabIndex={-1}
-                                        className="group relative min-w-[280px] sm:min-w-[340px] h-[420px] rounded-3xl overflow-hidden border border-stone-800/80 hover:border-amber-500/80 transition-all duration-500 shrink-0 shadow-lg bg-stone-900"
+                                        className="group relative w-[260px] xs:w-[280px] sm:w-[340px] h-[390px] sm:h-[450px] aspect-[3/4] rounded-3xl overflow-hidden border border-stone-800/80 hover:border-amber-500/80 transition-all duration-500 shrink-0 shadow-lg bg-stone-900 snap-start"
                                     >
                                         {cat.image_url ? (
-                                            <img
+                                            <Image
                                                 src={cat.image_url}
                                                 alt=""
-                                                loading="lazy"
-                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 brightness-90"
+                                                fill
+                                                sizes="(max-width: 640px) 260px, (max-width: 1024px) 340px, 340px"
+                                                quality={85}
+                                                className="object-cover group-hover:scale-110 transition-transform duration-700 brightness-90"
                                             />
                                         ) : (
                                             <div className="w-full h-full flex flex-col items-center justify-center bg-stone-900 text-stone-600">
@@ -461,11 +466,11 @@ export default function HomePageClient() {
 
                                         <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/40 to-transparent opacity-90 group-hover:opacity-85 transition-opacity" />
 
-                                        <div className="absolute inset-0 p-8 flex flex-col justify-end">
+                                        <div className="absolute inset-0 p-6 sm:p-8 flex flex-col justify-end z-10">
                                             <span className="text-[10px] font-mono text-amber-400 uppercase tracking-widest mb-1 block">
                                                 Colección Oro 18K
                                             </span>
-                                            <span className="font-serif text-2xl text-stone-100 group-hover:text-amber-300 transition-colors mb-4 block">
+                                            <span className="font-serif text-xl sm:text-2xl text-stone-100 group-hover:text-amber-300 transition-colors mb-3 sm:mb-4 block">
                                                 {cat.name}
                                             </span>
 
