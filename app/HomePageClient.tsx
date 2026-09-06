@@ -322,7 +322,8 @@ export default function HomePageClient() {
                         <a href="#colecciones" onClick={() => setMobileMenuOpen(false)} className="py-2 hover:text-amber-400">Colecciones</a>
                         <a href="#destacados" onClick={() => setMobileMenuOpen(false)} className="py-2 hover:text-amber-400">Joyería Fina</a>
                         <a href="#cotizador" onClick={() => setMobileMenuOpen(false)} className="py-2 hover:text-amber-400">Comprar/Vender Oro</a>
-                        <a href="#faqs" onClick={() => setMobileMenuOpen(false)} className="py-2 hover:text-amber-400">Preguntas Frecuentes</a>
+                        <Link href="/sobre-nosotros" className="hover:text-amber-400 transition-colors">Sobre Nosotros</Link>
+                        <a href="#faqs" onClick={() => setMobileMenuOpen(false)} className="py-2 hover:text-amber-400">Preguntas</a>
                         <a href="#ubicacion" onClick={() => setMobileMenuOpen(false)} className="py-2 hover:text-amber-400">Ubicación & Contacto</a>
                         <Link href="/catalogo" className="mt-2 text-center py-3 rounded-xl bg-amber-500 text-stone-950 font-semibold">
                             Ir al Catálogo Completo
