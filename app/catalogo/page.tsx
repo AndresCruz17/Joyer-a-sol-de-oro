@@ -4,8 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
-
-const PHONE_WHATSAPP = process.env.NEXT_PUBLIC_WHATSAPP || '573000000000';
+import { getWhatsAppUrl } from '@/lib/config';
 
 interface Category {
   id: string;
@@ -107,7 +106,7 @@ function CatalogoContent() {
           </Link>
 
           <a
-            href={`https://wa.me/${PHONE_WHATSAPP}?text=${encodeURIComponent('Hola, quisiera asesoría sobre joyas en Oro de 18K')}`}
+            href={getWhatsAppUrl('Hola, quisiera asesoría sobre joyas en Oro de 18K')}
             target="_blank"
             rel="noopener noreferrer"
             className="text-xs font-mono text-stone-300 hover:text-amber-400 transition-colors hidden sm:block"
@@ -255,7 +254,7 @@ function CatalogoContent() {
                 (itemImage ? `\n🖼️ *Ver Foto:* ${itemImage}\n\n` : '\n') +
                 `Hola, me interesa recibir más información sobre esta joya.`;
 
-              const whatsappUrl = `https://wa.me/${PHONE_WHATSAPP}?text=${encodeURIComponent(whatsappText)}`;
+              const whatsappUrl = getWhatsAppUrl(whatsappText);
 
               return (
                 <div

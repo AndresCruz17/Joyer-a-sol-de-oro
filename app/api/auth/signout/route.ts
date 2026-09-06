@@ -7,6 +7,6 @@ export async function POST(request: Request) {
 
     const requestUrl = new URL(request.url);
     return NextResponse.redirect(`${requestUrl.origin}/admin/login`, {
-        status: 301,
+        status: 303,
     });
 }

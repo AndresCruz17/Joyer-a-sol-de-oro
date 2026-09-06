@@ -4,9 +4,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { cache } from 'react';
 import ProductGallery from '@/components/product/ProductGallery';
-
-// Teléfono oficial (puedes pasarlo a .env.local como NEXT_PUBLIC_WHATSAPP)
-const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP || '573000000000';
+import { getWhatsAppUrl } from '@/lib/config';
 
 interface PageProps {
     params: Promise<{ id: string }> | { id: string };
@@ -109,7 +107,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
         (imageUrl ? `\n🖼️ *Ver Foto:* ${imageUrl}\n\n` : '\n') +
         `Hola, quisiera confirmar disponibilidad, tiempo de entrega y métodos de pago para esta pieza. ¡Muchas gracias!`;
 
-    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(whatsappText)}`;
+    const whatsappUrl = getWhatsAppUrl(whatsappText);
 
     return (
         <div className="min-h-screen bg-stone-950 text-stone-100 font-sans selection:bg-amber-500 selection:text-stone-950">

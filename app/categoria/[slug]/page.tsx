@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { getWhatsAppUrl } from '@/lib/config';
 
 interface PageProps {
   params: Promise<{ slug: string }> | { slug: string };
@@ -156,7 +157,7 @@ export default async function CategoryPage({ params }: PageProps) {
                 (itemImage ? `\n🖼️ *Ver Foto:* ${itemImage}\n\n` : '\n') +
                 `Hola, me interesa recibir más información sobre esta joya.`;
 
-              const whatsappUrl = `https://wa.me/573104993406?text=${encodeURIComponent(whatsappText)}`;
+              const whatsappUrl = getWhatsAppUrl(whatsappText);
 
               return (
                 <div

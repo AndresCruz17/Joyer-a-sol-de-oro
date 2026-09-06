@@ -6,10 +6,10 @@ import DeleteProductButton from '@/components/admin/DeleteProductButton';
 export default async function AdminDashboardPage() {
     const supabase = await createClient();
 
-    // Verificar sesión activa
-    const { data: { session } } = await supabase.auth.getSession();
+    // Verificar usuario autenticado
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!session) {
+    if (!user) {
         redirect('/admin/login');
     }
 

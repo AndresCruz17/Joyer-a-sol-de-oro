@@ -1,12 +1,9 @@
 'use client';
 
-export default function WhatsAppFloat() {
-    const phoneNumber = '573000000000'; // 👈 Reemplazar con el número real
-    const defaultMessage = encodeURIComponent(
-        'Hola *Sol de Oro*, me gustaría recibir asesoría personalizada sobre sus joyas en Oro de 18K.'
-    );
+import { getWhatsAppUrl } from '@/lib/config';
 
-    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${defaultMessage}`;
+export default function WhatsAppFloat() {
+    const whatsappUrl = getWhatsAppUrl();
 
     return (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 group">
