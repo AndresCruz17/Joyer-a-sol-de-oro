@@ -87,7 +87,7 @@ function CatalogoContent() {
     })
     .sort((a, b) => {
       if (sortBy === 'price-asc') return (a.price || 0) - (b.price || 0);
-      if (sortBy === 'price-desc') return (a.price || 0) - (b.price || 0);
+      if (sortBy === 'price-desc') return (b.price || 0) - (a.price || 0);
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
 
