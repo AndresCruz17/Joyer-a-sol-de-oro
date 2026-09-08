@@ -1,3 +1,5 @@
+import { SITE_CONFIG } from '@/lib/config';
+
 interface ProductSchemaProps {
   name: string;
   description: string;
@@ -17,16 +19,16 @@ export default function ProductSchema({
     '@context': 'https://schema.org/',
     '@type': 'Product',
     name: name,
-    image: image || 'https://tujoyeria.com/og-default.jpg',
+    image: image || `${SITE_CONFIG.url}/og-default.jpg`,
     description: description,
     brand: {
       '@type': 'Brand',
-      name: 'NombreDeTuMarca',
+      name: SITE_CONFIG.name,
     },
     offers: {
       '@type': 'Offer',
       priceCurrency: 'COP',
-      price: price || '0',
+      price: price ? price.toString() : '0',
       availability: 'https://schema.org/InStock',
       url: url,
     },

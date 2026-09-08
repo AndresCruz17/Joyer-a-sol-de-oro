@@ -1,30 +1,39 @@
 import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
+import { requireAdminUser } from '@/lib/supabase/auth';
 import Link from 'next/link';
 import DeleteProductButton from '@/components/admin/DeleteProductButton';
 
+interface DashboardProductItem {
+    id: string;
+    name: string;
+    price: number | null;
+    weight_grams: number | null;
+    image_url: string | null;
+    images: string[] | null;
+    is_active: boolean;
+    is_featured: boolean;
+    created_at: string;
+    categories: { name: string } | { name: string }[] | null;
+}
+
 export default async function AdminDashboardPage() {
+    // 1. Exigir autenticación y rol de administrador en base de datos
+    await requireAdminUser();
+
     const supabase = await createClient();
 
-    // Verificar usuario autenticado
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-        redirect('/admin/login');
-    }
-
-    // Cargar lista de productos
+    // Cargar lista completa de productos (activos e inactivos para gestión de admin)
     const { data: products } = await supabase
         .from('products')
-        .select('*, categories(name)')
+        .select('id, name, price, weight_grams, image_url, images, is_active, is_featured, created_at, categories(name)')
         .order('created_at', { ascending: false });
 
     // Cargar total de categorías
     const { count: categoriesCount } = await supabase
         .from('categories')
-        .select('*', { count: 'exact', head: true });
+        .select('id', { count: 'exact', head: true });
 
-    const productList = products || [];
+    const productList: DashboardProductItem[] = (products as unknown as DashboardProductItem[]) || [];
 
     return (
         <div className="min-h-screen bg-stone-950 text-stone-100 font-sans p-6 md:p-10">
@@ -50,7 +59,7 @@ export default async function AdminDashboardPage() {
                     <form action="/api/auth/signout" method="post">
                         <button
                             type="submit"
-                            className="px-4 py-2 rounded-xl border border-stone-800 bg-stone-900 text-stone-300 text-xs hover:border-red-500/50 hover:text-red-400 transition-colors"
+                            className="px-4 py-2 rounded-xl border border-stone-800 bg-stone-900 text-stone-300 text-xs hover:border-red-500/50 hover:text-red-400 transition-colors cursor-pointer"
                         >
                             Cerrar Sesión
                         </button>
@@ -105,30 +114,41 @@ export default async function AdminDashboardPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-stone-800/60 text-stone-300">
-                                {productList.map((item) => (
-                                    <tr key={item.id} className="hover:bg-stone-900/50 transition-colors">
-                                        <td className="p-4">
-                                            {item.image_url ? (
-                                                <img src={item.image_url} alt={item.name} className="w-10 h-10 object-cover rounded-lg border border-stone-800" />
-                                            ) : (
-                                                <div className="w-10 h-10 bg-stone-950 border border-stone-800 rounded-lg flex items-center justify-center text-[9px] text-stone-600">N/A</div>
-                                            )}
-                                        </td>
-                                        <td className="p-4 font-semibold text-stone-100">{item.name}</td>
-                                        <td className="p-4">{item.categories?.name || 'Sin categoría'}</td>
-                                        <td className="p-4 text-amber-400 font-mono">${item.price?.toLocaleString('es-CO')}</td>
-                                        <td className="p-4 font-mono">{item.weight_grams ? `${item.weight_grams}g` : 'N/A'}</td>
-                                        <td className="p-4 text-right space-x-2">
-                                            <Link
-                                                href={`/admin/productos/editar/${item.id}`}
-                                                className="inline-block px-3 py-1 rounded border border-stone-700 hover:border-amber-500 hover:text-amber-300 transition-colors"
-                                            >
-                                                Editar
-                                            </Link>
-                                            <DeleteProductButton id={item.id} name={item.name} imageUrl={item.image_url} />
-                                        </td>
-                                    </tr>
-                                ))}
+                                {productList.map((item) => {
+                                    const categoryName = (Array.isArray(item.categories)
+                                        ? item.categories[0]?.name
+                                        : item.categories?.name) || 'Sin categoría';
+
+                                    return (
+                                        <tr key={item.id} className="hover:bg-stone-900/50 transition-colors">
+                                            <td className="p-4">
+                                                {item.image_url ? (
+                                                    <img src={item.image_url} alt={item.name} className="w-10 h-10 object-cover rounded-lg border border-stone-800" />
+                                                ) : (
+                                                    <div className="w-10 h-10 bg-stone-950 border border-stone-800 rounded-lg flex items-center justify-center text-[9px] text-stone-600">N/A</div>
+                                                )}
+                                            </td>
+                                            <td className="p-4 font-semibold text-stone-100">{item.name}</td>
+                                            <td className="p-4">{categoryName}</td>
+                                            <td className="p-4 text-amber-400 font-mono">${item.price?.toLocaleString('es-CO')}</td>
+                                            <td className="p-4 font-mono">{item.weight_grams ? `${item.weight_grams}g` : 'N/A'}</td>
+                                            <td className="p-4 text-right space-x-2">
+                                                <Link
+                                                    href={`/admin/productos/editar/${item.id}`}
+                                                    className="inline-block px-3 py-1 rounded border border-stone-700 hover:border-amber-500 hover:text-amber-300 transition-colors"
+                                                >
+                                                    Editar
+                                                </Link>
+                                                <DeleteProductButton
+                                                    id={item.id}
+                                                    name={item.name}
+                                                    imageUrl={item.image_url}
+                                                    images={item.images}
+                                                />
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>

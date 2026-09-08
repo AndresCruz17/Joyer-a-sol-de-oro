@@ -3,6 +3,9 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getWhatsAppUrl } from '@/lib/config';
 
+// REVALIDACIÓN INCREMENTAL (ISR) CADA 60 SEGUNDOS
+export const revalidate = 60;
+
 interface PageProps {
   params: Promise<{ slug: string }> | { slug: string };
 }
@@ -16,7 +19,7 @@ export default async function CategoryPage({ params }: PageProps) {
   // 1. Obtener la categoría actual por su slug
   const { data: category, error: categoryError } = await supabase
     .from('categories')
-    .select('*')
+    .select('id, name, slug, image_url, description')
     .ilike('slug', slug)
     .maybeSingle();
 
@@ -32,11 +35,12 @@ export default async function CategoryPage({ params }: PageProps) {
 
   const categoriesList = allCategories || [];
 
-  // 3. Obtener los productos asociados a esta categoría
+  // 3. Obtener los productos asociados a esta categoría (solo activos)
   const { data: products } = await supabase
     .from('products')
-    .select('*')
+    .select('id, name, description, price, weight_grams, image_url, category_id, created_at')
     .eq('category_id', category.id)
+    .eq('is_active', true)
     .order('created_at', { ascending: false });
 
   const productList = products || [];

@@ -5,9 +5,10 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import { SITE_CONFIG } from '@/lib/config';
-import { config } from 'process';
 
 const CONFIG = {
+    url: SITE_CONFIG.url,
+    name: SITE_CONFIG.name,
     logoUrl: SITE_CONFIG.logoUrl,
     storeHeroBgUrl: SITE_CONFIG.storeHeroBgUrl,
     phoneWhatsapp: SITE_CONFIG.whatsappNumber,
@@ -59,16 +60,27 @@ interface Product {
     price: number | null;
     weight_grams: number | null;
     image_url: string | null;
-    categories: { name: string } | null;
+    category_id: string | null;
+    categories: { name: string } | { name: string }[] | null;
 }
 
-export default function HomePageClient() {
+export interface HomePageClientProps {
+    initialCategories?: Category[];
+    initialFeaturedProducts?: Product[];
+}
+
+export default function HomePageClient({
+    initialCategories,
+    initialFeaturedProducts,
+}: HomePageClientProps = {}) {
     const supabase = createClient();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-    const [categories, setCategories] = useState<Category[]>([]);
-    const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [categories, setCategories] = useState<Category[]>(initialCategories || []);
+    const [featuredProducts, setFeaturedProducts] = useState<Product[]>(initialFeaturedProducts || []);
+    const [loading, setLoading] = useState(
+        !initialCategories && !initialFeaturedProducts
+    );
 
     const [cursorPos, setCursorPos] = useState({ x: -100, y: -100 });
     const [isDesktop, setIsDesktop] = useState(false);
@@ -100,17 +112,31 @@ export default function HomePageClient() {
     }, []);
 
     useEffect(() => {
+        // Si los datos ya vienen precargados desde el servidor, evitamos la llamada cliente
+        if (initialCategories || initialFeaturedProducts) {
+            return;
+        }
+
         async function loadData() {
             setLoading(true);
-            const { data: catData } = await supabase.from('categories').select('*').order('name');
-            const { data: prodData } = await supabase.from('products').select('*, categories(name)').limit(6);
+            const { data: catData } = await supabase
+                .from('categories')
+                .select('id, name, slug, image_url')
+                .order('name');
+
+            const { data: prodData } = await supabase
+                .from('products')
+                .select('id, name, description, price, weight_grams, image_url, category_id, categories(name)')
+                .eq('is_active', true)
+                .order('created_at', { ascending: false })
+                .limit(6);
 
             if (catData) setCategories(catData);
-            if (prodData) setFeaturedProducts(prodData as Product[]);
+            if (prodData) setFeaturedProducts(prodData as unknown as Product[]);
             setLoading(false);
         }
         loadData();
-    }, [supabase]);
+    }, [supabase, initialCategories, initialFeaturedProducts]);
 
     useEffect(() => {
         const targetPhrase = TYPEWRITER_PHRASES[textIndex];
@@ -206,7 +232,7 @@ export default function HomePageClient() {
                         {
                             '@context': 'https://schema.org',
                             '@type': 'JewelryStore',
-                            name: 'Sol de Oro Joyería & Compraventa',
+                            name: CONFIG.name,
                             description: 'Alta joyería en Oro Nacional 18 Kilates. Compra de oro al mejor precio del mercado, avalúos inmediatos y taller orfebre a medida.',
                             address: {
                                 '@type': 'PostalAddress',
@@ -216,11 +242,11 @@ export default function HomePageClient() {
                             },
                             telephone: CONFIG.phoneWhatsapp,
                             priceRange: '$$$',
-                            url: 'https://soldeoro.com',
+                            url: CONFIG.url,
                             geo: {
                                 '@type': 'GeoCoordinates',
-                                latitude: 6.2442, // Ajustar según las coordenadas de Medellín
-                                longitude: -75.5812,
+                                latitude: 1.4583, // Taminango, Nariño
+                                longitude: -77.2917,
                             },
                         },
                         {
@@ -607,7 +633,7 @@ export default function HomePageClient() {
                     ) : featuredProducts.length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                             {featuredProducts.map((item) => {
-                                const categoryName = item.categories?.name || 'Oro 18K';
+                                const categoryName = (Array.isArray(item.categories) ? item.categories[0]?.name : item.categories?.name) || 'Oro 18K';
                                 const itemWeight = item.weight_grams ? `${item.weight_grams}g` : 'A consultar';
                                 const itemPrice = item.price ? `$${item.price.toLocaleString('es-CO')} COP` : 'A consultar';
                                 const itemImage = item.image_url || '';

@@ -3,14 +3,16 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { deleteStorageFiles } from '@/lib/storage/image-utils';
 
 interface DeleteProps {
     id: string;
     name: string;
     imageUrl?: string | null;
+    images?: string[] | null;
 }
 
-export default function DeleteProductButton({ id, name, imageUrl }: DeleteProps) {
+export default function DeleteProductButton({ id, name, imageUrl, images }: DeleteProps) {
     const [deleting, setDeleting] = useState(false);
     const router = useRouter();
 
@@ -22,24 +24,26 @@ export default function DeleteProductButton({ id, name, imageUrl }: DeleteProps)
         const supabase = createClient();
 
         try {
-            // 1. Borrar la imagen de Supabase Storage si existe
-            if (imageUrl) {
-                const pathParts = imageUrl.split('/storage/v1/object/public/products/');
-                if (pathParts.length > 1) {
-                    const filePath = pathParts[1];
-                    await supabase.storage.from('products').remove([filePath]);
-                }
+            // 1. Recopilar todas las imágenes asociadas al producto (portada + galería)
+            const allImages = Array.from(
+                new Set([imageUrl, ...(images || [])].filter(Boolean) as string[])
+            );
+
+            // 2. Eliminar el producto de la base de datos
+            const { error: dbError } = await supabase.from('products').delete().eq('id', id);
+
+            if (dbError) throw dbError;
+
+            // 3. Si se eliminó de la BD, limpiar todos los archivos de Storage
+            if (allImages.length > 0) {
+                await deleteStorageFiles(supabase, allImages, 'products');
             }
 
-            // 2. Eliminar el producto de la tabla
-            const { error } = await supabase.from('products').delete().eq('id', id);
-
-            if (error) throw error;
-
-            // 3. Recargar datos en la interfaz
+            // 4. Recargar datos en la interfaz
             router.refresh();
         } catch (err: any) {
-            alert(`Error al eliminar el producto: ${err.message}`);
+            console.error('Error al eliminar producto:', err);
+            alert(`Error al eliminar el producto: ${err.message || 'Ocurrió un error inesperado.'}`);
         } finally {
             setDeleting(false);
         }

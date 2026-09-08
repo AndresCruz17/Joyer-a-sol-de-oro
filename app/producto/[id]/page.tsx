@@ -4,7 +4,11 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { cache } from 'react';
 import ProductGallery from '@/components/product/ProductGallery';
-import { getWhatsAppUrl } from '@/lib/config';
+import ProductSchema from '@/components/seo/ProductSchema';
+import { getWhatsAppUrl, SITE_CONFIG } from '@/lib/config';
+
+// REVALIDACIÓN INCREMENTAL (ISR) CADA 60 SEGUNDOS
+export const revalidate = 60;
 
 interface PageProps {
     params: Promise<{ id: string }> | { id: string };
@@ -15,8 +19,9 @@ const getProduct = cache(async (productId: string) => {
     const supabase = await createClient();
     const { data: product, error } = await supabase
         .from('products')
-        .select('*, categories(name, slug)')
+        .select('id, name, slug, description, price, weight_grams, image_url, images, category_id, is_active, categories(name, slug)')
         .eq('id', productId)
+        .eq('is_active', true)
         .maybeSingle();
 
     if (error || !product) return null;
@@ -34,7 +39,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         };
     }
 
-    const categoryName = product.categories?.name ? `Colección ${product.categories.name}` : 'Alta Joyería';
+    const category = Array.isArray(product.categories) ? product.categories[0] : product.categories;
+    const categoryName = category?.name ? `Colección ${category.name}` : 'Alta Joyería';
     const priceFormatted = product.price ? `$${product.price.toLocaleString('es-CO')} COP` : '';
     const weightText = product.weight_grams ? `• Peso: ${product.weight_grams}g` : '';
 
@@ -82,16 +88,18 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
     const supabase = await createClient();
 
-    // Productos relacionados de la misma categoría
+    // Productos relacionados de la misma categoría (solo activos)
     const { data: relatedProducts } = await supabase
         .from('products')
-        .select('*')
+        .select('id, name, price, image_url')
         .eq('category_id', product.category_id)
+        .eq('is_active', true)
         .neq('id', product.id)
         .limit(3);
 
-    const categoryName = product.categories?.name || 'Joyería';
-    const categorySlug = product.categories?.slug;
+    const category = Array.isArray(product.categories) ? product.categories[0] : product.categories;
+    const categoryName = category?.name || 'Joyería';
+    const categorySlug = category?.slug;
 
     const imageUrl = product.image_url || '';
     const weightText = product.weight_grams ? `${product.weight_grams}g` : 'A consultar';
@@ -111,6 +119,13 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
     return (
         <div className="min-h-screen bg-stone-950 text-stone-100 font-sans selection:bg-amber-500 selection:text-stone-950">
+            <ProductSchema
+                name={product.name}
+                description={product.description || `Joya ${product.name} en Oro 18K`}
+                image={product.image_url || undefined}
+                price={product.price || undefined}
+                url={`${SITE_CONFIG.url}/producto/${product.id}`}
+            />
 
             {/* NAV */}
             <nav className="border-b border-stone-800/80 bg-stone-950/90 backdrop-blur-md sticky top-0 z-50 px-6 py-4">

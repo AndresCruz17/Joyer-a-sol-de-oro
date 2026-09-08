@@ -1,11 +1,11 @@
 import { Metadata } from 'next';
 import HomePageClient from './HomePageClient';
+import { SITE_CONFIG } from '@/lib/config';
 
 // METADATA OFICIAL PARA MOTOR DE BÚSQUEDA Y REDES SOCIALES
 export const metadata: Metadata = {
-  title: 'Sol de Oro Joyería & Compraventa | Oro 18K Ley 750 Medellín',
-  description:
-    'Compramos tu oro al mejor precio del mercado con avalúos inmediatos. Joyería fina en Oro Nacional 18 Kilates, diseños personalizados y envíos asegurados en Colombia.',
+  title: `${SITE_CONFIG.name} | Oro 18K Ley 750 Nariño`,
+  description: SITE_CONFIG.description,
   keywords: [
     'compra de oro Nariño',
     'compra de oro Colombia',
@@ -15,19 +15,19 @@ export const metadata: Metadata = {
     'vender oro Colombia',
     'avaluo de oro',
     'joyas personalizadas colombia',
+    'Sol de Oro',
   ],
   openGraph: {
-    title: 'Sol de Oro Joyería & Compraventa | Oro 18K Certificado',
-    description:
-      'Avalúos transparentes y pago inmediato por tu oro. Explora nuestro catálogo de alta joyería.',
-    url: 'https://soldeoro.com', // Reemplazar por tu dominio real
-    siteName: 'Sol de Oro Joyería',
+    title: `${SITE_CONFIG.name} | Oro 18K Certificado`,
+    description: SITE_CONFIG.description,
+    url: SITE_CONFIG.url,
+    siteName: SITE_CONFIG.name,
     images: [
       {
-        url: '/og-image.jpg', // Recomienda crear una imagen de 1200x630px en public/
+        url: '/og-default.jpg',
         width: 1200,
         height: 630,
-        alt: 'Sol de Oro Joyería & Compraventa',
+        alt: SITE_CONFIG.name,
       },
     ],
     locale: 'es_CO',
@@ -38,10 +38,43 @@ export const metadata: Metadata = {
     follow: true,
   },
   alternates: {
-    canonical: 'https://soldeoro.com',
+    canonical: SITE_CONFIG.url,
   },
 };
 
-export default function Page() {
-  return <HomePageClient />;
+// REVALIDACIÓN INCREMENTAL (ISR) CADA 60 SEGUNDOS
+export const revalidate = 60;
+
+import { getCategories, getFeaturedProducts } from '@/lib/supabase/queries';
+
+export default async function Page() {
+  const [categoriesData, featuredProductsData] = await Promise.all([
+    getCategories(),
+    getFeaturedProducts(6),
+  ]);
+
+  const initialCategories = (categoriesData || []).map((cat) => ({
+    id: cat.id,
+    name: cat.name,
+    slug: cat.slug,
+    image_url: cat.image_url,
+  }));
+
+  const initialFeaturedProducts = (featuredProductsData || []).map((prod) => ({
+    id: prod.id,
+    name: prod.name,
+    description: prod.description,
+    price: prod.price,
+    weight_grams: prod.weight_grams,
+    image_url: prod.image_url,
+    category_id: prod.category_id,
+    categories: prod.categories,
+  }));
+
+  return (
+    <HomePageClient
+      initialCategories={initialCategories}
+      initialFeaturedProducts={initialFeaturedProducts}
+    />
+  );
 }

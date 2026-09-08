@@ -1,15 +1,23 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
-export default function AdminLoginPage() {
+function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const errorParam = searchParams.get('error');
+    if (errorParam === 'unauthorized') {
+      setError('Acceso denegado: Tu cuenta no tiene permisos de administrador.');
+    }
+  }, [searchParams]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,15 +25,35 @@ export default function AdminLoginPage() {
     setLoading(true);
 
     const supabase = createClient();
-    const { error: authError } = await supabase.auth.signInWithPassword({
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (authError) {
-      setError(authError.message === 'Invalid login credentials' 
-        ? 'Credenciales incorrectas. Verifica correo y contraseña.' 
-        : authError.message);
+    if (authError || !authData.user) {
+      const msg = authError?.message || '';
+      if (msg.includes('rate limit') || msg.includes('Too many requests') || msg.includes('over_email_send_rate_limit')) {
+        setError('Demasiados intentos fallidos. Por seguridad, espera unos minutos antes de reintentar.');
+      } else if (msg === 'Invalid login credentials') {
+        setError('Credenciales incorrectas. Verifica correo y contraseña.');
+      } else {
+        setError('No fue posible iniciar sesión. Verifica tus datos de acceso.');
+      }
+      setLoading(false);
+      return;
+    }
+
+    // Comprobar si el usuario realmente es administrador en la base de datos
+    const { data: adminRecord, error: adminError } = await supabase
+      .from('admin_users')
+      .select('user_id')
+      .eq('user_id', authData.user.id)
+      .maybeSingle();
+
+    if (adminError || !adminRecord) {
+      // Cerrar sesión inmediatamente si no tiene rol administrativo
+      await supabase.auth.signOut();
+      setError('Acceso denegado: Esta cuenta no está registrada como administradora.');
       setLoading(false);
       return;
     }
@@ -91,13 +119,25 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 text-stone-950 font-bold text-sm hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-amber-500/20 disabled:opacity-50"
+            className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 text-stone-950 font-bold text-sm hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-amber-500/20 disabled:opacity-50 cursor-pointer"
           >
-            {loading ? 'Verificando...' : 'Iniciar Sesión'}
+            {loading ? 'Verificando autorización...' : 'Iniciar Sesión'}
           </button>
         </form>
 
       </div>
     </div>
+  );
+}
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-stone-950 flex items-center justify-center text-xs font-mono text-stone-500">
+        Cargando acceso...
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }

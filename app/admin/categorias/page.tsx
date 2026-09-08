@@ -1,8 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
+import { slugify } from '@/lib/seo/slugify';
+import {
+  validateImageFile,
+  generateSafeStoragePath,
+  deleteStorageFiles,
+} from '@/lib/storage/image-utils';
 
 interface Category {
   id: string;
@@ -28,9 +34,25 @@ export default function AdminCategoriasPage() {
     description: '',
   });
 
+  // Previsualización de imagen seleccionada con ciclo de vida controlado
+  const previewUrl = useMemo(() => {
+    return imageFile ? URL.createObjectURL(imageFile) : null;
+  }, [imageFile]);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
   const fetchCategories = async () => {
     setFetching(true);
-    const { data } = await supabase.from('categories').select('*').order('name');
+    const { data } = await supabase
+      .from('categories')
+      .select('id, name, slug, image_url, description')
+      .order('name');
     if (data) setCategories(data);
     setFetching(false);
   };
@@ -56,39 +78,63 @@ export default function AdminCategoriasPage() {
     setImageFile(null);
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    if (!file) {
+      setImageFile(null);
+      return;
+    }
+
+    const validation = validateImageFile(file);
+    if (!validation.valid) {
+      alert(validation.error || 'Archivo de imagen no válido.');
+      e.target.value = '';
+      setImageFile(null);
+      return;
+    }
+
+    setImageFile(file);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
+    let newlyUploadedPath: string | null = null;
+
     try {
       let finalImageUrl = editingCategory ? editingCategory.image_url : null;
+      const previousImageUrl = editingCategory?.image_url || null;
 
-      // 1. Si se seleccionó una nueva imagen, subirla a Supabase Storage
+      // 1. Si se seleccionó una nueva imagen, validarla y subirla con nombre seguro
       if (imageFile) {
-        const fileExt = imageFile.name.split('.').pop();
-        const fileName = `cat-${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-        const filePath = `categories/${fileName}`;
+        const filePath = generateSafeStoragePath('categories', imageFile);
 
         const { error: uploadError } = await supabase.storage
           .from('products')
-          .upload(filePath, imageFile);
+          .upload(filePath, imageFile, {
+            contentType: imageFile.type,
+            upsert: false,
+          });
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          throw new Error(`Error al subir imagen: ${uploadError.message}`);
+        }
+
+        newlyUploadedPath = filePath;
 
         const { data: publicUrlData } = supabase.storage
           .from('products')
           .getPublicUrl(filePath);
 
-        finalImageUrl = publicUrlData.publicUrl;
+        finalImageUrl = publicUrlData?.publicUrl || null;
       }
 
-      // 2. Generar slug a partir del nombre
-      const slug = formData.name
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)+/g, '');
+      // 2. Estrategia de slugs: Preservar el slug existente al editar para evitar enlaces rotos,
+      // o generarlo a partir del nombre con slugify() si es una categoría nueva.
+      const slug = editingCategory?.slug
+        ? editingCategory.slug
+        : slugify(formData.name);
 
       if (editingCategory) {
         // ACTUALIZAR CATEGORÍA EXISTENTE
@@ -103,6 +149,11 @@ export default function AdminCategoriasPage() {
           .eq('id', editingCategory.id);
 
         if (updateError) throw updateError;
+
+        // Si se subió una nueva imagen y existía una anterior, borrar la anterior de Storage
+        if (imageFile && previousImageUrl && previousImageUrl !== finalImageUrl) {
+          await deleteStorageFiles(supabase, [previousImageUrl], 'products');
+        }
       } else {
         // CREAR NUEVA CATEGORÍA
         const { error: insertError } = await supabase
@@ -122,34 +173,49 @@ export default function AdminCategoriasPage() {
       // Limpiar formulario y refrescar lista
       handleCancelEdit();
       fetchCategories();
-    } catch (err: any) {
-      alert(`Error al guardar la categoría: ${err.message}`);
+    } catch (err: unknown) {
+      console.error('Error al guardar categoría:', err);
+
+      // ROLLBACK: Si falló la BD, borrar la imagen que se acaba de subir
+      if (newlyUploadedPath) {
+        await deleteStorageFiles(supabase, [newlyUploadedPath], 'products');
+      }
+
+      const errorMsg = err instanceof Error ? err.message : 'Error inesperado al guardar la categoría.';
+      alert(`Error al guardar la categoría: ${errorMsg}`);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (id: string, name: string) => {
-    if (!window.confirm(`¿Estás seguro de eliminar la categoría "${name}"?`)) return;
+  const handleDelete = async (cat: Category) => {
+    if (!window.confirm(`¿Estás seguro de eliminar la categoría "${cat.name}"?`)) return;
 
     try {
-      const { error } = await supabase.from('categories').delete().eq('id', id);
+      const { error } = await supabase.from('categories').delete().eq('id', cat.id);
       if (error) throw error;
-      
-      if (editingCategory?.id === id) {
+
+      // Si la categoría tenía imagen, borrarla de Storage
+      if (cat.image_url) {
+        await deleteStorageFiles(supabase, [cat.image_url], 'products');
+      }
+
+      if (editingCategory?.id === cat.id) {
         handleCancelEdit();
       }
-      
+
       fetchCategories();
-    } catch (err: any) {
-      alert(`Error al eliminar: ${err.message}`);
+    } catch (err: unknown) {
+      console.error('Error al eliminar categoría:', err);
+      const errorMsg = err instanceof Error ? err.message : 'Error inesperado al eliminar.';
+      alert(`Error al eliminar: ${errorMsg}`);
     }
   };
 
   return (
     <div className="min-h-screen bg-stone-950 text-stone-100 p-6 md:p-10">
       <div className="max-w-5xl mx-auto">
-        
+
         {/* Encabezado */}
         <div className="flex items-center justify-between mb-8 pb-6 border-b border-stone-800">
           <div>
@@ -163,7 +229,7 @@ export default function AdminCategoriasPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
+
           {/* Formulario (Crear / Editar) */}
           <form onSubmit={handleSubmit} className="bg-stone-900/50 border border-stone-800 p-6 rounded-2xl space-y-4 h-fit backdrop-blur-md">
             <div className="flex items-center justify-between mb-2">
@@ -174,7 +240,7 @@ export default function AdminCategoriasPage() {
                 <button
                   type="button"
                   onClick={handleCancelEdit}
-                  className="text-[10px] font-mono text-stone-400 hover:text-stone-200 underline"
+                  className="text-[10px] font-mono text-stone-400 hover:text-stone-200 underline cursor-pointer"
                 >
                   Cancelar Edición
                 </button>
@@ -193,26 +259,40 @@ export default function AdminCategoriasPage() {
               />
             </div>
 
+            {editingCategory && (
+              <div>
+                <label className="block text-xs font-mono uppercase text-stone-500 mb-1">
+                  Slug / Enlace permanente
+                </label>
+                <div className="text-xs font-mono text-amber-400 bg-stone-950 px-3 py-2 rounded-xl border border-stone-800">
+                  /categoria/{editingCategory.slug}
+                </div>
+              </div>
+            )}
+
             <div>
               <label className="block text-xs font-mono uppercase text-stone-400 mb-1">
-                {editingCategory ? 'Cambiar Imagen (Opcional)' : 'Imagen de Portada'}
+                {editingCategory ? 'Cambiar Imagen (JPG, PNG, WEBP, AVIF - Máx. 5MB)' : 'Imagen de Portada (Máx. 5MB)'}
               </label>
-              
-              {editingCategory?.image_url && !imageFile && (
+
+              {/* Vista previa de imagen actual o nueva seleccionada */}
+              {(previewUrl || editingCategory?.image_url) && (
                 <div className="mb-3 flex items-center gap-3">
                   <img
-                    src={editingCategory.image_url}
-                    alt="Vista previa actual"
+                    src={previewUrl || editingCategory?.image_url || ''}
+                    alt="Vista previa"
                     className="w-12 h-12 object-cover rounded-lg border border-stone-800"
                   />
-                  <span className="text-xs text-stone-500">Imagen actual</span>
+                  <span className="text-xs text-stone-400">
+                    {previewUrl ? 'Nueva seleccionada' : 'Imagen actual'}
+                  </span>
                 </div>
               )}
 
               <input
                 type="file"
-                accept="image/*"
-                onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                accept="image/jpeg,image/png,image/webp,image/avif"
+                onChange={handleImageChange}
                 className="w-full text-xs text-stone-400 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-amber-500/10 file:text-amber-400 hover:file:bg-amber-500/20 border border-stone-800 rounded-xl p-2 bg-stone-950 cursor-pointer"
               />
             </div>
@@ -232,7 +312,7 @@ export default function AdminCategoriasPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 text-stone-950 font-bold text-xs hover:brightness-110 transition-all disabled:opacity-50"
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 text-stone-950 font-bold text-xs hover:brightness-110 transition-all disabled:opacity-50 cursor-pointer"
               >
                 {loading
                   ? 'Guardando...'
@@ -286,13 +366,13 @@ export default function AdminCategoriasPage() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleEditClick(cat)}
-                        className="px-3 py-1 rounded border border-stone-700 hover:border-amber-500 hover:text-amber-300 text-xs transition-colors"
+                        className="px-3 py-1 rounded border border-stone-700 hover:border-amber-500 hover:text-amber-300 text-xs transition-colors cursor-pointer"
                       >
                         Editar
                       </button>
                       <button
-                        onClick={() => handleDelete(cat.id, cat.name)}
-                        className="px-3 py-1 rounded border border-red-900/60 bg-red-950/20 text-red-400 hover:bg-red-900/40 text-xs transition-colors"
+                        onClick={() => handleDelete(cat)}
+                        className="px-3 py-1 rounded border border-red-900/60 bg-red-950/20 text-red-400 hover:bg-red-900/40 text-xs transition-colors cursor-pointer"
                       >
                         Eliminar
                       </button>
