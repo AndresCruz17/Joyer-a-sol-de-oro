@@ -6,7 +6,7 @@ import { slugify } from '@/lib/seo/slugify';
 import { useRouter } from 'next/navigation';
 import {
   validateImageFiles,
-  generateSafeStoragePath,
+  uploadOptimizedImage,
   deleteStorageFiles,
   MAX_PRODUCT_IMAGES,
 } from '@/lib/storage/image-utils';
@@ -20,27 +20,22 @@ export default function NewProductPage() {
   const supabase = createClient();
   const router = useRouter();
 
-  const [categories, setCategories] = useState<CategoryOption[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
-
-  // Campos
   const [name, setName] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [price, setPrice] = useState('');
   const [weightGrams, setWeightGrams] = useState('');
   const [description, setDescription] = useState('');
   const [isFeatured, setIsFeatured] = useState(false);
-
-  // Galería de fotos
   const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [categories, setCategories] = useState<CategoryOption[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
 
-  // URLs de previsualización con gestión de ciclo de vida
+  // Liberación de URLs de previsualización para prevenir fugas de memoria
   const previewUrls = useMemo(() => {
     return imageFiles.map((file) => URL.createObjectURL(file));
   }, [imageFiles]);
 
-  // Limpiar URLs en memoria cuando cambien o al desmontar
   useEffect(() => {
     return () => {
       previewUrls.forEach((url) => URL.revokeObjectURL(url));
@@ -49,21 +44,27 @@ export default function NewProductPage() {
 
   useEffect(() => {
     async function loadCategories() {
-      const { data } = await supabase.from('categories').select('id, name').order('name');
-      if (data) setCategories(data);
+      const { data, error } = await supabase
+        .from('categories')
+        .select('id, name')
+        .order('name');
+
+      if (!error && data) {
+        setCategories(data);
+      }
     }
     loadCategories();
-  }, []);
+  }, [supabase]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMessage(null);
-    if (!e.target.files) return;
+    if (!e.target.files || e.target.files.length === 0) return;
 
     const selected = Array.from(e.target.files);
     const validation = validateImageFiles(selected, imageFiles.length, MAX_PRODUCT_IMAGES);
 
     if (!validation.valid) {
-      setMessage(validation.error || 'Error al validar las imágenes.');
+      setMessage(validation.error || 'Archivos inválidos.');
       e.target.value = '';
       return;
     }
@@ -85,31 +86,12 @@ export default function NewProductPage() {
     const uploadedUrls: string[] = [];
 
     try {
-      // 1. Subir fotos validadas con nombres seguros
+      // 1. Procesar y subir fotos optimizadas a WebP en el servidor
       if (imageFiles.length > 0) {
         for (const file of imageFiles) {
-          const filePath = generateSafeStoragePath('products', file);
-
-          const { error: uploadError } = await supabase.storage
-            .from('products')
-            .upload(filePath, file, {
-              contentType: file.type,
-              upsert: false,
-            });
-
-          if (uploadError) {
-            throw new Error(`Error al subir imagen: ${uploadError.message}`);
-          }
-
-          uploadedPaths.push(filePath);
-
-          const { data: publicUrlData } = supabase.storage
-            .from('products')
-            .getPublicUrl(filePath);
-
-          if (publicUrlData?.publicUrl) {
-            uploadedUrls.push(publicUrlData.publicUrl);
-          }
+          const { publicUrl, storagePath } = await uploadOptimizedImage(file, 'products');
+          uploadedPaths.push(storagePath);
+          uploadedUrls.push(publicUrl);
         }
       }
 

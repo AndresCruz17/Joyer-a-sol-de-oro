@@ -6,8 +6,8 @@ import Link from 'next/link';
 import { slugify } from '@/lib/seo/slugify';
 import {
   validateImageFile,
-  generateSafeStoragePath,
   deleteStorageFiles,
+  uploadOptimizedImage,
 } from '@/lib/storage/image-utils';
 
 interface Category {
@@ -106,28 +106,11 @@ export default function AdminCategoriasPage() {
       let finalImageUrl = editingCategory ? editingCategory.image_url : null;
       const previousImageUrl = editingCategory?.image_url || null;
 
-      // 1. Si se seleccionó una nueva imagen, validarla y subirla con nombre seguro
+      // 1. Si se seleccionó una nueva imagen, procesarla, optimizarla a WebP y subirla
       if (imageFile) {
-        const filePath = generateSafeStoragePath('categories', imageFile);
-
-        const { error: uploadError } = await supabase.storage
-          .from('products')
-          .upload(filePath, imageFile, {
-            contentType: imageFile.type,
-            upsert: false,
-          });
-
-        if (uploadError) {
-          throw new Error(`Error al subir imagen: ${uploadError.message}`);
-        }
-
-        newlyUploadedPath = filePath;
-
-        const { data: publicUrlData } = supabase.storage
-          .from('products')
-          .getPublicUrl(filePath);
-
-        finalImageUrl = publicUrlData?.publicUrl || null;
+        const { publicUrl, storagePath } = await uploadOptimizedImage(imageFile, 'categories');
+        newlyUploadedPath = storagePath;
+        finalImageUrl = publicUrl;
       }
 
       // 2. Estrategia de slugs: Preservar el slug existente al editar para evitar enlaces rotos,

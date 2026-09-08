@@ -9,7 +9,6 @@ export const ALLOWED_IMAGE_MIME_TYPES: Record<string, string> = {
   'image/jpg': 'jpg',
   'image/png': 'png',
   'image/webp': 'webp',
-  'image/avif': 'avif',
 };
 
 export const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
@@ -21,7 +20,7 @@ export interface ImageValidationResult {
 }
 
 /**
- * Valida un archivo individual de imagen
+ * Valida un archivo individual de imagen (rechaza SVG, ejecutables y no admitidos)
  */
 export function validateImageFile(file: File, maxSize = MAX_IMAGE_SIZE_BYTES): ImageValidationResult {
   if (!file) {
@@ -29,10 +28,13 @@ export function validateImageFile(file: File, maxSize = MAX_IMAGE_SIZE_BYTES): I
   }
 
   const mime = file.type.toLowerCase();
-  if (!ALLOWED_IMAGE_MIME_TYPES[mime]) {
+  const name = file.name.toLowerCase();
+
+  // Rechazo explícito de SVG o archivos sin MIME admitido
+  if (mime === 'image/svg+xml' || name.endsWith('.svg') || !ALLOWED_IMAGE_MIME_TYPES[mime]) {
     return {
       valid: false,
-      error: `Formato de archivo no admitido (${file.type || 'desconocido'}). Formatos permitidos: JPG, PNG, WEBP, AVIF.`,
+      error: `Formato de archivo no admitido (${file.type || 'desconocido'}). Formatos permitidos: JPG, PNG, WEBP.`,
     };
   }
 
@@ -135,3 +137,42 @@ export async function deleteStorageFiles(
     console.error('Excepción al invocar supabase.storage.remove:', err);
   }
 }
+
+export interface UploadOptimizedImageResult {
+  publicUrl: string;
+  storagePath: string;
+}
+
+/**
+ * Sube una imagen al servidor para ser validada, redimensionada (máx 1600px) y convertida a WebP (calidad 82)
+ */
+export async function uploadOptimizedImage(
+  file: File,
+  folder: 'products' | 'categories' = 'products'
+): Promise<UploadOptimizedImageResult> {
+  const validation = validateImageFile(file);
+  if (!validation.valid) {
+    throw new Error(validation.error || 'Archivo de imagen no válido.');
+  }
+
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('folder', folder);
+
+  const response = await fetch('/api/admin/upload-image', {
+    method: 'POST',
+    body: formData,
+  });
+
+  const data = await response.json();
+
+  if (!response.ok || !data.success) {
+    throw new Error(data.error || 'Error al procesar y subir la imagen optimizada.');
+  }
+
+  return {
+    publicUrl: data.publicUrl,
+    storagePath: data.storagePath,
+  };
+}
+

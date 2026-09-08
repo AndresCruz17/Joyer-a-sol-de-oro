@@ -6,8 +6,8 @@ import { slugify } from '@/lib/seo/slugify';
 import { useRouter, useParams } from 'next/navigation';
 import {
   validateImageFiles,
-  generateSafeStoragePath,
   deleteStorageFiles,
+  uploadOptimizedImage,
   MAX_PRODUCT_IMAGES,
 } from '@/lib/storage/image-utils';
 
@@ -121,31 +121,12 @@ export default function EditProductPage() {
     const newlyUploadedUrls: string[] = [];
 
     try {
-      // 1. Subir fotos nuevas
+      // 1. Subir fotos nuevas optimizadas a WebP
       if (newImageFiles.length > 0) {
         for (const file of newImageFiles) {
-          const filePath = generateSafeStoragePath('products', file);
-
-          const { error: uploadError } = await supabase.storage
-            .from('products')
-            .upload(filePath, file, {
-              contentType: file.type,
-              upsert: false,
-            });
-
-          if (uploadError) {
-            throw new Error(`Error al subir imagen: ${uploadError.message}`);
-          }
-
-          newlyUploadedPaths.push(filePath);
-
-          const { data: publicUrlData } = supabase.storage
-            .from('products')
-            .getPublicUrl(filePath);
-
-          if (publicUrlData?.publicUrl) {
-            newlyUploadedUrls.push(publicUrlData.publicUrl);
-          }
+          const { publicUrl, storagePath } = await uploadOptimizedImage(file, 'products');
+          newlyUploadedPaths.push(storagePath);
+          newlyUploadedUrls.push(publicUrl);
         }
       }
 
