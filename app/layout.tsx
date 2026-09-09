@@ -1,16 +1,24 @@
 import type { Metadata } from 'next';
-import { Inter, Playfair_Display } from 'next/font/google';
+import { Bodoni_Moda, Montserrat, Inter } from 'next/font/google';
 import WhatsAppFloat from '@/components/ui/WhatsAppFloat';
 import './globals.css';
 
-const inter = Inter({
+const bodoni = Bodoni_Moda({
   subsets: ['latin'],
-  variable: '--font-sans',
+  variable: '--font-bodoni',
+  display: 'swap',
 });
 
-const playfair = Playfair_Display({
+const montserrat = Montserrat({
   subsets: ['latin'],
-  variable: '--font-serif',
+  variable: '--font-montserrat',
+  display: 'swap',
+});
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
@@ -25,8 +33,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${inter.variable} ${playfair.variable}`}>
-      <body className="bg-stone-950 text-stone-100 antialiased selection:bg-amber-500 selection:text-stone-950">
+    <html
+      lang="es"
+      className={`${inter.variable} ${bodoni.variable} ${montserrat.variable}`}
+    >
+      <body className="bg-stone-950 text-stone-100 font-sans antialiased selection:bg-amber-500 selection:text-stone-950">
         {children}
         <WhatsAppFloat />
       </body>

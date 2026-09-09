@@ -109,11 +109,11 @@ function CatalogoContent({ initialCategories, initialProducts }: CatalogoClientP
       {/* HEADER / NAV */}
       <nav className="border-b border-stone-800/80 bg-stone-950/90 backdrop-blur-md sticky top-0 z-50 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link href="/" className="inline-flex items-center gap-2 text-xs font-mono text-amber-400 hover:text-amber-300 transition-colors">
+          <Link href="/" className="inline-flex items-center gap-2 text-xs font-display tracking-wider text-amber-400 hover:text-amber-300 transition-colors uppercase">
             <span>←</span> Volver al Inicio
           </Link>
 
-          <Link href="/" className="font-serif italic text-lg tracking-wide text-amber-300">
+          <Link href="/" className="font-serif italic text-lg tracking-widest text-amber-300">
             Sol de Oro
           </Link>
 
@@ -121,7 +121,7 @@ function CatalogoContent({ initialCategories, initialProducts }: CatalogoClientP
             href={getWhatsAppUrl('Hola, quisiera asesoría sobre joyas en Oro de 18K')}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs font-mono text-stone-300 hover:text-amber-400 transition-colors hidden sm:block"
+            className="text-xs font-display tracking-wider text-stone-300 hover:text-amber-400 transition-colors hidden sm:block uppercase"
           >
             Contacto WhatsApp
           </a>
@@ -131,13 +131,13 @@ function CatalogoContent({ initialCategories, initialProducts }: CatalogoClientP
       {/* BANNER PRINCIPAL */}
       <header className="py-12 sm:py-16 px-6 text-center border-b border-stone-800/80 bg-gradient-to-b from-stone-900/40 to-stone-950">
         <div className="max-w-3xl mx-auto">
-          <span className="text-xs font-mono text-amber-400 uppercase tracking-widest block mb-3">
+          <span className="text-xs font-display text-amber-400 uppercase tracking-widest block mb-3">
             Colección Completa // Oro Nacional e Italiano 18K
           </span>
-          <h1 className="font-serif text-3xl sm:text-5xl font-light text-stone-100 mb-4">
+          <h1 className="font-serif text-3xl sm:text-5xl font-light text-stone-100 tracking-widest mb-4">
             Catálogo de <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500">Alta Joyería</span>
           </h1>
-          <p className="text-stone-400 text-sm font-light leading-relaxed">
+          <p className="text-stone-400 text-sm font-sans font-light leading-relaxed">
             Explora todas nuestras piezas garantizadas de por vida en pureza de metal.
           </p>
         </div>
@@ -154,12 +154,12 @@ function CatalogoContent({ initialCategories, initialProducts }: CatalogoClientP
               placeholder="Buscar por anillo, cadena, peso..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-stone-900 border border-stone-800 rounded-full px-5 py-2.5 text-xs text-stone-100 placeholder-stone-500 focus:outline-none focus:border-amber-500/60 transition-all"
+              className="w-full bg-stone-900 border border-stone-800 rounded-full px-5 py-2.5 text-xs font-sans text-stone-100 placeholder-stone-500 focus:outline-none focus:border-amber-500/60 transition-all"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-mono text-stone-500 hover:text-stone-300"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-display text-stone-500 hover:text-stone-300"
               >
                 ✕
               </button>
@@ -168,11 +168,11 @@ function CatalogoContent({ initialCategories, initialProducts }: CatalogoClientP
 
           {/* Selector de Orden */}
           <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
-            <span className="text-[11px] font-mono text-stone-500 uppercase shrink-0">Ordenar:</span>
+            <span className="text-[11px] font-display text-stone-500 uppercase tracking-wider shrink-0">Ordenar:</span>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as 'newest' | 'price-asc' | 'price-desc')}
-              className="bg-stone-900 border border-stone-800 text-xs font-mono text-stone-300 rounded-xl px-3 py-2 focus:outline-none focus:border-amber-500/60"
+              className="bg-stone-900 border border-stone-800 text-xs font-display text-stone-300 rounded-xl px-3 py-2 focus:outline-none focus:border-amber-500/60"
             >
               <option value="newest">Más Recientes</option>
               <option value="price-asc">Precio: Menor a Mayor</option>
@@ -185,7 +185,7 @@ function CatalogoContent({ initialCategories, initialProducts }: CatalogoClientP
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pt-4 mt-1">
           <button
             onClick={() => setSelectedCategory('all')}
-            className={`px-4 py-1.5 rounded-full text-xs font-mono transition-all shrink-0 border ${selectedCategory === 'all'
+            className={`px-4 py-1.5 rounded-full text-xs font-display uppercase tracking-wider transition-all shrink-0 border ${selectedCategory === 'all'
                 ? 'bg-amber-500/20 border-amber-500 text-amber-300 font-semibold shadow-[0_0_15px_rgba(245,158,11,0.2)]'
                 : 'bg-stone-900 border-stone-800 text-stone-400 hover:border-stone-700 hover:text-stone-200'
               }`}
@@ -201,7 +201,7 @@ function CatalogoContent({ initialCategories, initialProducts }: CatalogoClientP
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`px-4 py-1.5 rounded-full text-xs font-mono transition-all shrink-0 border ${isActive
+                className={`px-4 py-1.5 rounded-full text-xs font-display uppercase tracking-wider transition-all shrink-0 border ${isActive
                     ? 'bg-amber-500/20 border-amber-500 text-amber-300 font-semibold shadow-[0_0_15px_rgba(245,158,11,0.2)]'
                     : 'bg-stone-900 border-stone-800 text-stone-400 hover:border-stone-700 hover:text-stone-200'
                   }`}
@@ -234,8 +234,8 @@ function CatalogoContent({ initialCategories, initialProducts }: CatalogoClientP
           </div>
         ) : filteredProducts.length === 0 ? (
           <div className="text-center py-20 border border-stone-800/60 rounded-3xl bg-stone-900/20 max-w-md mx-auto">
-            <p className="font-serif text-lg text-stone-400 mb-2">No se encontraron joyas</p>
-            <p className="text-xs font-mono text-stone-500 mb-6">
+            <p className="font-serif text-lg text-stone-400 mb-2 tracking-wide">No se encontraron joyas</p>
+            <p className="text-xs font-sans text-stone-500 mb-6">
               Prueba cambiando la búsqueda o seleccionando otra categoría.
             </p>
             <button
@@ -243,7 +243,7 @@ function CatalogoContent({ initialCategories, initialProducts }: CatalogoClientP
                 setSearchQuery('');
                 setSelectedCategory('all');
               }}
-              className="px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/40 text-amber-300 text-xs font-mono hover:bg-amber-500 hover:text-stone-950 transition-all"
+              className="px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/40 text-amber-300 text-xs font-display uppercase tracking-wider hover:bg-amber-500 hover:text-stone-950 transition-all font-semibold"
             >
               Restablecer Filtros
             </button>
@@ -287,7 +287,7 @@ function CatalogoContent({ initialCategories, initialProducts }: CatalogoClientP
                         Sin Foto
                       </div>
                     )}
-                    <span className="absolute top-3 left-3 text-[10px] font-mono bg-stone-950/80 backdrop-blur-md text-amber-400 border border-amber-500/30 px-2.5 py-1 rounded-full uppercase">
+                    <span className="absolute top-3 left-3 text-[10px] font-display bg-stone-950/80 backdrop-blur-md text-amber-400 border border-amber-500/30 px-2.5 py-1 rounded-full uppercase tracking-wider">
                       {categoryName}
                     </span>
                   </Link>
@@ -296,13 +296,13 @@ function CatalogoContent({ initialCategories, initialProducts }: CatalogoClientP
                   <div className="p-6 flex-1 flex flex-col justify-between">
                     <div>
                       <Link href={`/producto/${item.id}`}>
-                        <h3 className="font-serif text-xl text-stone-100 group-hover:text-amber-300 transition-colors mb-2">
+                        <h3 className="font-serif text-xl text-stone-100 group-hover:text-amber-300 transition-colors tracking-wide mb-2">
                           {item.name}
                         </h3>
                       </Link>
 
                       {item.description && (
-                        <p className="text-xs text-stone-400 font-light line-clamp-2 mb-4 leading-relaxed">
+                        <p className="text-xs text-stone-400 font-sans font-light line-clamp-2 mb-4 leading-relaxed">
                           {item.description}
                         </p>
                       )}
@@ -311,19 +311,20 @@ function CatalogoContent({ initialCategories, initialProducts }: CatalogoClientP
                     <div className="pt-4 border-t border-stone-800/60 flex items-center justify-between">
                       <div>
                         {item.weight_grams && (
-                          <span className="text-[10px] font-mono text-stone-500 block uppercase">
+                          <span className="text-[10px] font-display text-stone-500 block uppercase tracking-wider">
                             Peso: {item.weight_grams}g
                           </span>
                         )}
                         {/* Renderizado seguro del precio */}
-                        <span className="font-mono text-lg text-amber-400 font-semibold">
+                        <span className="text-amber-400 font-bold">
                           {item.price ? (
                             <>
-                              ${item.price.toLocaleString('es-CO')}{' '}
-                              <span className="text-[10px] text-stone-400">COP</span>
+                              <span className="font-sans text-xs text-amber-500/80 mr-0.5">$</span>
+                              <span className="font-serif text-lg tracking-wide">{item.price.toLocaleString('es-CO')}</span>
+                              <span className="font-sans text-[10px] text-stone-400 ml-1">COP</span>
                             </>
                           ) : (
-                            <span className="text-xs text-stone-400 font-normal">A consultar</span>
+                            <span className="font-sans text-xs text-amber-400">A consultar</span>
                           )}
                         </span>
                       </div>
@@ -332,7 +333,7 @@ function CatalogoContent({ initialCategories, initialProducts }: CatalogoClientP
                         href={whatsappUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/40 text-amber-300 hover:bg-amber-500 hover:text-stone-950 text-xs font-semibold transition-all"
+                        className="px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/40 text-amber-300 hover:bg-amber-500 hover:text-stone-950 text-xs font-display font-semibold uppercase tracking-wider transition-all"
                       >
                         Cotizar
                       </a>

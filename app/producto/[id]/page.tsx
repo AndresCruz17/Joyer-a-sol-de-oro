@@ -128,25 +128,27 @@ export default async function ProductDetailPage({ params }: PageProps) {
             />
 
             {/* NAV */}
-            <nav className="border-b border-stone-800/80 bg-stone-950/90 backdrop-blur-md sticky top-0 z-50 px-6 py-4">
+            <nav className="border-b border-stone-800/80 bg-stone-950/90 backdrop-blur-md sticky top-0 z-50 px-6 sm:px-8 py-4 sm:py-5">
                 <div className="max-w-7xl mx-auto flex items-center justify-between">
                     <Link
-                        href={categorySlug ? `/categoria/${categorySlug}` : '/#catalogo'}
-                        className="inline-flex items-center gap-2 text-xs font-mono text-amber-400 hover:text-amber-300 transition-colors"
+                        href={categorySlug ? `/categoria/${categorySlug}` : '/'}
+                        className="inline-flex items-center gap-2 text-xs sm:text-sm font-display tracking-wider text-amber-400 hover:text-amber-300 transition-colors uppercase"
                     >
-                        <span>←</span> Volver a {categoryName}
+                        <span>←</span> {categoryName ? `Volver a ${categoryName}` : 'Volver al Inicio'}
                     </Link>
 
-                    <Link href="/" className="font-serif italic text-lg tracking-wide text-amber-300">
+                    <Link href="/" className="font-serif italic text-xl sm:text-2xl tracking-widest text-amber-300">
                         Sol de Oro
                     </Link>
 
-                    <Link
-                        href="/catalogo"
-                        className="text-xs font-mono text-stone-400 hover:text-stone-200 transition-colors hidden sm:block"
+                    <a
+                        href={whatsappUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs sm:text-sm font-display tracking-wider text-stone-400 hover:text-amber-300 transition-colors hidden sm:block uppercase"
                     >
-                        Catálogo Completo
-                    </Link>
+                        Atención Personalizada
+                    </a>
                 </div>
             </nav>
 
@@ -164,47 +166,54 @@ export default async function ProductDetailPage({ params }: PageProps) {
                     {/* Ficha Técnica */}
                     <div className="flex flex-col justify-between space-y-8">
                         <div>
-                            <span className="text-xs font-mono text-amber-400 uppercase tracking-widest block mb-2">
+                            <span className="text-xs font-display text-amber-400 uppercase tracking-widest block mb-2">
                                 Colección // {categoryName}
                             </span>
-                            <h1 className="font-serif text-3xl sm:text-5xl font-light text-stone-100 mb-4">
+                            <h1 className="font-serif text-3xl sm:text-5xl font-light text-stone-100 tracking-wide mb-4">
                                 {product.name}
                             </h1>
 
                             <div className="flex items-baseline gap-3 mb-6">
-                                {/* FIX: Renderizado seguro si no hay precio */}
-                                <span className="font-mono text-3xl sm:text-4xl text-amber-400 font-bold">
-                                    {priceText}
-                                </span>
+                                {product.price ? (
+                                    <span className="text-amber-400 font-bold flex items-baseline gap-1">
+                                        <span className="font-sans text-xl text-amber-500/80">$</span>
+                                        <span className="font-serif text-3xl sm:text-4xl tracking-wide">{product.price.toLocaleString('es-CO')}</span>
+                                        <span className="font-sans text-sm text-stone-400 ml-1">COP</span>
+                                    </span>
+                                ) : (
+                                    <span className="font-sans text-2xl text-amber-400 font-bold">
+                                        A consultar
+                                    </span>
+                                )}
                             </div>
 
                             {product.description && (
-                                <p className="text-stone-300 font-light leading-relaxed text-sm sm:text-base mb-8 border-b border-stone-800/80 pb-6">
+                                <p className="text-stone-300 font-sans font-light leading-relaxed text-sm sm:text-base mb-8 border-b border-stone-800/80 pb-6">
                                     {product.description}
                                 </p>
                             )}
 
                             <div className="grid grid-cols-2 gap-4 mb-8">
                                 <div className="p-4 rounded-2xl bg-stone-900/50 border border-stone-800">
-                                    <span className="text-[10px] font-mono text-stone-400 uppercase block mb-1">Material</span>
-                                    <p className="text-sm font-semibold text-stone-200">Oro 18K Garante</p>
+                                    <span className="text-[10px] font-display text-stone-400 uppercase tracking-wider block mb-1">Material</span>
+                                    <p className="text-sm font-semibold text-stone-200 font-sans">Oro 18K Ley 750</p>
                                 </div>
 
                                 <div className="p-4 rounded-2xl bg-stone-900/50 border border-stone-800">
-                                    <span className="text-[10px] font-mono text-stone-400 uppercase block mb-1">Peso Aproximado</span>
-                                    <p className="text-sm font-semibold text-stone-200">
+                                    <span className="text-[10px] font-display text-stone-400 uppercase tracking-wider block mb-1">Peso Aproximado</span>
+                                    <p className="text-sm font-semibold text-stone-200 font-sans">
                                         {product.weight_grams ? `${product.weight_grams} gramos` : 'Consultar'}
                                     </p>
                                 </div>
 
                                 <div className="p-4 rounded-2xl bg-stone-900/50 border border-stone-800">
-                                    <span className="text-[10px] font-mono text-stone-400 uppercase block mb-1">Garantía</span>
-                                    <p className="text-sm font-semibold text-stone-200">De por vida en el metal</p>
+                                    <span className="text-[10px] font-display text-stone-400 uppercase tracking-wider block mb-1">Garantía</span>
+                                    <p className="text-sm font-semibold text-stone-200 font-sans">De por vida en el metal</p>
                                 </div>
 
                                 <div className="p-4 rounded-2xl bg-stone-900/50 border border-stone-800">
-                                    <span className="text-[10px] font-mono text-stone-400 uppercase block mb-1">Disponibilidad</span>
-                                    <p className="text-sm font-semibold text-amber-400">Entrega Inmediata / Pedido</p>
+                                    <span className="text-[10px] font-display text-stone-400 uppercase tracking-wider block mb-1">Disponibilidad</span>
+                                    <p className="text-sm font-semibold text-amber-400 font-sans">Entrega Inmediata / Pedido</p>
                                 </div>
                             </div>
                         </div>
@@ -214,13 +223,13 @@ export default async function ProductDetailPage({ params }: PageProps) {
                                 href={whatsappUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="w-full py-4 rounded-2xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-center text-sm transition-all shadow-[0_0_25px_rgba(245,158,11,0.2)] flex items-center justify-center gap-2"
+                                className="w-full py-4 rounded-2xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-display font-bold uppercase tracking-wider text-center text-sm transition-all shadow-[0_0_25px_rgba(245,158,11,0.2)] flex items-center justify-center gap-2"
                             >
                                 <span>Cotizar esta joya por WhatsApp</span>
                                 <span>→</span>
                             </a>
 
-                            <p className="text-center text-[11px] font-mono text-stone-400">
+                            <p className="text-center text-[11px] font-sans text-stone-400">
                                 Respuesta inmediata por nuestros asesores de Sol de Oro.
                             </p>
                         </div>
@@ -231,7 +240,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                 {/* Productos Relacionados */}
                 {relatedProducts && relatedProducts.length > 0 && (
                     <section className="mt-24 pt-12 border-t border-stone-800/80">
-                        <h2 className="font-serif text-2xl font-light text-stone-100 mb-8">
+                        <h2 className="font-serif text-2xl font-light text-stone-100 tracking-widest mb-8">
                             Otras piezas de la colección <span className="italic text-amber-300">{categoryName}</span>
                         </h2>
 
@@ -240,22 +249,36 @@ export default async function ProductDetailPage({ params }: PageProps) {
                                 <Link
                                     key={rel.id}
                                     href={`/producto/${rel.id}`}
-                                    className="group rounded-2xl bg-stone-900/40 border border-stone-800 p-4 hover:border-amber-500/50 transition-all duration-300 flex items-center gap-4"
+                                    className="group p-4 rounded-2xl bg-stone-900/40 border border-stone-800/80 hover:border-amber-500/60 transition-all flex items-center gap-4"
                                 >
                                     <div className="w-16 h-16 rounded-xl overflow-hidden bg-stone-950 shrink-0">
                                         {rel.image_url ? (
-                                            <img src={rel.image_url} alt={rel.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+                                            <img
+                                                src={rel.image_url}
+                                                alt={rel.name}
+                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                            />
                                         ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-[10px] text-stone-600">Sin foto</div>
+                                            <div className="w-full h-full flex items-center justify-center text-stone-700 text-xs font-serif">
+                                                Sin Foto
+                                            </div>
                                         )}
                                     </div>
                                     <div>
-                                        <h3 className="font-serif text-sm text-stone-200 group-hover:text-amber-300 transition-colors line-clamp-1">
+                                        <h4 className="font-serif text-stone-200 group-hover:text-amber-300 transition-colors text-sm font-medium tracking-wide">
                                             {rel.name}
-                                        </h3>
-                                        <p className="text-xs font-mono text-amber-400 mt-1">
-                                            {rel.price ? `$${rel.price.toLocaleString('es-CO')} COP` : 'A consultar'}
-                                        </p>
+                                        </h4>
+                                        <span className="text-amber-400 text-xs font-bold">
+                                            {rel.price ? (
+                                                <>
+                                                    <span className="font-sans text-[10px] text-amber-500/80 mr-0.5">$</span>
+                                                    <span className="font-serif text-sm tracking-wide">{rel.price.toLocaleString('es-CO')}</span>
+                                                    <span className="font-sans text-[9px] text-stone-400 ml-1">COP</span>
+                                                </>
+                                            ) : (
+                                                <span className="font-sans text-[11px] text-stone-400">A consultar</span>
+                                            )}
+                                        </span>
                                     </div>
                                 </Link>
                             ))}
