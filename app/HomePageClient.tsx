@@ -21,20 +21,25 @@ const CONFIG = {
 };
 
 const TYPEWRITER_PHRASES = [
+    'Oro Nacional 18K & Oro Italiano 18K Ley 750',
     'Compramos tu Oro 18K al Mejor Precio del Mercado',
-    'Oro de 18 Kilates Certificado Ley 750',
-    'Diseños Exclusivos & Orfebrería a Medida',
-    'Avalúos Transparentes y Pago de Inmediato',
+    'Cotización y Avalúos de Oro en Vivo al Instante',
+    'Diseños Exclusivos, Tejidos Italianos y Taller Orfebre',
+    'Pago Inmediato en Efectivo y Transferencia',
 ];
 
 const FAQS = [
     {
+        q: '¿Qué diferencia hay entre el Oro Nacional y el Oro Italiano 18K?',
+        a: 'Ambos son auténtico Oro de 18 Kilates Ley 750 (75% oro puro garantizado). El Oro Nacional se distingue por su fabricación orfebre maciza, robustez y adaptabilidad para diseños personalizados. El Oro Italiano destaca por sus tejidos de precisión tecnológica europea (como Cartier, Mónaco o Gucci), broches de alta gama y acabado pulido espejo ultrabrillante.',
+    },
+    {
         q: '¿Cómo funciona el proceso de venta de mi oro a la compraventa?',
-        a: 'Traes tu pieza a nuestro local o nos envías fotos y gramaje por WhatsApp. Realizamos la prueba de pureza y pesaje de precisión frente a ti y te pagamos de inmediato al mejor valor por gramo de la ciudad.',
+        a: 'Traes tu pieza a nuestro local o nos envías fotos y gramaje por WhatsApp. Realizamos la prueba de pureza y pesaje de precisión frente a ti y te pagamos de inmediato con la tasa de cotización más competitiva del mercado.',
     },
     {
         q: '¿Cómo garantizan que las joyas son realmente Oro de 18 Kilates?',
-        a: 'Todas nuestras piezas son elaboradas e inspeccionadas con estándares de Ley 750 (75% oro puro y 25% aleación noble). Entregamos un certificado físico con validez permanente que respalda la pureza.',
+        a: 'Todas nuestras piezas (nacionales e italianas) son elaboradas e inspeccionadas con estándares de Ley 750 (750 partes de oro puro por cada mil). Entregamos un certificado físico con garantía permanente de pureza.',
     },
     {
         q: '¿Realizan envíos a todo el país y qué tan seguros son?',
@@ -42,7 +47,7 @@ const FAQS = [
     },
     {
         q: '¿Puedo llevar una foto o diseño propio para que lo fabriquen?',
-        a: '¡Por supuesto! Nuestro servicio de taller orfebre nos permite plasmar cualquier diseño en Oro 18K. Te asesoramos en el peso, tipo de acabado e incrustaciones según tu presupuesto.',
+        a: '¡Por supuesto! En nuestro taller orfebre podemos forjar cualquier diseño en Oro Nacional 18K a tu medida o conseguir piezas en Oro Italiano según tus preferencias y presupuesto.',
     },
 ];
 
@@ -86,6 +91,7 @@ export default function HomePageClient({
     const [isDesktop, setIsDesktop] = useState(false);
 
     const [calcGrams, setCalcGrams] = useState<number>(5);
+    const [goldOrigin, setGoldOrigin] = useState<'nacional' | 'italiano'>('nacional');
     const [calcService, setCalcService] = useState<'vender_mi_oro' | 'fabricar_joya' | 'comprar_joya'>('vender_mi_oro');
 
     const [openFaq, setOpenFaq] = useState<number | null>(0);
@@ -190,21 +196,25 @@ export default function HomePageClient({
         return () => cancelAnimationFrame(animationId);
     }, [isHoveredCarousel, categories]);
 
-    const whatsappHeroUrl = `https://wa.me/${CONFIG.phoneWhatsapp}?text=${encodeURIComponent('Hola Sol de Oro, me gustaría recibir atención personalizada sobre joyas o venta de oro.')}`;
+    const whatsappHeroUrl = `https://wa.me/${CONFIG.phoneWhatsapp}?text=${encodeURIComponent('Hola Sol de Oro, me gustaría recibir atención personalizada sobre joyas en Oro Nacional/Italiano 18K o cotización de venta de oro.')}`;
 
     const getCalcWhatsappUrl = () => {
+        const goldTypeName = goldOrigin === 'nacional' ? 'Oro Nacional 18K Ley 750 (Orfebre Macizo)' : 'Oro Italiano 18K Ley 750 (Tejido Europeo)';
         let headerText = '';
         if (calcService === 'vender_mi_oro') {
             headerText = `*SOLICITUD DE AVALÚO // VENTA DE ORO*\n` +
+                `• Tipo / Ley: ${goldTypeName}\n` +
                 `• Peso estimado: ${calcGrams} Gramos\n` +
-                `Hola, me interesa agendar una cita o consultar la tasa de compra por gramo para vender mi oro.`;
+                `Hola, me interesa agendar una cita o consultar la tasa de compra en vivo por gramo para vender mi oro.`;
         } else if (calcService === 'fabricar_joya') {
             headerText = `*COTIZACIÓN DE FABRICACIÓN A MEDIDA*\n` +
-                `• Peso aproximado: ${calcGrams} Gramos (Oro 18K Ley 750)\n` +
+                `• Tipo de Oro: ${goldTypeName}\n` +
+                `• Peso aproximado: ${calcGrams} Gramos\n` +
                 `Hola, deseo cotizar la elaboración personalizada de una pieza con estas características.`;
         } else {
             headerText = `*CONSULTA DE DISPONIBILIDAD DE JOYA*\n` +
-                `• Rango de peso: ${calcGrams} Gramos (Oro 18K)\n` +
+                `• Línea de Oro: ${goldTypeName}\n` +
+                `• Rango de peso: ${calcGrams} Gramos\n` +
                 `Hola, me gustaría conocer qué diseños tienen disponibles en inventario en este peso.`;
         }
         return `https://wa.me/${CONFIG.phoneWhatsapp}?text=${encodeURIComponent(headerText)}`;
@@ -269,25 +279,29 @@ export default function HomePageClient({
             <div className="bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-500 text-stone-950 text-[11px] font-mono font-semibold py-2 overflow-hidden relative z-50 shadow-md">
                 <div className="animate-marquee whitespace-nowrap flex items-center gap-12">
                     <div className="flex items-center gap-12">
+                        <span>✦</span>
+                        <span>ORO NACIONAL Y ORO ITALIANO 18K LEY 750 CERTIFICADO</span>
+                        <span>✦</span>
+                        <span>TASA DEL ORO EN VIVO & AVALÚOS AL INSTANTE</span>
+                        <span>✦</span>
                         <span>COMPRAMOS TU ORO AL MEJOR PRECIO DEL MERCADO</span>
                         <span>✦</span>
-                        <span>ORO NACIONAL 18K LEY 750 CERTIFICADO</span>
-                        <span>✦</span>
-                        <span>FABRICACIÓN DE JOYAS A MEDIDA</span>
+                        <span>TALLER ORFEBRE A MEDIDA & IMPORTACIÓN ITALIANA</span>
                         <span>✦</span>
                         <span>GARANTÍA DE POR VIDA EN PUREZA</span>
-                        <span>✦</span>
                     </div>
                     {/* Duplicado para ciclo continuo sin saltos */}
                     <div className="flex items-center gap-12" aria-hidden="true">
+                        <span>✦</span>
+                        <span>ORO NACIONAL Y ORO ITALIANO 18K LEY 750 CERTIFICADO</span>
+                        <span>✦</span>
+                        <span>TASA DEL ORO EN VIVO & AVALÚOS AL INSTANTE</span>
+                        <span>✦</span>
                         <span>COMPRAMOS TU ORO AL MEJOR PRECIO DEL MERCADO</span>
                         <span>✦</span>
-                        <span>ORO NACIONAL 18K LEY 750 CERTIFICADO</span>
-                        <span>✦</span>
-                        <span>FABRICACIÓN DE JOYAS A MEDIDA</span>
+                        <span>TALLER ORFEBRE A MEDIDA & IMPORTACIÓN ITALIANA</span>
                         <span>✦</span>
                         <span>GARANTÍA DE POR VIDA EN PUREZA</span>
-                        <span>✦</span>
                     </div>
                 </div>
             </div>
@@ -316,7 +330,7 @@ export default function HomePageClient({
                         </div>
                     </Link>
 
-                    <div className="hidden lg:flex items-center gap-7 text-xs font-mono tracking-wider text-stone-300 uppercase">
+                    <div className="hidden lg:flex items-center gap-6 xl:gap-7 text-xs font-mono tracking-wider text-stone-300 uppercase">
                         <a href="#colecciones" className="hover:text-amber-400 transition-colors">Colecciones</a>
                         <a href="#destacados" className="hover:text-amber-400 transition-colors">Joyería Fina</a>
                         <a href="#cotizador" className="hover:text-amber-400 transition-colors">Comprar/Vender Oro</a>
@@ -326,6 +340,18 @@ export default function HomePageClient({
                     </div>
 
                     <div className="hidden sm:flex items-center gap-3">
+                        {/* Indicador de Tasa en Vivo */}
+                        <a
+                            href="#cotizador"
+                            className="hidden xl:inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-mono hover:bg-emerald-500/20 hover:border-emerald-500/50 transition-all shadow-[0_0_12px_rgba(16,185,129,0.15)] group"
+                            title="Tasa de Referencia de Oro 18K en Vivo"
+                        >
+                            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                            <span className="text-stone-300 group-hover:text-emerald-300 font-medium">Tasa Oro 18K:</span>
+                            <span className="text-emerald-400 font-bold">En Vivo</span>
+                            <span className="text-stone-500 text-[10px]">↓</span>
+                        </a>
+
                         <Link
                             href="/catalogo"
                             className="px-5 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/40 text-amber-300 text-xs font-mono hover:bg-amber-500 hover:text-stone-950 transition-all duration-300 shadow-[0_0_15px_rgba(245,158,11,0.15)] font-semibold"
@@ -345,6 +371,18 @@ export default function HomePageClient({
 
                 {mobileMenuOpen && (
                     <div className="lg:hidden pt-4 pb-2 border-t border-stone-800/80 mt-3 flex flex-col gap-3 text-xs font-mono uppercase text-stone-300">
+                        {/* Indicador Móvil */}
+                        <a
+                            href="#cotizador"
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="py-2.5 px-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-between text-xs"
+                        >
+                            <span className="flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                                <span>Tasa Oro 18K en Vivo (Nacional / Italiano)</span>
+                            </span>
+                            <span>→</span>
+                        </a>
                         <a href="#colecciones" onClick={() => setMobileMenuOpen(false)} className="py-2 hover:text-amber-400">Colecciones</a>
                         <a href="#destacados" onClick={() => setMobileMenuOpen(false)} className="py-2 hover:text-amber-400">Joyería Fina</a>
                         <a href="#cotizador" onClick={() => setMobileMenuOpen(false)} className="py-2 hover:text-amber-400">Comprar/Vender Oro</a>
@@ -366,10 +404,14 @@ export default function HomePageClient({
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-stone-950/70 via-stone-950/90 to-stone-950" />
 
-                <section className="relative z-10 py-24 sm:py-36 px-6 text-center max-w-5xl mx-auto flex flex-col items-center">
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono uppercase tracking-widest mb-8 backdrop-blur-md shadow-[0_0_20px_rgba(245,158,11,0.2)]">
-                        <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
-                        Joyería Fina & Compraventa de Oro 18K
+                <section className="relative z-10 py-20 sm:py-32 px-6 text-center max-w-5xl mx-auto flex flex-col items-center">
+                    <div className="inline-flex flex-wrap items-center justify-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono uppercase tracking-widest mb-8 backdrop-blur-md shadow-[0_0_20px_rgba(245,158,11,0.2)]">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                        <span>Oro 18K Ley 750</span>
+                        <span className="text-amber-500 font-bold">•</span>
+                        <span className="text-stone-200">Nacional (Macizo Orfebre)</span>
+                        <span className="text-amber-500 font-bold">&</span>
+                        <span className="text-stone-200">Italiano (Alta Precisión)</span>
                     </div>
 
                     <h1 className="font-serif text-4xl sm:text-6xl md:text-7xl font-light text-stone-100 leading-tight mb-6">
@@ -386,7 +428,7 @@ export default function HomePageClient({
                     </div>
 
                     <p className="text-stone-300 text-sm sm:text-base font-light max-w-2xl leading-relaxed mb-10">
-                        Tasación profesional de oro al instante con pago inmediato en nuestro local físico. Elaboramos joyas únicas en Oro puro Ley 750 con garantía permanente.
+                        Especialistas en <strong className="text-amber-300 font-normal">Oro Nacional 18K</strong> de taller artesanal y <strong className="text-amber-300 font-normal">Oro Italiano 18K</strong> importado de alta definición. Avalúos de oro al instante con pago inmediato y garantía permanente de pureza Ley 750.
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
@@ -394,7 +436,7 @@ export default function HomePageClient({
                             href="#cotizador"
                             className="px-8 py-4 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-500 text-stone-950 font-semibold text-xs font-mono tracking-wider hover:brightness-110 shadow-[0_0_30px_rgba(245,158,11,0.4)] transition-all duration-300 text-center uppercase"
                         >
-                            Cotizar / Vender mi Oro
+                            Cotizar / Vender mi Oro en Vivo
                         </a>
                         <Link
                             href="/catalogo"
@@ -522,22 +564,77 @@ export default function HomePageClient({
                 </div>
             </section>
 
-            {/* CALCULADORA LUXURY */}
+            {/* CALCULADORA & COTIZACIÓN LUXURY CON INDICADOR EN VIVO */}
             <section id="cotizador" className="py-20 px-6 border-t border-stone-800/60 bg-gradient-to-b from-stone-900/60 to-stone-950">
-                <div className="max-w-4xl mx-auto rounded-3xl bg-stone-900/80 border border-stone-800 p-8 sm:p-12 shadow-2xl backdrop-blur-md">
+                <div className="max-w-5xl mx-auto rounded-3xl bg-stone-900/80 border border-stone-800 p-8 sm:p-12 shadow-2xl backdrop-blur-md">
+                    
+                    {/* Header con Indicador en Vivo */}
                     <div className="text-center mb-10">
-                        <span className="text-xs font-mono text-amber-400 uppercase tracking-widest block mb-2">Servicios de Compraventa & Joyería</span>
-                        <h2 className="font-serif text-3xl sm:text-4xl text-stone-100 mb-3">Calculadora & Avalúos Expres</h2>
-                        <p className="text-stone-400 text-xs sm:text-sm font-light">
-                            Selecciona el tipo de consulta e ingresa el peso aproximado en gramos.
+                        <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono mb-4 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
+                            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                            <span className="font-semibold uppercase tracking-wider">Indicador de Cotización en Vivo // Oro 18K Ley 750</span>
+                        </div>
+                        <h2 className="font-serif text-3xl sm:text-4xl text-stone-100 mb-3">Calculadora & Avalúos de Oro</h2>
+                        <p className="text-stone-400 text-xs sm:text-sm font-light max-w-2xl mx-auto">
+                            Comercializamos <strong className="text-stone-200">Oro Nacional</strong> (macizo artesanal) y <strong className="text-stone-200">Oro Italiano</strong> (diseño europeo de alta precisión), ambos garantizados en <strong className="text-amber-300 font-normal">18 Kilates Ley 750</strong>.
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                        <div className="space-y-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                        
+                        {/* Controles Interactivos (Columna Izquierda) */}
+                        <div className="lg:col-span-7 space-y-6">
+                            
+                            {/* 1. SELECCIÓN DE LÍNEA DE ORO (NACIONAL VS ITALIANO) */}
                             <div>
-                                <label className="block text-xs font-mono uppercase text-stone-300 mb-3">
-                                    1. Tipo de Servicio:
+                                <label className="block text-xs font-mono uppercase text-stone-300 mb-2.5">
+                                    1. Selección de Línea de Oro 18K:
+                                </label>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => setGoldOrigin('nacional')}
+                                        className={`p-4 rounded-2xl text-left border transition-all flex flex-col justify-between ${goldOrigin === 'nacional'
+                                            ? 'bg-amber-500/15 border-amber-500 text-stone-100 shadow-[0_0_15px_rgba(245,158,11,0.15)] ring-1 ring-amber-500'
+                                            : 'bg-stone-950 border-stone-800 text-stone-400 hover:border-stone-700'
+                                            }`}
+                                    >
+                                        <div className="flex items-center justify-between mb-2">
+                                            <span className="font-serif text-sm font-bold text-amber-300 flex items-center gap-1.5">
+                                                🇨🇴 Oro Nacional 18K
+                                            </span>
+                                            {goldOrigin === 'nacional' && <span className="text-amber-400 text-xs">●</span>}
+                                        </div>
+                                        <p className="text-[11px] text-stone-400 font-light leading-snug">
+                                            Hechura orfebre maciza y tradicional. Máxima durabilidad y forja a medida.
+                                        </p>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => setGoldOrigin('italiano')}
+                                        className={`p-4 rounded-2xl text-left border transition-all flex flex-col justify-between ${goldOrigin === 'italiano'
+                                            ? 'bg-amber-500/15 border-amber-500 text-stone-100 shadow-[0_0_15px_rgba(245,158,11,0.15)] ring-1 ring-amber-500'
+                                            : 'bg-stone-950 border-stone-800 text-stone-400 hover:border-stone-700'
+                                            }`}
+                                    >
+                                        <div className="flex items-center justify-between mb-2">
+                                            <span className="font-serif text-sm font-bold text-amber-300 flex items-center gap-1.5">
+                                                🇮🇹 Oro Italiano 18K
+                                            </span>
+                                            {goldOrigin === 'italiano' && <span className="text-amber-400 text-xs">●</span>}
+                                        </div>
+                                        <p className="text-[11px] text-stone-400 font-light leading-snug">
+                                            Tejidos finos europeos computarizados, pulido espejo y broches de precisión.
+                                        </p>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* 2. TIPO DE SERVICIO */}
+                            <div>
+                                <label className="block text-xs font-mono uppercase text-stone-300 mb-2.5">
+                                    2. Tipo de Servicio:
                                 </label>
                                 <div className="grid grid-cols-1 gap-2.5">
                                     {[
@@ -547,8 +644,9 @@ export default function HomePageClient({
                                     ].map((s) => (
                                         <button
                                             key={s.id}
+                                            type="button"
                                             onClick={() => setCalcService(s.id as any)}
-                                            className={`py-3.5 px-4 rounded-xl text-xs font-mono text-left border transition-all flex items-center justify-between ${calcService === s.id
+                                            className={`py-3 px-4 rounded-xl text-xs font-mono text-left border transition-all flex items-center justify-between ${calcService === s.id
                                                 ? 'bg-amber-500/20 border-amber-500 text-amber-300 font-semibold shadow-[0_0_15px_rgba(245,158,11,0.15)]'
                                                 : 'bg-stone-950 border-stone-800 text-stone-400 hover:border-stone-700'
                                                 }`}
@@ -560,12 +658,13 @@ export default function HomePageClient({
                                 </div>
                             </div>
 
+                            {/* 3. GRAMAJE */}
                             <div>
                                 <div className="flex justify-between items-center mb-2">
                                     <label className="text-xs font-mono uppercase text-stone-300">
-                                        2. Gramaje Estimado:
+                                        3. Gramaje Estimado:
                                     </label>
-                                    <span className="text-amber-400 font-mono text-sm font-bold">
+                                    <span className="text-amber-400 font-mono text-sm font-bold bg-stone-950 px-3 py-1 rounded-lg border border-stone-800">
                                         {calcGrams} Gramos
                                     </span>
                                 </div>
@@ -575,7 +674,7 @@ export default function HomePageClient({
                                     max="50"
                                     value={calcGrams}
                                     onChange={(e) => setCalcGrams(Number(e.target.value))}
-                                    className="w-full accent-amber-500 bg-stone-950 h-2 rounded-lg cursor-pointer"
+                                    className="w-full accent-amber-500 bg-stone-950 h-2.5 rounded-lg cursor-pointer"
                                 />
                                 <div className="flex justify-between text-[10px] font-mono text-stone-500 mt-1">
                                     <span>1g (Dije/Anillo)</span>
@@ -585,29 +684,70 @@ export default function HomePageClient({
                             </div>
                         </div>
 
-                        <div className="p-6 rounded-2xl bg-stone-950 border border-stone-800/80 text-center flex flex-col justify-between h-full">
+                        {/* Ficha Resumen & Cotización en Vivo (Columna Derecha) */}
+                        <div className="lg:col-span-5 p-6 sm:p-7 rounded-2xl bg-stone-950 border border-stone-800/90 flex flex-col justify-between h-full space-y-6 shadow-xl relative overflow-hidden">
+                            
+                            {/* Brillo sutil de fondo */}
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl pointer-events-none" />
+
                             <div>
-                                <span className="text-[10px] font-mono uppercase text-amber-400 block mb-1">
-                                    {calcService === 'vender_mi_oro' ? 'Tasación Compraventa' : 'Presupuesto Joyería'}
-                                </span>
-                                <h3 className="font-serif text-3xl text-stone-100 mb-2">
-                                    {calcGrams} Gramos
-                                </h3>
-                                <p className="text-xs text-stone-400 font-light mb-6 leading-relaxed">
-                                    {calcService === 'vender_mi_oro' && 'Evaluamos tu oro en 18K/14K/24K con pesaje calibrado y pago inmediato en efectivo o transferencia.'}
-                                    {calcService === 'fabricar_joya' && 'Diseño y fundición personalizada con Oro Ley 750 y garantía de pureza de por vida.'}
-                                    {calcService === 'comprar_joya' && 'Consulta inventario listo para entrega inmediata de piezas en este peso.'}
-                                </p>
+                                <div className="flex items-center justify-between mb-3 pb-3 border-b border-stone-800/70">
+                                    <span className="text-[10px] font-mono uppercase tracking-widest text-emerald-400 flex items-center gap-1.5">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                                        Tasa del Día Activa
+                                    </span>
+                                    <span className="text-[10px] font-mono text-stone-400">
+                                        Pureza Ley 750 (18K)
+                                    </span>
+                                </div>
+
+                                <div className="space-y-3 mb-5">
+                                    <div className="flex justify-between items-center text-xs font-mono">
+                                        <span className="text-stone-400">Línea Seleccionada:</span>
+                                        <span className="text-amber-300 font-semibold">
+                                            {goldOrigin === 'nacional' ? 'Oro Nacional 18K' : 'Oro Italiano 18K'}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-xs font-mono">
+                                        <span className="text-stone-400">Peso a Evaluar:</span>
+                                        <span className="text-stone-100 font-bold text-sm">
+                                            {calcGrams}g
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-xs font-mono">
+                                        <span className="text-stone-400">Certificación:</span>
+                                        <span className="text-amber-400">Garantía de por vida</span>
+                                    </div>
+                                </div>
+
+                                <div className="p-3.5 rounded-xl bg-stone-900/80 border border-stone-800 text-[11px] text-stone-300 leading-relaxed font-light mb-4">
+                                    {calcService === 'vender_mi_oro' && (
+                                        <span>💎 <strong>Avalúo en Vivo:</strong> Pesaje exacto con balanza analítica calibrada y pago inmediato en nuestro local al mejor precio por gramo del mercado.</span>
+                                    )}
+                                    {calcService === 'fabricar_joya' && (
+                                        <span>👑 <strong>Taller Orfebre:</strong> Fabricamos tu pieza personalizada en Oro {goldOrigin === 'nacional' ? 'Nacional' : 'Italiano'} 18K con acabados de alta joyería.</span>
+                                    )}
+                                    {calcService === 'comprar_joya' && (
+                                        <span>✨ <strong>Disponibilidad:</strong> Consulta catálogo físico y entrega inmediata en piezas de {calcGrams} gramos.</span>
+                                    )}
+                                </div>
                             </div>
 
-                            <a
-                                href={getCalcWhatsappUrl()}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-stone-950 font-mono text-xs font-semibold hover:brightness-110 transition-all uppercase shadow-[0_0_20px_rgba(245,158,11,0.2)]"
-                            >
-                                {calcService === 'vender_mi_oro' ? 'Solicitar Avalúo por WhatsApp →' : 'Enviar Cotización a WhatsApp →'}
-                            </a>
+                            <div className="space-y-2.5">
+                                <a
+                                    href={getCalcWhatsappUrl()}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 text-stone-950 font-mono text-xs font-bold hover:brightness-110 transition-all uppercase shadow-[0_0_20px_rgba(245,158,11,0.25)] flex items-center justify-center gap-2 text-center"
+                                >
+                                    <span>{calcService === 'vender_mi_oro' ? 'Consultar Valor por Gramo en WhatsApp' : 'Enviar Consulta a WhatsApp'}</span>
+                                    <span>→</span>
+                                </a>
+
+                                <p className="text-center text-[10px] font-mono text-stone-500">
+                                    Atención personalizada y respuesta inmediata por WhatsApp.
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>

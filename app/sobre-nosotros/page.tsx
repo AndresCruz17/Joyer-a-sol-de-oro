@@ -43,13 +43,13 @@ export default function SobreNosotrosPage() {
         <div className="absolute inset-0 z-0 opacity-20 pointer-events-none bg-gradient-to-b from-amber-500/10 via-transparent to-transparent"></div>
         <div className="max-w-3xl mx-auto relative z-10">
           <span className="text-xs font-mono text-amber-400 uppercase tracking-widest block mb-3">
-            Tradición & Excelencia // Oro Nacional 18K
+            Tradición & Excelencia // Oro Nacional & Italiano 18K
           </span>
           <h1 className="font-serif text-4xl sm:text-6xl font-light text-stone-100 mb-6">
             Nuestra <span className="italic text-amber-400">Historia</span>
           </h1>
           <p className="text-stone-300 font-light leading-relaxed text-base sm:text-lg">
-            En <strong className="text-amber-300 font-normal">Sol de Oro Joyería & Compraventa</strong>, transformamos el metal más noble en símbolos de elegancia permanente, confianza y valor auténtico para nuestros clientes.
+            En <strong className="text-amber-300 font-normal">Sol de Oro Joyería & Compraventa</strong>, transformamos el metal más noble en símbolos de elegancia permanente, confianza y valor auténtico a través de nuestras líneas de <strong className="text-stone-100 font-normal">Oro Nacional</strong> y <strong className="text-stone-100 font-normal">Oro Italiano 18K Ley 750</strong>.
           </p>
         </div>
       </header>
@@ -66,10 +66,10 @@ export default function SobreNosotrosPage() {
               Pasión por la orfebrería de alta pureza
             </h2>
             <p className="text-sm text-stone-300 font-light leading-relaxed">
-              Ubicados en el corazón de <strong className="text-stone-100 font-medium">El Remolino, Taminango, Nariño</strong>, nos consolidamos como un referente regional en el comercio y elaboración de piezas exclusivas en <strong className="text-amber-300 font-medium">Oro de 18 Kilates Ley 750</strong>.
+              Ubicados en el corazón de <strong className="text-stone-100 font-medium">El Remolino, Taminango, Nariño</strong>, nos consolidamos como un referente regional en el comercio, importación y elaboración de piezas exclusivas en <strong className="text-amber-300 font-medium">Oro Nacional y Oro Italiano de 18 Kilates Ley 750</strong>.
             </p>
             <p className="text-sm text-stone-400 font-light leading-relaxed">
-              Nuestra misión es ofrecer una experiencia transparente, tanto para quienes buscan perpetuar momentos inolvidables a través de una joya fina, como para quienes desean valorar y vender su oro con avalúos justos y pago inmediato.
+              Nuestra misión es ofrecer una experiencia transparente, tanto para quienes buscan perpetuar momentos inolvidables a través de una joya fina (artesanal o de diseño europeo), como para quienes desean valorar y vender su oro con avalúos justos y pago inmediato.
             </p>
           </div>
 

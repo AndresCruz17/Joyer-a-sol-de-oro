@@ -111,7 +111,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
         `🏷️ *Colección:* ${categoryName}\n` +
         `⚖️ *Peso aprox:* ${weightText}\n` +
         `💰 *Precio catálogo:* ${priceText}\n` +
-        `👑 *Material:* Oro Nacional 18K\n` +
+        `👑 *Material:* Oro 18K Ley 750 (Nacional / Italiano)\n` +
         (imageUrl ? `\n🖼️ *Ver Foto:* ${imageUrl}\n\n` : '\n') +
         `Hola, quisiera confirmar disponibilidad, tiempo de entrega y métodos de pago para esta pieza. ¡Muchas gracias!`;
 
