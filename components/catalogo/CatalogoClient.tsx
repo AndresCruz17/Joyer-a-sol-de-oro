@@ -5,6 +5,8 @@ import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 import { getWhatsAppUrl } from '@/lib/config';
+import NeonSparkles from '@/components/ui/NeonSparkles';
+
 
 export interface Category {
   id: string;
@@ -128,14 +130,15 @@ function CatalogoContent({ initialCategories, initialProducts }: CatalogoClientP
         </div>
       </nav>
 
-      {/* BANNER PRINCIPAL */}
-      <header className="py-12 sm:py-16 px-6 text-center border-b border-stone-800/80 bg-gradient-to-b from-stone-900/40 to-stone-950">
-        <div className="max-w-3xl mx-auto">
+      {/* BANNER PRINCIPAL CON DESTELLOS NEÓN */}
+      <header className="relative py-12 sm:py-16 px-6 text-center border-b border-stone-800/80 bg-gradient-to-b from-stone-900/40 to-stone-950 overflow-hidden">
+        <NeonSparkles />
+        <div className="relative z-10 max-w-3xl mx-auto">
           <span className="text-xs font-display text-amber-400 uppercase tracking-widest block mb-3">
             Colección Completa // Oro Nacional e Italiano 18K
           </span>
-          <h1 className="font-serif text-3xl sm:text-5xl font-light text-stone-100 tracking-widest mb-4">
-            Catálogo de <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500">Alta Joyería</span>
+          <h1 className="font-serif text-3xl sm:text-5xl font-light text-stone-100 tracking-widest mb-4 drop-shadow-lg">
+            Catálogo de <span className="italic animate-shimmer-text drop-shadow-[0_0_20px_rgba(245,158,11,0.4)]">Alta Joyería</span>
           </h1>
           <p className="text-stone-400 text-sm font-sans font-light leading-relaxed">
             Explora todas nuestras piezas garantizadas de por vida en pureza de metal.
@@ -154,12 +157,12 @@ function CatalogoContent({ initialCategories, initialProducts }: CatalogoClientP
               placeholder="Buscar por anillo, cadena, peso..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-stone-900 border border-stone-800 rounded-full px-5 py-2.5 text-xs font-sans text-stone-100 placeholder-stone-500 focus:outline-none focus:border-amber-500/60 transition-all"
+              className="glass-input pl-5 pr-10 text-xs font-sans placeholder-stone-500"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-display text-stone-500 hover:text-stone-300"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-display text-stone-400 hover:text-amber-300 transition-colors cursor-pointer"
               >
                 ✕
               </button>
@@ -168,11 +171,11 @@ function CatalogoContent({ initialCategories, initialProducts }: CatalogoClientP
 
           {/* Selector de Orden */}
           <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
-            <span className="text-[11px] font-display text-stone-500 uppercase tracking-wider shrink-0">Ordenar:</span>
+            <span className="text-[11px] font-display text-stone-400 uppercase tracking-wider shrink-0">Ordenar:</span>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as 'newest' | 'price-asc' | 'price-desc')}
-              className="bg-stone-900 border border-stone-800 text-xs font-display text-stone-300 rounded-xl px-3 py-2 focus:outline-none focus:border-amber-500/60"
+              className="glass-input text-xs font-display !py-2.5 !w-auto cursor-pointer"
             >
               <option value="newest">Más Recientes</option>
               <option value="price-asc">Precio: Menor a Mayor</option>

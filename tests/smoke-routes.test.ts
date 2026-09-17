@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getCategories, getAllActiveProducts, getProductById, getProductsByCategorySlug } from '@/lib/supabase/queries';
+import { getCategories, getAllActiveProducts, getProductById, getProductsByCategorySlug, getActiveEvents } from '@/lib/supabase/queries';
 import { SITE_CONFIG } from '@/lib/config';
 import robots from '@/app/robots';
 import sitemap from '@/app/sitemap';
@@ -98,6 +98,29 @@ describe('9. Smoke Tests de Rutas Principales y Configuración de Producción', 
 
       expect(product?.name).toBe('Pulsera Eslabón');
       expect(categoryProducts).toHaveLength(1);
+    });
+  });
+
+  describe('Smoke Test de Consultas de Eventos', () => {
+    it('getActiveEvents debe devolver un array (vacío o con datos)', async () => {
+      const { createClient } = await import('@/lib/supabase/server');
+      (createClient as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
+        from: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          order: vi.fn().mockResolvedValue({
+            data: [
+              { id: 'evt-1', title: 'Exhibición Navidad', is_active: true, event_date: '2026-12-20T18:00:00Z' },
+            ],
+            error: null,
+          }),
+        }),
+      });
+
+      const events = await getActiveEvents();
+      expect(Array.isArray(events)).toBe(true);
+      expect(events).toHaveLength(1);
+      expect(events[0].title).toBe('Exhibición Navidad');
     });
   });
 });

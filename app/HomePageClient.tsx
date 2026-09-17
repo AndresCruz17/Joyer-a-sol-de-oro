@@ -5,6 +5,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import { SITE_CONFIG } from '@/lib/config';
+import NeonSparkles from '@/components/ui/NeonSparkles';
+
 
 const CONFIG = {
     url: SITE_CONFIG.url,
@@ -275,6 +277,20 @@ export default function HomePageClient({
                 }}
             />
 
+            {/* LUZ AMBIENTAL DINÁMICA QUE SIGUE EL CURSOR */}
+            {isDesktop && (
+                <div
+                    className="fixed pointer-events-none z-30 transition-opacity duration-300 rounded-full blur-3xl opacity-35 mix-blend-screen"
+                    style={{
+                        left: cursorPos.x - 175,
+                        top: cursorPos.y - 175,
+                        width: 350,
+                        height: 350,
+                        background: 'radial-gradient(circle, rgba(245, 158, 11, 0.22) 0%, rgba(217, 119, 6, 0.08) 50%, transparent 80%)',
+                    }}
+                />
+            )}
+
             {/* CINTA SUPERIOR INFORMATIVA CON ANIMACIÓN CONTINUA */}
             <div className="bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-500 text-stone-950 text-[11px] font-display font-semibold tracking-wider py-2 overflow-hidden relative z-50 shadow-md">
                 <div className="animate-marquee whitespace-nowrap flex items-center gap-12">
@@ -310,23 +326,33 @@ export default function HomePageClient({
             <nav className="border-b border-stone-800/80 bg-stone-950/90 backdrop-blur-md sticky top-0 z-40 px-6 sm:px-8 lg:px-12 py-4 sm:py-5 transition-all">
                 <div className="max-w-7xl mx-auto flex items-center justify-between gap-6">
 
-                    {/* LOGO */}
+                    {/* LOGO CON AURA RADIANTE, DESTELLO SHINE Y LEVITACIÓN */}
                     <Link href="/" className="flex items-center gap-3.5 group shrink-0">
                         {CONFIG.logoUrl && (
-                            <img
-                                src={CONFIG.logoUrl}
-                                alt="Sol de Oro Joyería Logo"
-                                className="h-10 sm:h-12 w-auto object-contain transition-transform group-hover:scale-105"
-                                onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
-                            />
+                            <div className="relative animate-logo-levitate">
+                                {/* Resplandor de aura detrás del logo que se prende y apaga suavemente */}
+                                <div className="absolute -inset-2 bg-amber-400/25 rounded-full blur-md group-hover:bg-amber-400/40 group-hover:blur-lg transition-all animate-neon-pulse" />
+
+                                <div className="relative overflow-hidden rounded-xl">
+                                    <img
+                                        src={CONFIG.logoUrl}
+                                        alt="Sol de Oro Joyería Logo"
+                                        className="h-10 sm:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-110 drop-shadow-[0_0_12px_rgba(245,158,11,0.6)]"
+                                        onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                                    />
+                                    {/* Haz de luz de destello recorriendo el logo periódicamente */}
+                                    <div className="animate-shine-sweep absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none" />
+                                </div>
+                            </div>
                         )}
 
                         <div className="flex flex-col">
-                            <span className="font-serif italic text-2xl sm:text-3xl font-light tracking-widest text-amber-300 leading-tight">
+                            <span className="font-serif italic text-2xl sm:text-3xl font-light tracking-widest text-amber-300 leading-tight group-hover:text-amber-200 transition-colors animate-neon-flicker">
                                 Sol de Oro
                             </span>
-                            <span className="text-[10px] font-display tracking-widest text-stone-400 uppercase">
-                                Joyería & Compraventa
+                            <span className="text-[10px] font-display tracking-widest text-stone-400 uppercase flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-400/90 animate-ping inline-block" />
+                                <span>Joyería & Compraventa</span>
                             </span>
                         </div>
                     </Link>
@@ -392,6 +418,9 @@ export default function HomePageClient({
 
             {/* HERO SECTION */}
             <div className="relative border-b border-stone-800/60 overflow-hidden">
+                {/* Partículas y chispas doradas que se prenden y apagan */}
+                <NeonSparkles />
+
                 <div
                     className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20 scale-105 transition-transform duration-1000"
                     style={{ backgroundImage: `url(${CONFIG.storeHeroBgUrl})` }}
@@ -399,8 +428,8 @@ export default function HomePageClient({
                 <div className="absolute inset-0 bg-gradient-to-b from-stone-950/70 via-stone-950/90 to-stone-950" />
 
                 <section className="relative z-10 py-20 sm:py-32 px-6 text-center max-w-5xl mx-auto flex flex-col items-center">
-                    <div className="inline-flex flex-wrap items-center justify-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-display uppercase tracking-widest mb-8 backdrop-blur-md shadow-[0_0_20px_rgba(245,158,11,0.2)]">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <div className="inline-flex flex-wrap items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-stone-900/80 border border-amber-500/40 text-amber-300 text-xs font-display uppercase tracking-widest mb-8 backdrop-blur-md shadow-[0_0_25px_rgba(245,158,11,0.25)] hover:border-amber-400 transition-all">
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
                         <span>Oro 18K Ley 750</span>
                         <span className="text-amber-500 font-bold">•</span>
                         <span className="text-stone-200">Nacional (Macizo Orfebre)</span>
@@ -408,17 +437,22 @@ export default function HomePageClient({
                         <span className="text-stone-200">Italiano (Alta Precisión)</span>
                     </div>
 
-                    <h1 className="font-serif text-4xl sm:text-6xl md:text-7xl font-light text-stone-100 leading-tight tracking-widest mb-6">
+                    <h1 className="font-serif text-4xl sm:text-6xl md:text-7xl font-light text-stone-100 leading-tight tracking-widest mb-6 drop-shadow-2xl">
                         Compramos tu Oro & Creamos <br />
-                        <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500">
+                        <span className="italic animate-shimmer-text drop-shadow-[0_0_25px_rgba(245,158,11,0.45)]">
                             Piezas Exclusivas en 18K
                         </span>
                     </h1>
 
-                    <div className="h-10 flex items-center justify-center mb-8">
-                        <p className="text-amber-300/90 font-display text-sm sm:text-lg border-r-2 border-amber-400 pr-1 animate-pulse tracking-wider">
-                            {currentText}
-                        </p>
+                    {/* ANIMACIÓN DE ESCRITURA NEÓN TIPO TERMINAL LUXURY */}
+                    <div className="min-h-[56px] flex items-center justify-center mb-8">
+                        <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-stone-900/70 border border-amber-500/35 backdrop-blur-xl shadow-[0_0_25px_rgba(245,158,11,0.18)] group hover:border-amber-500/60 transition-all">
+                            <span className="text-amber-400 text-sm animate-sparkle">✦</span>
+                            <p className="text-transparent bg-clip-text bg-gradient-to-r from-amber-100 via-yellow-200 to-amber-400 font-display text-sm sm:text-lg tracking-wider font-medium">
+                                {currentText}
+                            </p>
+                            <span className="w-1 h-5 sm:h-6 bg-amber-400 rounded-full animate-cursor-blink inline-block shadow-[0_0_12px_#fbbf24]" />
+                        </div>
                     </div>
 
                     <p className="text-stone-300 text-sm sm:text-base font-light font-sans max-w-2xl leading-relaxed mb-10">
@@ -428,15 +462,18 @@ export default function HomePageClient({
                     <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                         <a
                             href="#cotizador"
-                            className="px-8 py-4 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-500 text-stone-950 font-semibold text-xs font-display tracking-wider hover:brightness-110 shadow-[0_0_30px_rgba(245,158,11,0.4)] transition-all duration-300 text-center uppercase"
+                            className="relative overflow-hidden group px-8 py-4 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-500 text-stone-950 font-bold text-xs font-display tracking-wider hover:brightness-110 shadow-[0_0_35px_rgba(245,158,11,0.45)] transition-all duration-300 text-center uppercase active:scale-95"
                         >
-                            Cotizar / Vender mi Oro en Vivo
+                            <span className="relative z-10">Cotizar / Vender mi Oro en Vivo</span>
+                            {/* Destello de luz sobre el botón */}
+                            <div className="animate-shine-sweep absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none" />
                         </a>
                         <Link
                             href="/catalogo"
-                            className="px-8 py-4 rounded-xl bg-stone-900/80 border border-stone-800 text-stone-200 hover:border-amber-500/60 hover:text-amber-300 font-display text-xs tracking-wider transition-all duration-300 text-center uppercase backdrop-blur-sm"
+                            className="px-8 py-4 rounded-xl bg-stone-900/80 border border-stone-800 text-stone-200 hover:border-amber-500/60 hover:text-amber-300 font-display text-xs tracking-wider transition-all duration-300 text-center uppercase backdrop-blur-sm active:scale-95"
                         >
                             Explorar Catálogo de Joyas
+
                         </Link>
                     </div>
                 </section>
@@ -1027,8 +1064,9 @@ export default function HomePageClient({
             {/* FOOTER */}
             <footer className="border-t border-stone-900 bg-stone-950 py-12 text-stone-500 text-xs text-center relative z-10">
                 <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <Link href="/" className="font-serif text-lg tracking-widest text-amber-300">
-                        Sol de Oro
+                    <Link href="/" className="font-serif text-xl tracking-widest text-amber-300 animate-neon-pulse flex items-center gap-2 hover:text-amber-200 transition-colors">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping inline-block" />
+                        <span>Sol de Oro</span>
                     </Link>
                     <p className="font-sans">© {new Date().getFullYear()} Sol de Oro Joyería & Compraventa. Todos los derechos reservados.</p>
                     <div className="flex items-center gap-4 text-stone-400 font-display text-xs tracking-wider">

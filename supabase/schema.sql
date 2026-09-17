@@ -200,6 +200,93 @@ create policy "Admins can delete from products bucket"
   using (bucket_id = 'products' and (select public.is_admin()));
 
 -- ==============================================================================
+-- 11. TABLA DE EVENTOS
+-- ==============================================================================
+create table if not exists public.events (
+    id uuid primary key default gen_random_uuid(),
+    title text not null,
+    slug text not null,
+    description text,
+    event_date timestamptz not null,
+    image_url text,
+    is_active boolean not null default true,
+    created_at timestamptz not null default now()
+);
+
+-- 12. ÍNDICES DE RENDIMIENTO PARA EVENTOS
+create index if not exists events_slug_idx on public.events (slug);
+create index if not exists events_active_date_idx on public.events (is_active, event_date desc);
+
+-- 13. HABILITAR RLS PARA EVENTOS
+alter table public.events enable row level security;
+
+-- 14. POLÍTICAS RLS PARA events
+-- Lectura: Público solo puede ver eventos activos, admins pueden ver todos
+drop policy if exists "Active events are viewable by everyone" on public.events;
+create policy "Active events are viewable by everyone"
+  on public.events
+  for select
+  using (is_active = true or (select public.is_admin()));
+
+-- Modificación (INSERT, UPDATE, DELETE) EXCLUSIVA para administradores
+drop policy if exists "Admins can insert events" on public.events;
+create policy "Admins can insert events"
+  on public.events
+  for insert
+  to authenticated
+  with check ((select public.is_admin()));
+
+drop policy if exists "Admins can update events" on public.events;
+create policy "Admins can update events"
+  on public.events
+  for update
+  to authenticated
+  using ((select public.is_admin()))
+  with check ((select public.is_admin()));
+
+drop policy if exists "Admins can delete events" on public.events;
+create policy "Admins can delete events"
+  on public.events
+  for delete
+  to authenticated
+  using ((select public.is_admin()));
+
+-- ==============================================================================
+-- 15. POLÍTICAS RLS PARA STORAGE (Bucket 'events')
+-- ==============================================================================
+insert into storage.buckets (id, name, public)
+values ('events', 'events', true)
+on conflict (id) do update set public = true;
+
+drop policy if exists "Public Access Events Bucket" on storage.objects;
+create policy "Public Access Events Bucket"
+  on storage.objects
+  for select
+  using (bucket_id = 'events');
+
+drop policy if exists "Admins can upload to events bucket" on storage.objects;
+create policy "Admins can upload to events bucket"
+  on storage.objects
+  for insert
+  to authenticated
+  with check (bucket_id = 'events' and (select public.is_admin()));
+
+drop policy if exists "Admins can update events bucket" on storage.objects;
+create policy "Admins can update events bucket"
+  on storage.objects
+  for update
+  to authenticated
+  using (bucket_id = 'events' and (select public.is_admin()))
+  with check (bucket_id = 'events' and (select public.is_admin()));
+
+drop policy if exists "Admins can delete from events bucket" on storage.objects;
+create policy "Admins can delete from events bucket"
+  on storage.objects
+  for delete
+  to authenticated
+  using (bucket_id = 'events' and (select public.is_admin()));
+
+-- ==============================================================================
 -- INSTRUCCIONES PARA ASIGNAR EL PRIMER ADMINISTRADOR:
 -- 1. Regístrate o crea el usuario en Supabase Dashboard > Authentication > Users.
 -- 2. Copia el 'User UID' (ej: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx').

@@ -83,14 +83,15 @@ function LoginForm() {
         {/* Formulario */}
         <form onSubmit={handleLogin} className="space-y-5">
           {error && (
-            <div className="p-3 text-xs rounded-lg bg-red-950/50 border border-red-800/50 text-red-300 text-center">
+            <div className="p-3 text-xs rounded-lg bg-red-950/50 border border-red-800/50 text-red-300 text-center backdrop-blur-md">
               {error}
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-mono text-stone-400 mb-1 uppercase tracking-wider">
-              Correo Electrónico
+            <label className="block text-xs font-mono text-stone-300 mb-1.5 uppercase tracking-wider flex items-center justify-between">
+              <span>Correo Electrónico</span>
+              <span className="text-[10px] text-stone-500 lowercase font-sans">autorizado</span>
             </label>
             <input
               type="email"
@@ -98,13 +99,14 @@ function LoginForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="admin@soldeoro.com"
-              className="w-full bg-stone-950/80 border border-stone-800 rounded-xl px-4 py-3 text-sm text-stone-100 focus:outline-none focus:border-amber-500 transition-colors"
+              className="glass-input"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-mono text-stone-400 mb-1 uppercase tracking-wider">
-              Contraseña
+            <label className="block text-xs font-mono text-stone-300 mb-1.5 uppercase tracking-wider flex items-center justify-between">
+              <span>Contraseña</span>
+              <span className="text-[10px] text-stone-500 lowercase font-sans">seguridad</span>
             </label>
             <input
               type="password"
@@ -112,14 +114,14 @@ function LoginForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full bg-stone-950/80 border border-stone-800 rounded-xl px-4 py-3 text-sm text-stone-100 focus:outline-none focus:border-amber-500 transition-colors"
+              className="glass-input font-mono"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 text-stone-950 font-bold text-sm hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-amber-500/20 disabled:opacity-50 cursor-pointer"
+            className="w-full py-4 rounded-xl bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 text-stone-950 font-bold text-sm uppercase tracking-wider hover:brightness-110 active:scale-[0.98] transition-all shadow-lg shadow-amber-500/20 disabled:opacity-50 cursor-pointer"
           >
             {loading ? 'Verificando autorización...' : 'Iniciar Sesión'}
           </button>

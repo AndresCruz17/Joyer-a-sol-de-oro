@@ -1,20 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { requireAdminUser } from '@/lib/supabase/auth';
 import Link from 'next/link';
-import DeleteProductButton from '@/components/admin/DeleteProductButton';
+import AdminProductTable, { DashboardProductItem } from '@/components/admin/AdminProductTable';
 
-interface DashboardProductItem {
-    id: string;
-    name: string;
-    price: number | null;
-    weight_grams: number | null;
-    image_url: string | null;
-    images: string[] | null;
-    is_active: boolean;
-    is_featured: boolean;
-    created_at: string;
-    categories: { name: string } | { name: string }[] | null;
-}
 
 export default async function AdminDashboardPage() {
     // 1. Exigir autenticación y rol de administrador en base de datos
@@ -31,6 +19,11 @@ export default async function AdminDashboardPage() {
     // Cargar total de categorías
     const { count: categoriesCount } = await supabase
         .from('categories')
+        .select('id', { count: 'exact', head: true });
+
+    // Cargar total de eventos
+    const { count: eventsCount } = await supabase
+        .from('events')
         .select('id', { count: 'exact', head: true });
 
     const productList: DashboardProductItem[] = (products as unknown as DashboardProductItem[]) || [];
@@ -51,6 +44,12 @@ export default async function AdminDashboardPage() {
 
                 <div className="flex items-center gap-3">
                     <Link
+                        href="/admin/eventos"
+                        className="px-4 py-2 rounded-xl border border-stone-800 bg-stone-900 text-amber-300 text-xs hover:border-amber-500 transition-colors"
+                    >
+                        Gestión Eventos
+                    </Link>
+                    <Link
                         href="/admin/categorias"
                         className="px-4 py-2 rounded-xl border border-stone-800 bg-stone-900 text-amber-300 text-xs hover:border-amber-500 transition-colors"
                     >
@@ -68,7 +67,7 @@ export default async function AdminDashboardPage() {
             </header>
 
             {/* Indicadores */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 my-8">
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-6 my-8">
                 <div className="p-6 rounded-2xl bg-stone-900/60 border border-stone-800">
                     <div className="text-xs font-mono text-stone-400 uppercase mb-2">Total Productos</div>
                     <div className="text-3xl font-serif text-amber-400">{productList.length}</div>
@@ -77,83 +76,31 @@ export default async function AdminDashboardPage() {
                     <div className="text-xs font-mono text-stone-400 uppercase mb-2">Categorías Activas</div>
                     <div className="text-3xl font-serif text-amber-400">{categoriesCount || 0}</div>
                 </div>
+                <div className="p-6 rounded-2xl bg-stone-900/60 border border-stone-800">
+                    <div className="text-xs font-mono text-stone-400 uppercase mb-2">Total Eventos</div>
+                    <div className="text-3xl font-serif text-amber-400">{eventsCount || 0}</div>
+                </div>
                 <div className="p-6 rounded-2xl bg-stone-900/60 border border-stone-800 flex flex-col justify-between">
                     <div className="text-xs font-mono text-stone-400 uppercase mb-2">Acciones Rápidas</div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
                         <Link
                             href="/admin/productos/nuevo"
                             className="px-4 py-2 rounded-lg bg-amber-500 text-stone-950 font-bold text-xs hover:bg-amber-400 transition-all"
                         >
-                            + Nuevo Producto
+                            + Producto
+                        </Link>
+                        <Link
+                            href="/admin/eventos"
+                            className="px-4 py-2 rounded-lg bg-amber-500/20 text-amber-400 font-bold text-xs hover:bg-amber-500/30 transition-all border border-amber-500/30"
+                        >
+                            + Evento
                         </Link>
                     </div>
                 </div>
             </div>
 
-            {/* Tabla de Productos */}
-            <section className="rounded-2xl bg-stone-900/40 border border-stone-800 overflow-hidden">
-                <div className="p-6 border-b border-stone-800 flex justify-between items-center">
-                    <h2 className="font-serif text-xl">Catálogo Registrado</h2>
-                </div>
-
-                {productList.length === 0 ? (
-                    <div className="p-12 text-center text-stone-500 text-sm">
-                        No hay productos registrados en la base de datos.
-                    </div>
-                ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left text-xs">
-                            <thead className="bg-stone-900/80 text-stone-400 uppercase font-mono tracking-wider">
-                                <tr>
-                                    <th className="p-4">Imagen</th>
-                                    <th className="p-4">Producto</th>
-                                    <th className="p-4">Categoría</th>
-                                    <th className="p-4">Precio</th>
-                                    <th className="p-4">Peso</th>
-                                    <th className="p-4 text-right">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-stone-800/60 text-stone-300">
-                                {productList.map((item) => {
-                                    const categoryName = (Array.isArray(item.categories)
-                                        ? item.categories[0]?.name
-                                        : item.categories?.name) || 'Sin categoría';
-
-                                    return (
-                                        <tr key={item.id} className="hover:bg-stone-900/50 transition-colors">
-                                            <td className="p-4">
-                                                {item.image_url ? (
-                                                    <img src={item.image_url} alt={item.name} className="w-10 h-10 object-cover rounded-lg border border-stone-800" />
-                                                ) : (
-                                                    <div className="w-10 h-10 bg-stone-950 border border-stone-800 rounded-lg flex items-center justify-center text-[9px] text-stone-600">N/A</div>
-                                                )}
-                                            </td>
-                                            <td className="p-4 font-semibold text-stone-100">{item.name}</td>
-                                            <td className="p-4">{categoryName}</td>
-                                            <td className="p-4 text-amber-400 font-mono">${item.price?.toLocaleString('es-CO')}</td>
-                                            <td className="p-4 font-mono">{item.weight_grams ? `${item.weight_grams}g` : 'N/A'}</td>
-                                            <td className="p-4 text-right space-x-2">
-                                                <Link
-                                                    href={`/admin/productos/editar/${item.id}`}
-                                                    className="inline-block px-3 py-1 rounded border border-stone-700 hover:border-amber-500 hover:text-amber-300 transition-colors"
-                                                >
-                                                    Editar
-                                                </Link>
-                                                <DeleteProductButton
-                                                    id={item.id}
-                                                    name={item.name}
-                                                    imageUrl={item.image_url}
-                                                    images={item.images}
-                                                />
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
-            </section>
+            {/* Tabla de Productos con Buscador Interactivo */}
+            <AdminProductTable initialProducts={productList} />
 
         </div>
     );

@@ -138,3 +138,43 @@ export async function getRelatedActiveProducts(categoryId: string, excludeProduc
 
   return data;
 }
+
+/**
+ * Obtiene todos los eventos activos ordenados por fecha del evento (más próximos primero)
+ */
+export async function getActiveEvents() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('events')
+    .select('id, title, slug, description, event_date, image_url, is_active, created_at')
+    .eq('is_active', true)
+    .order('event_date', { ascending: true });
+
+  if (error) {
+    console.error('Error al obtener eventos activos:', error);
+    return [];
+  }
+
+  return data;
+}
+
+/**
+ * Obtiene los próximos eventos activos (fecha futura) con límite opcional
+ */
+export async function getUpcomingEvents(limit = 3) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('events')
+    .select('id, title, slug, description, event_date, image_url')
+    .eq('is_active', true)
+    .gte('event_date', new Date().toISOString())
+    .order('event_date', { ascending: true })
+    .limit(limit);
+
+  if (error) {
+    console.error('Error al obtener próximos eventos:', error);
+    return [];
+  }
+
+  return data;
+}

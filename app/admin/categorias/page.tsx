@@ -214,16 +214,22 @@ export default function AdminCategoriasPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
           {/* Formulario (Crear / Editar) */}
-          <form onSubmit={handleSubmit} className="bg-stone-900/50 border border-stone-800 p-6 rounded-2xl space-y-4 h-fit backdrop-blur-md">
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="font-serif text-lg text-amber-300">
-                {editingCategory ? 'Editar Categoría' : 'Nueva Categoría'}
-              </h2>
+          <form onSubmit={handleSubmit} className="bg-stone-900/60 border border-stone-800/80 p-6 sm:p-7 rounded-2xl space-y-5 h-fit backdrop-blur-xl shadow-2xl relative overflow-hidden">
+            {/* Brillo ambiental dorado en la esquina del formulario */}
+            <div className="absolute -top-12 -right-12 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
+
+            <div className="flex items-center justify-between pb-2 border-b border-stone-800/70">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                <h2 className="font-serif text-lg text-amber-300">
+                  {editingCategory ? 'Editar Categoría' : 'Nueva Categoría'}
+                </h2>
+              </div>
               {editingCategory && (
                 <button
                   type="button"
                   onClick={handleCancelEdit}
-                  className="text-[10px] font-mono text-stone-400 hover:text-stone-200 underline cursor-pointer"
+                  className="text-xs font-mono text-amber-400/80 hover:text-amber-300 underline cursor-pointer transition-colors"
                 >
                   Cancelar Edición
                 </button>
@@ -231,44 +237,51 @@ export default function AdminCategoriasPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-mono uppercase text-stone-400 mb-1">Nombre *</label>
+              <label className="block text-xs font-mono uppercase text-stone-300 mb-1.5 tracking-wider flex items-center justify-between">
+                <span>Nombre de Categoría *</span>
+                <span className="text-[10px] text-stone-500 lowercase font-sans">obligatorio</span>
+              </label>
               <input
                 type="text"
                 required
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Ej. Anillos de Compromiso"
-                className="w-full bg-stone-950 border border-stone-800 rounded-xl p-3 text-sm focus:outline-none focus:border-amber-500"
+                className="glass-input font-sans"
               />
             </div>
 
             {editingCategory && (
               <div>
-                <label className="block text-xs font-mono uppercase text-stone-500 mb-1">
+                <label className="block text-xs font-mono uppercase text-stone-400 mb-1.5 tracking-wider">
                   Slug / Enlace permanente
                 </label>
-                <div className="text-xs font-mono text-amber-400 bg-stone-950 px-3 py-2 rounded-xl border border-stone-800">
-                  /categoria/{editingCategory.slug}
+                <div className="text-xs font-mono text-amber-400 bg-stone-950/70 px-4 py-3 rounded-xl border border-stone-800/90 shadow-inner flex items-center gap-2">
+                  <span className="text-stone-500">🔗</span>
+                  <span className="truncate">/categoria/{editingCategory.slug}</span>
                 </div>
               </div>
             )}
 
             <div>
-              <label className="block text-xs font-mono uppercase text-stone-400 mb-1">
-                {editingCategory ? 'Cambiar Imagen (JPG, PNG, WEBP, AVIF - Máx. 5MB)' : 'Imagen de Portada (Máx. 5MB)'}
+              <label className="block text-xs font-mono uppercase text-stone-300 mb-1.5 tracking-wider">
+                {editingCategory ? 'Cambiar Imagen (JPG, PNG, WEBP - Máx. 5MB)' : 'Imagen de Portada (Máx. 5MB)'}
               </label>
 
               {/* Vista previa de imagen actual o nueva seleccionada */}
               {(previewUrl || editingCategory?.image_url) && (
-                <div className="mb-3 flex items-center gap-3">
+                <div className="mb-3 p-3 bg-stone-950/70 border border-stone-800/80 rounded-xl flex items-center gap-3 backdrop-blur-md">
                   <img
                     src={previewUrl || editingCategory?.image_url || ''}
                     alt="Vista previa"
-                    className="w-12 h-12 object-cover rounded-lg border border-stone-800"
+                    className="w-14 h-14 object-cover rounded-lg border border-amber-500/40 shadow-md"
                   />
-                  <span className="text-xs text-stone-400">
-                    {previewUrl ? 'Nueva seleccionada' : 'Imagen actual'}
-                  </span>
+                  <div className="text-xs">
+                    <span className="text-amber-300 font-medium block">
+                      {previewUrl ? '✨ Nueva seleccionada' : '📷 Imagen actual en servidor'}
+                    </span>
+                    <span className="text-stone-500 text-[11px]">Se optimizará a formato WebP</span>
+                  </div>
                 </div>
               )}
 
@@ -276,26 +289,28 @@ export default function AdminCategoriasPage() {
                 type="file"
                 accept="image/jpeg,image/png,image/webp,image/avif"
                 onChange={handleImageChange}
-                className="w-full text-xs text-stone-400 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-amber-500/10 file:text-amber-400 hover:file:bg-amber-500/20 border border-stone-800 rounded-xl p-2 bg-stone-950 cursor-pointer"
+                className="glass-file-input"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-mono uppercase text-stone-400 mb-1">Descripción</label>
+              <label className="block text-xs font-mono uppercase text-stone-300 mb-1.5 tracking-wider">
+                Descripción
+              </label>
               <textarea
                 rows={3}
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Breve reseña de la colección..."
-                className="w-full bg-stone-950 border border-stone-800 rounded-xl p-3 text-sm focus:outline-none focus:border-amber-500"
+                placeholder="Breve reseña de la colección o tipo de piezas..."
+                className="glass-input resize-none font-sans"
               />
             </div>
 
-            <div className="pt-2 flex gap-2">
+            <div className="pt-2">
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 text-stone-950 font-bold text-xs hover:brightness-110 transition-all disabled:opacity-50 cursor-pointer"
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 text-stone-950 font-bold text-xs uppercase tracking-wider hover:brightness-110 active:scale-[0.98] transition-all shadow-lg shadow-amber-500/20 disabled:opacity-50 cursor-pointer"
               >
                 {loading
                   ? 'Guardando...'
