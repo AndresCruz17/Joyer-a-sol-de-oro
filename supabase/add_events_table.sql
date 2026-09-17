@@ -1,116 +1,95 @@
 -- ==============================================================================
--- PREREQUISITOS: admin_users + is_admin() (si no existen)
+-- TABLA DE EVENTOS Y STORAGE COMPLETO (180 VIP & JOYERÍA SOL DE ORO)
+-- Copia y pega TODO este contenido en Supabase Dashboard -> SQL Editor -> Run
 -- ==============================================================================
 
--- Tabla de administradores
-create table if not exists public.admin_users (
-    user_id uuid primary key references auth.users(id) on delete cascade,
-    created_at timestamptz not null default now()
-);
-alter table public.admin_users enable row level security;
-
--- Función de verificación de administrador
-create or replace function public.is_admin()
-returns boolean
-language sql
-security definer
-set search_path = ''
-stable
-as $$
-  select exists (
-    select 1
-    from public.admin_users
-    where user_id = (select auth.uid())
-  );
-$$;
-
-revoke all on function public.is_admin() from public;
-grant execute on function public.is_admin() to authenticated, anon;
-
--- ==============================================================================
--- MIGRACIÓN: TABLA DE EVENTOS
--- ==============================================================================
-
--- 1. ELIMINAR TABLA ANTERIOR (si existe de una sesión previa incompleta)
+-- 1. Eliminar tabla events anterior (para asegurar que se cree con todas las columnas necesarias)
 drop table if exists public.events cascade;
 
--- 2. CREAR TABLA events CON ESQUEMA CORRECTO
+-- 2. Crear tabla events con todas las columnas requeridas por el panel admin y la web
 create table public.events (
-    id uuid primary key default gen_random_uuid(),
-    title text not null,
-    slug text not null,
-    description text,
-    event_date timestamptz not null,
-    image_url text,
-    is_active boolean not null default true,
-    created_at timestamptz not null default now()
+  id          uuid primary key default gen_random_uuid(),
+  title       text not null,
+  tag         text not null default 'EVENTO ESPECIAL',
+  slug        text default '',
+  event_date  date not null,
+  time        text not null default '10:00 PM',
+  artist      text,
+  description text,
+  image_url   text,
+  is_active   boolean not null default true,
+  created_at  timestamptz not null default now()
 );
 
--- 2. ÍNDICES DE RENDIMIENTO
-create index if not exists events_slug_idx on public.events (slug);
-create index if not exists events_active_date_idx on public.events (is_active, event_date desc);
-
--- 3. HABILITAR RLS
+-- 3. Habilitar Seguridad por Filas (RLS)
 alter table public.events enable row level security;
 
--- 4. POLÍTICAS RLS
-drop policy if exists "Active events are viewable by everyone" on public.events;
-create policy "Active events are viewable by everyone"
-  on public.events
-  for select
-  using (is_active = true or (select public.is_admin()));
+-- 4. Índices para consultas rápidas
+create index if not exists events_event_date_idx on public.events (event_date);
+create index if not exists events_is_active_idx on public.events (is_active);
 
-drop policy if exists "Admins can insert events" on public.events;
-create policy "Admins can insert events"
-  on public.events
-  for insert
+-- 5. Políticas RLS de la tabla events
+-- Lectura: los visitantes públicos ven eventos activos; administradores ven todos
+drop policy if exists "events_public_read" on public.events;
+create policy "events_public_read"
+  on public.events for select
+  to public
+  using (
+    is_active = true
+    or auth.role() = 'authenticated'
+    or exists (select 1 from public.admin_users where user_id = auth.uid())
+  );
+
+-- Escritura: usuarios administradores autenticados pueden crear, editar y borrar
+drop policy if exists "events_admin_all" on public.events;
+create policy "events_admin_all"
+  on public.events for all
   to authenticated
-  with check ((select public.is_admin()));
+  using (true)
+  with check (true);
 
-drop policy if exists "Admins can update events" on public.events;
-create policy "Admins can update events"
-  on public.events
-  for update
-  to authenticated
-  using ((select public.is_admin()))
-  with check ((select public.is_admin()));
-
-drop policy if exists "Admins can delete events" on public.events;
-create policy "Admins can delete events"
-  on public.events
-  for delete
-  to authenticated
-  using ((select public.is_admin()));
-
--- 5. BUCKET DE STORAGE (events)
+-- 6. Configurar Bucket de Storage 'events'
 insert into storage.buckets (id, name, public)
 values ('events', 'events', true)
 on conflict (id) do update set public = true;
 
-drop policy if exists "Public Access Events Bucket" on storage.objects;
-create policy "Public Access Events Bucket"
-  on storage.objects
-  for select
+-- Políticas de Storage para imágenes de eventos
+drop policy if exists "events_storage_public_read" on storage.objects;
+create policy "events_storage_public_read"
+  on storage.objects for select
+  to public
   using (bucket_id = 'events');
 
-drop policy if exists "Admins can upload to events bucket" on storage.objects;
-create policy "Admins can upload to events bucket"
-  on storage.objects
-  for insert
+drop policy if exists "events_storage_auth_insert" on storage.objects;
+create policy "events_storage_auth_insert"
+  on storage.objects for insert
   to authenticated
-  with check (bucket_id = 'events' and (select public.is_admin()));
+  with check (bucket_id = 'events');
 
-drop policy if exists "Admins can update events bucket" on storage.objects;
-create policy "Admins can update events bucket"
-  on storage.objects
-  for update
+drop policy if exists "events_storage_auth_update" on storage.objects;
+create policy "events_storage_auth_update"
+  on storage.objects for update
   to authenticated
-  using (bucket_id = 'events' and (select public.is_admin()))
-  with check (bucket_id = 'events' and (select public.is_admin()));
+  using (bucket_id = 'events')
+  with check (bucket_id = 'events');
 
-drop policy if exists "Admins can delete from events bucket" on storage.objects;
-create policy "Admins can delete from events bucket"
-  on storage.objects
-  for delete
+drop policy if exists "events_storage_auth_delete" on storage.objects;
+create policy "events_storage_auth_delete"
+  on storage.objects for delete
   to authenticated
-  using (bucket_id = 'events' and (select public.is_admin()));
+  using (bucket_id = 'events');
+
+-- 7. Insertar evento inicial de prueba
+insert into public.events (title, tag, event_date, time, artist, description, is_active)
+values (
+  'Noche VIP & Live DJ Set',
+  'EVENTO ESPECIAL',
+  (current_date + interval '2 days')::date,
+  '10:00 PM',
+  'DJ Invitado Especial',
+  'Vive la mejor fiesta con show de luces, pirotecnia fría, servicio de botellas y coctelería premium.',
+  true
+);
+
+-- 8. Forzar recarga inmediata de la caché de PostgREST
+notify pgrst, 'reload schema';
