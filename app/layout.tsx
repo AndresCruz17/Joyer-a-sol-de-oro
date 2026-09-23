@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Bodoni_Moda, Montserrat, Inter } from 'next/font/google';
+import { Bodoni_Moda, Plus_Jakarta_Sans } from 'next/font/google';
 import WhatsAppFloat from '@/components/ui/WhatsAppFloat';
 import './globals.css';
 
@@ -9,15 +9,9 @@ const bodoni = Bodoni_Moda({
   display: 'swap',
 });
 
-const montserrat = Montserrat({
+const plusJakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
-  variable: '--font-montserrat',
-  display: 'swap',
-});
-
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
+  variable: '--font-jakarta',
   display: 'swap',
 });
 
@@ -35,7 +29,7 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${inter.variable} ${bodoni.variable} ${montserrat.variable}`}
+      className={`${plusJakarta.variable} ${bodoni.variable}`}
     >
       <body className="bg-stone-950 text-stone-100 font-sans antialiased selection:bg-amber-500 selection:text-stone-950">
         {children}

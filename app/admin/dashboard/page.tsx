@@ -1,20 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { requireAdminUser } from '@/lib/supabase/auth';
 import Link from 'next/link';
-import DeleteProductButton from '@/components/admin/DeleteProductButton';
-
-interface DashboardProductItem {
-    id: string;
-    name: string;
-    price: number | null;
-    weight_grams: number | null;
-    image_url: string | null;
-    images: string[] | null;
-    is_active: boolean;
-    is_featured: boolean;
-    created_at: string;
-    categories: { name: string } | { name: string }[] | null;
-}
+import AdminInventoryTable, { DashboardProductItem } from '@/components/admin/AdminInventoryTable';
 
 export default async function AdminDashboardPage() {
     // 1. Exigir autenticación y rol de administrador en base de datos
@@ -35,126 +22,147 @@ export default async function AdminDashboardPage() {
 
     const productList: DashboardProductItem[] = (products as unknown as DashboardProductItem[]) || [];
 
+    // Métricas calculadas
+    const totalFeatured = productList.filter((p) => p.is_featured).length;
+    const totalActive = productList.filter((p) => p.is_active).length;
+
     return (
-        <div className="min-h-screen bg-stone-950 text-stone-100 font-sans p-6 md:p-10">
+        <div className="min-h-screen bg-stone-950 text-stone-100 font-sans p-5 sm:p-8 lg:p-12 relative overflow-hidden">
+            {/* LUZ AMBIENTAL DE FONDO */}
+            <div className="absolute top-0 left-1/3 w-[600px] h-[350px] bg-amber-500/5 blur-[150px] pointer-events-none -z-10" />
 
-            {/* Encabezado */}
-            <header className="flex flex-col md:flex-row md:items-center justify-between pb-8 border-b border-stone-800 gap-4">
-                <div>
-                    <span className="text-xs font-mono text-amber-400 uppercase tracking-widest block mb-1">
-                        Panel de Control // Sol de Oro
-                    </span>
-                    <h1 className="font-serif text-3xl font-light">
-                        Gestión de <span className="italic text-amber-400">Inventario</span>
-                    </h1>
-                </div>
+            <div className="max-w-7xl mx-auto space-y-10">
 
-                <div className="flex items-center gap-3">
-                    <Link
-                        href="/admin/categorias"
-                        className="px-4 py-2 rounded-xl border border-stone-800 bg-stone-900 text-amber-300 text-xs hover:border-amber-500 transition-colors"
-                    >
-                        Gestión Categorías
-                    </Link>
-                    <form action="/api/auth/signout" method="post">
-                        <button
-                            type="submit"
-                            className="px-4 py-2 rounded-xl border border-stone-800 bg-stone-900 text-stone-300 text-xs hover:border-red-500/50 hover:text-red-400 transition-colors cursor-pointer"
+                {/* CABECERA DE MANDO ORFEBRE (ATELIER CONSOLE HEADER) */}
+                <header className="flex flex-col lg:flex-row lg:items-center justify-between pb-8 border-b border-white/10 gap-6">
+                    <div className="space-y-2">
+                        {/* Eyebrow Hallmark con baliza de estado */}
+                        <div className="inline-flex items-center gap-2.5 px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-[10px] font-mono uppercase tracking-widest backdrop-blur-sm">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_6px_#34d399]" />
+                            <span>Sesión Autenticada // Sol de Oro Ley 750</span>
+                        </div>
+
+                        <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-light text-stone-100 tracking-tight">
+                            Consola de <span className="italic font-normal text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-500">Inventario</span>
+                        </h1>
+
+                        <p className="text-stone-400 text-xs sm:text-sm font-sans font-light">
+                            Gestión central de joyas, avalúos, escaparate destacado y colecciones de la casa.
+                        </p>
+                    </div>
+
+                    {/* Toolbar de Navegación Rápida */}
+                    <div className="flex flex-wrap items-center gap-3">
+                        <Link
+                            href="/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-4 py-2 rounded-full border border-white/10 hover:border-amber-400/40 bg-stone-900/60 text-stone-300 hover:text-amber-300 text-xs font-sans tracking-wider uppercase transition-all backdrop-blur-xl flex items-center gap-2 active:scale-[0.98]"
                         >
-                            Cerrar Sesión
-                        </button>
-                    </form>
-                </div>
-            </header>
+                            <span>Ver Tienda</span>
+                            <span className="text-[10px]">↗</span>
+                        </Link>
 
-            {/* Indicadores */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 my-8">
-                <div className="p-6 rounded-2xl bg-stone-900/60 border border-stone-800">
-                    <div className="text-xs font-mono text-stone-400 uppercase mb-2">Total Productos</div>
-                    <div className="text-3xl font-serif text-amber-400">{productList.length}</div>
-                </div>
-                <div className="p-6 rounded-2xl bg-stone-900/60 border border-stone-800">
-                    <div className="text-xs font-mono text-stone-400 uppercase mb-2">Categorías Activas</div>
-                    <div className="text-3xl font-serif text-amber-400">{categoriesCount || 0}</div>
-                </div>
-                <div className="p-6 rounded-2xl bg-stone-900/60 border border-stone-800 flex flex-col justify-between">
-                    <div className="text-xs font-mono text-stone-400 uppercase mb-2">Acciones Rápidas</div>
-                    <div className="flex gap-2">
+                        <Link
+                            href="/admin/categorias"
+                            className="px-4 py-2 rounded-full border border-amber-500/30 hover:border-amber-400 bg-amber-500/10 text-amber-300 text-xs font-sans tracking-wider uppercase transition-all backdrop-blur-xl flex items-center gap-2 active:scale-[0.98]"
+                        >
+                            <span>Gestión de Categorías</span>
+                        </Link>
+
+                        <form action="/api/auth/signout" method="post">
+                            <button
+                                type="submit"
+                                className="px-4 py-2 rounded-full border border-white/10 hover:border-red-500/50 bg-stone-900/60 text-stone-400 hover:text-red-400 text-xs font-sans tracking-wider uppercase transition-all backdrop-blur-xl cursor-pointer active:scale-[0.98]"
+                            >
+                                Salir
+                            </button>
+                        </form>
+                    </div>
+                </header>
+
+                {/* TARJETAS DE MÉTRICAS KPI (GLASS CONSOLE) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+
+                    {/* KPI 1: Total Piezas */}
+                    <div className="p-6 rounded-3xl bg-stone-900/40 border border-white/10 backdrop-blur-xl flex flex-col justify-between space-y-3 relative overflow-hidden group hover:border-amber-400/30 transition-colors">
+                        <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-widest text-stone-400">
+                            <span>Piezas Totales</span>
+                            <span className="text-amber-400">💎</span>
+                        </div>
+                        <div className="font-serif text-3xl sm:text-4xl text-stone-100 font-light">
+                            {productList.length}
+                        </div>
+                        <div className="text-[11px] font-sans text-stone-400">
+                            <span className="text-emerald-400 font-medium">{totalActive}</span> joyas activas en catálogo
+                        </div>
+                    </div>
+
+                    {/* KPI 2: Joyas Destacadas */}
+                    <div className="p-6 rounded-3xl bg-stone-900/40 border border-white/10 backdrop-blur-xl flex flex-col justify-between space-y-3 relative overflow-hidden group hover:border-amber-400/30 transition-colors">
+                        <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-widest text-stone-400">
+                            <span>Destacadas en Home</span>
+                            <span className="text-amber-400">✦</span>
+                        </div>
+                        <div className="font-serif text-3xl sm:text-4xl text-amber-300 font-light">
+                            {totalFeatured}
+                        </div>
+                        <div className="text-[11px] font-sans text-stone-400">
+                            Exhibidas en escaparate principal
+                        </div>
+                    </div>
+
+                    {/* KPI 3: Categorías Activas */}
+                    <div className="p-6 rounded-3xl bg-stone-900/40 border border-white/10 backdrop-blur-xl flex flex-col justify-between space-y-3 relative overflow-hidden group hover:border-amber-400/30 transition-colors">
+                        <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-widest text-stone-400">
+                            <span>Colecciones</span>
+                            <span className="text-amber-400">◈</span>
+                        </div>
+                        <div className="font-serif text-3xl sm:text-4xl text-stone-100 font-light">
+                            {categoriesCount || 0}
+                        </div>
+                        <div className="text-[11px] font-sans text-stone-400">
+                            Líneas orfebres registradas
+                        </div>
+                    </div>
+
+                    {/* KPI 4 / CTA Rápido: Agregar Nueva Joya */}
+                    <div className="p-6 rounded-3xl bg-gradient-to-br from-amber-500/15 via-yellow-500/10 to-stone-900/40 border border-amber-500/30 backdrop-blur-xl flex flex-col justify-between space-y-4">
+                        <div className="text-[10px] font-mono uppercase tracking-widest text-amber-300 font-medium">
+                            Acción de Taller
+                        </div>
+                        <div className="text-xs text-stone-300 font-sans leading-relaxed">
+                            Carga una nueva pieza con optimización automática a WebP.
+                        </div>
                         <Link
                             href="/admin/productos/nuevo"
-                            className="px-4 py-2 rounded-lg bg-amber-500 text-stone-950 font-bold text-xs hover:bg-amber-400 transition-all"
+                            className="relative overflow-hidden w-full py-3 px-4 rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-stone-950 font-sans text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(245,158,11,0.3)] active:scale-[0.98] text-center"
                         >
-                            + Nuevo Producto
+                            <span className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none animate-liquid-sweep" />
+                            <span className="relative z-10">+ Nueva Joya</span>
+                            <span className="relative z-10">→</span>
                         </Link>
                     </div>
+
                 </div>
+
+                {/* TABLA INTERACTIVA DE INVENTARIO */}
+                <section className="space-y-4">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h2 className="font-serif text-2xl font-light text-stone-100">
+                                Catálogo Registrado
+                            </h2>
+                            <p className="text-xs text-stone-400 font-sans">
+                                Modifica precios, imágenes, peso en gramos o visibilidad en tiempo real.
+                            </p>
+                        </div>
+                    </div>
+
+                    <AdminInventoryTable products={productList} />
+                </section>
+
             </div>
-
-            {/* Tabla de Productos */}
-            <section className="rounded-2xl bg-stone-900/40 border border-stone-800 overflow-hidden">
-                <div className="p-6 border-b border-stone-800 flex justify-between items-center">
-                    <h2 className="font-serif text-xl">Catálogo Registrado</h2>
-                </div>
-
-                {productList.length === 0 ? (
-                    <div className="p-12 text-center text-stone-500 text-sm">
-                        No hay productos registrados en la base de datos.
-                    </div>
-                ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left text-xs">
-                            <thead className="bg-stone-900/80 text-stone-400 uppercase font-mono tracking-wider">
-                                <tr>
-                                    <th className="p-4">Imagen</th>
-                                    <th className="p-4">Producto</th>
-                                    <th className="p-4">Categoría</th>
-                                    <th className="p-4">Precio</th>
-                                    <th className="p-4">Peso</th>
-                                    <th className="p-4 text-right">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-stone-800/60 text-stone-300">
-                                {productList.map((item) => {
-                                    const categoryName = (Array.isArray(item.categories)
-                                        ? item.categories[0]?.name
-                                        : item.categories?.name) || 'Sin categoría';
-
-                                    return (
-                                        <tr key={item.id} className="hover:bg-stone-900/50 transition-colors">
-                                            <td className="p-4">
-                                                {item.image_url ? (
-                                                    <img src={item.image_url} alt={item.name} className="w-10 h-10 object-cover rounded-lg border border-stone-800" />
-                                                ) : (
-                                                    <div className="w-10 h-10 bg-stone-950 border border-stone-800 rounded-lg flex items-center justify-center text-[9px] text-stone-600">N/A</div>
-                                                )}
-                                            </td>
-                                            <td className="p-4 font-semibold text-stone-100">{item.name}</td>
-                                            <td className="p-4">{categoryName}</td>
-                                            <td className="p-4 text-amber-400 font-mono">${item.price?.toLocaleString('es-CO')}</td>
-                                            <td className="p-4 font-mono">{item.weight_grams ? `${item.weight_grams}g` : 'N/A'}</td>
-                                            <td className="p-4 text-right space-x-2">
-                                                <Link
-                                                    href={`/admin/productos/editar/${item.id}`}
-                                                    className="inline-block px-3 py-1 rounded border border-stone-700 hover:border-amber-500 hover:text-amber-300 transition-colors"
-                                                >
-                                                    Editar
-                                                </Link>
-                                                <DeleteProductButton
-                                                    id={item.id}
-                                                    name={item.name}
-                                                    imageUrl={item.image_url}
-                                                    images={item.images}
-                                                />
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
-            </section>
-
         </div>
     );
 }

@@ -53,7 +53,7 @@ export default function DeleteProductButton({ id, name, imageUrl, images }: Dele
         <button
             onClick={handleDelete}
             disabled={deleting}
-            className="px-3 py-1 rounded border border-red-900/60 bg-red-950/20 text-red-400 hover:bg-red-900/40 hover:border-red-500 transition-colors disabled:opacity-50"
+            className="px-3 py-1.5 rounded-xl border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:border-red-500/40 transition-all text-xs font-sans disabled:opacity-50 active:scale-[0.97] cursor-pointer"
         >
             {deleting ? 'Borrando...' : 'Eliminar'}
         </button>

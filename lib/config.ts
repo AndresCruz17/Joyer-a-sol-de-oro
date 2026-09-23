@@ -12,7 +12,7 @@ export const SITE_CONFIG = {
   address: 'Barrio Fatima',
   city: 'El Remolino, Taminango, Nariño',
   country: 'Colombia',
-  googleMapsUrl: 'https://maps.app.goo.gl/AHRoJkCtHsAfeBwz6',
+  googleMapsUrl: 'https://maps.app.goo.gl/757BvH8TdxXh43c86',
   facebookUrl: 'https://www.facebook.com/profile.php?id=61582655280439',
   instagramUrl: 'https://www.instagram.com/sol_de_oro_compraventa',
   tiktokUrl: 'https://www.tiktok.com/@compraventa_soldeoro',
