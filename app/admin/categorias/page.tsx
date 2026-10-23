@@ -9,6 +9,7 @@ import {
   deleteStorageFiles,
   uploadOptimizedImage,
 } from '@/lib/storage/image-utils';
+import { ArrowLeft, ArrowRight, ArrowUpRight, Sparkles, AlertTriangle, RefreshCw } from 'lucide-react';
 
 interface Category {
   id: string;
@@ -231,7 +232,9 @@ export default function AdminCategoriasPage() {
             href="/admin/dashboard"
             className="inline-flex items-center gap-2 text-xs font-sans tracking-widest text-stone-400 hover:text-amber-300 transition-colors uppercase group self-start sm:self-auto"
           >
-            <span className="w-5 h-5 rounded-full bg-white/5 border border-white/10 group-hover:border-amber-400/40 flex items-center justify-center text-[10px] group-hover:-translate-x-0.5 transition-all">←</span>
+            <span className="w-5 h-5 rounded-full bg-white/5 border border-white/10 group-hover:border-amber-400/40 flex items-center justify-center text-[10px] group-hover:-translate-x-0.5 transition-all">
+              <ArrowLeft className="w-3 h-3 text-stone-400 group-hover:text-amber-300" strokeWidth={1.5} />
+            </span>
             <span>Volver a la Consola</span>
           </Link>
         </div>
@@ -272,7 +275,7 @@ export default function AdminCategoriasPage() {
               
               <div className="flex items-center justify-between pb-3 border-b border-white/10">
                 <div className="flex items-center gap-2">
-                  <span className="text-amber-400 text-sm">✦</span>
+                  <Sparkles className="w-4 h-4 text-amber-400" strokeWidth={1.5} />
                   <h2 className="font-serif text-lg text-stone-100">
                     {editingCategory ? 'Modificar Colección' : 'Nueva Colección'}
                   </h2>
@@ -312,9 +315,10 @@ export default function AdminCategoriasPage() {
                     <Link
                       href={`/categoria/${editingCategory.slug}`}
                       target="_blank"
-                      className="text-[10px] font-sans text-stone-400 hover:text-amber-300 transition-colors uppercase tracking-wider"
+                      className="text-[10px] font-sans text-stone-400 hover:text-amber-300 transition-colors uppercase tracking-wider inline-flex items-center gap-1"
                     >
-                      Ver ↗
+                      <span>Ver</span>
+                      <ArrowUpRight className="w-3 h-3" strokeWidth={1.5} />
                     </Link>
                   </div>
                 </div>
@@ -388,7 +392,7 @@ export default function AdminCategoriasPage() {
                 ) : (
                   <>
                     <span>{editingCategory ? 'Guardar Cambios de Colección' : 'Publicar Nueva Colección'}</span>
-                    <span>→</span>
+                    <ArrowRight className="w-4 h-4 text-stone-950 inline-block ml-1" strokeWidth={2} />
                   </>
                 )}
               </button>
@@ -416,7 +420,7 @@ export default function AdminCategoriasPage() {
               ) : fetchError ? (
                 <div className="p-8 rounded-2xl bg-amber-500/5 border border-amber-500/20 text-center space-y-3">
                   <div className="w-10 h-10 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-300 text-sm">
-                    ✦
+                    <AlertTriangle className="w-4 h-4 text-amber-400" strokeWidth={1.5} />
                   </div>
                   <h3 className="text-xs font-serif text-amber-300 tracking-wide uppercase">
                     Inconveniente de Conexión con Supabase
@@ -430,7 +434,7 @@ export default function AdminCategoriasPage() {
                     className="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-stone-900 border border-white/10 hover:border-amber-400/40 text-amber-300 hover:text-amber-200 text-xs font-sans transition-all cursor-pointer active:scale-95"
                   >
                     <span>Reintentar Conexión</span>
-                    <span>↻</span>
+                    <RefreshCw className="w-3.5 h-3.5 text-amber-300" strokeWidth={1.5} />
                   </button>
                 </div>
               ) : categories.length === 0 ? (
@@ -466,10 +470,10 @@ export default function AdminCategoriasPage() {
                             <Link
                               href={`/categoria/${cat.slug}`}
                               target="_blank"
-                              className="text-stone-500 hover:text-amber-300 text-[11px] transition-colors"
+                              className="text-stone-500 hover:text-amber-300 text-[11px] transition-colors inline-flex items-center"
                               title="Ver en la web oficial"
                             >
-                              ↗
+                              <ArrowUpRight className="w-3.5 h-3.5" strokeWidth={1.5} />
                             </Link>
                           </div>
                           <span className="text-[10px] font-mono text-amber-400/80 block">

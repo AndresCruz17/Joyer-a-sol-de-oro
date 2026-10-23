@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { requireAdminUser } from '@/lib/supabase/auth';
 import Link from 'next/link';
 import AdminInventoryTable, { DashboardProductItem } from '@/components/admin/AdminInventoryTable';
+import { ArrowUpRight, ArrowRight, Gem, Sparkles, Crown, Plus } from 'lucide-react';
 
 export default async function AdminDashboardPage() {
     // 1. Exigir autenticación y rol de administrador en base de datos
@@ -57,10 +58,10 @@ export default async function AdminDashboardPage() {
                             href="/"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="px-4 py-2 rounded-full border border-white/10 hover:border-amber-400/40 bg-stone-900/60 text-stone-300 hover:text-amber-300 text-xs font-sans tracking-wider uppercase transition-all backdrop-blur-xl flex items-center gap-2 active:scale-[0.98]"
+                            className="px-4 py-2 rounded-full border border-white/10 hover:border-amber-400/40 bg-stone-900/60 text-stone-300 hover:text-amber-300 text-xs font-sans tracking-wider uppercase transition-all backdrop-blur-xl flex items-center gap-1.5 active:scale-[0.98] group"
                         >
                             <span>Ver Tienda</span>
-                            <span className="text-[10px]">↗</span>
+                            <ArrowUpRight className="w-3.5 h-3.5 text-stone-400 group-hover:text-amber-300" strokeWidth={1.5} />
                         </Link>
 
                         <Link
@@ -88,7 +89,7 @@ export default async function AdminDashboardPage() {
                     <div className="p-6 rounded-3xl bg-stone-900/40 border border-white/10 backdrop-blur-xl flex flex-col justify-between space-y-3 relative overflow-hidden group hover:border-amber-400/30 transition-colors">
                         <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-widest text-stone-400">
                             <span>Piezas Totales</span>
-                            <span className="text-amber-400">💎</span>
+                            <Gem className="w-4 h-4 text-amber-400" strokeWidth={1.5} />
                         </div>
                         <div className="font-serif text-3xl sm:text-4xl text-stone-100 font-light">
                             {productList.length}
@@ -102,7 +103,7 @@ export default async function AdminDashboardPage() {
                     <div className="p-6 rounded-3xl bg-stone-900/40 border border-white/10 backdrop-blur-xl flex flex-col justify-between space-y-3 relative overflow-hidden group hover:border-amber-400/30 transition-colors">
                         <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-widest text-stone-400">
                             <span>Destacadas en Home</span>
-                            <span className="text-amber-400">✦</span>
+                            <Sparkles className="w-4 h-4 text-amber-400" strokeWidth={1.5} />
                         </div>
                         <div className="font-serif text-3xl sm:text-4xl text-amber-300 font-light">
                             {totalFeatured}
@@ -116,7 +117,7 @@ export default async function AdminDashboardPage() {
                     <div className="p-6 rounded-3xl bg-stone-900/40 border border-white/10 backdrop-blur-xl flex flex-col justify-between space-y-3 relative overflow-hidden group hover:border-amber-400/30 transition-colors">
                         <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-widest text-stone-400">
                             <span>Colecciones</span>
-                            <span className="text-amber-400">◈</span>
+                            <Crown className="w-4 h-4 text-amber-400" strokeWidth={1.5} />
                         </div>
                         <div className="font-serif text-3xl sm:text-4xl text-stone-100 font-light">
                             {categoriesCount || 0}
@@ -139,8 +140,9 @@ export default async function AdminDashboardPage() {
                             className="relative overflow-hidden w-full py-3 px-4 rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-stone-950 font-sans text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(245,158,11,0.3)] active:scale-[0.98] text-center"
                         >
                             <span className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none animate-liquid-sweep" />
-                            <span className="relative z-10">+ Nueva Joya</span>
-                            <span className="relative z-10">→</span>
+                            <Plus className="w-3.5 h-3.5 text-stone-950 relative z-10" strokeWidth={2} />
+                            <span className="relative z-10">Nueva Joya</span>
+                            <ArrowRight className="w-3.5 h-3.5 text-stone-950 relative z-10" strokeWidth={2} />
                         </Link>
                     </div>
 

@@ -5,6 +5,7 @@ import type { Metadata } from 'next';
 import { cache } from 'react';
 import { getWhatsAppUrl, SITE_CONFIG } from '@/lib/config';
 import LuxuryNavbar from '@/components/ui/LuxuryNavbar';
+import { Gem, ShieldCheck, Scale, Truck, ArrowRight } from 'lucide-react';
 
 // REVALIDACIÓN INCREMENTAL (ISR) CADA 60 SEGUNDOS
 export const revalidate = 60;
@@ -13,7 +14,7 @@ interface PageProps {
   params: Promise<{ slug: string }> | { slug: string };
 }
 
-// 💡 OPTIMIZACIÓN: Función cacheada para compartir consulta entre Metadata y Page
+// OPTIMIZACIÓN: Función cacheada para compartir consulta entre Metadata y Page
 const getCategory = cache(async (slug: string) => {
   const supabase = await createClient();
   const { data: category, error } = await supabase
@@ -181,8 +182,8 @@ export default async function CategoryPage({ params }: PageProps) {
       <main className="max-w-7xl mx-auto px-6 py-12 sm:py-16">
         {productList.length === 0 ? (
           <div className="text-center py-20 border border-white/10 rounded-3xl bg-stone-900/30 max-w-md mx-auto p-8 space-y-4">
-            <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-stone-500 text-lg mx-auto">
-              💎
+            <div className="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto">
+              <Gem className="w-5 h-5 text-amber-400" strokeWidth={1.5} />
             </div>
             <h3 className="font-serif text-xl text-stone-200 font-light">Colección en Preparación</h3>
             <p className="text-xs text-stone-400 font-sans leading-relaxed">
@@ -199,9 +200,10 @@ export default async function CategoryPage({ params }: PageProps) {
                 href={getWhatsAppUrl(`Hola Sol de Oro, me gustaría encargar una pieza personalizada para la colección de ${category.name}.`)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-5 py-2.5 rounded-full bg-white/5 border border-white/10 text-stone-300 text-xs font-sans uppercase tracking-wider hover:text-amber-300 hover:border-white/20 transition-all"
+                className="px-5 py-2.5 rounded-full bg-white/5 border border-white/10 text-stone-300 text-xs font-sans uppercase tracking-wider hover:text-amber-300 hover:border-white/20 transition-all inline-flex items-center justify-center gap-1.5"
               >
-                Diseñar por Encargo →
+                <span>Diseñar por Encargo</span>
+                <ArrowRight className="w-3.5 h-3.5" strokeWidth={1.5} />
               </a>
             </div>
           </div>
@@ -213,13 +215,14 @@ export default async function CategoryPage({ params }: PageProps) {
               const itemImage = item.image_url || '';
 
               const whatsappText =
-                `✨ *COTIZACIÓN RÁPIDA // SOL DE ORO* ✨\n\n` +
-                `📌 *Joya:* ${item.name}\n` +
-                `🏷️ *Colección:* ${category.name}\n` +
-                `⚖️ *Peso aprox:* ${itemWeight}\n` +
-                `💰 *Precio catálogo:* ${itemPrice}\n` +
-                `👑 *Material:* Oro 18K Ley 750\n` +
-                (itemImage ? `\n🖼️ *Ver Foto:* ${itemImage}\n\n` : '\n') +
+                `*SOL DE ORO // ALTA JOYERÍA*\n` +
+                `Solicitud de cotización oficial\n\n` +
+                `• *Joya:* ${item.name}\n` +
+                `• *Colección:* ${category.name}\n` +
+                `• *Peso aprox:* ${itemWeight}\n` +
+                `• *Precio catálogo:* ${itemPrice}\n` +
+                `• *Material:* Oro 18K Ley 750\n` +
+                (itemImage ? `\n• *Ver Foto:* ${itemImage}\n\n` : '\n') +
                 `Hola, me interesa recibir más información sobre esta pieza de su colección.`;
 
               const whatsappUrl = getWhatsAppUrl(whatsappText);
@@ -303,7 +306,9 @@ export default async function CategoryPage({ params }: PageProps) {
         <section className="mt-20 pt-12 border-t border-white/10">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <div className="p-6 rounded-3xl bg-stone-900/40 border border-white/10 backdrop-blur-xl flex items-start gap-4">
-              <span className="text-2xl text-amber-400">🛡️</span>
+              <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-5 h-5 text-amber-400" strokeWidth={1.5} />
+              </div>
               <div>
                 <h4 className="font-serif text-base text-stone-100 mb-1">Garantía Perpetua</h4>
                 <p className="text-xs text-stone-400 leading-relaxed font-sans">
@@ -313,7 +318,9 @@ export default async function CategoryPage({ params }: PageProps) {
             </div>
 
             <div className="p-6 rounded-3xl bg-stone-900/40 border border-white/10 backdrop-blur-xl flex items-start gap-4">
-              <span className="text-2xl text-amber-400">⚖️</span>
+              <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
+                <Scale className="w-5 h-5 text-amber-400" strokeWidth={1.5} />
+              </div>
               <div>
                 <h4 className="font-serif text-base text-stone-100 mb-1">Balanza de Precisión</h4>
                 <p className="text-xs text-stone-400 leading-relaxed font-sans">
@@ -323,7 +330,9 @@ export default async function CategoryPage({ params }: PageProps) {
             </div>
 
             <div className="p-6 rounded-3xl bg-stone-900/40 border border-white/10 backdrop-blur-xl flex items-start gap-4">
-              <span className="text-2xl text-amber-400">📦</span>
+              <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
+                <Truck className="w-5 h-5 text-amber-400" strokeWidth={1.5} />
+              </div>
               <div>
                 <h4 className="font-serif text-base text-stone-100 mb-1">Envíos Asegurados</h4>
                 <p className="text-xs text-stone-400 leading-relaxed font-sans">

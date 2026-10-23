@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
+import { ArrowLeft, ArrowRight, Eye, EyeOff, ShieldCheck, AlertTriangle } from 'lucide-react';
 
 function LoginForm() {
   const [email, setEmail] = useState('');
@@ -75,7 +76,9 @@ function LoginForm() {
           href="/"
           className="inline-flex items-center gap-2 text-xs font-sans tracking-widest text-stone-400 hover:text-amber-300 transition-colors uppercase group"
         >
-          <span className="w-5 h-5 rounded-full bg-white/5 border border-white/10 group-hover:border-amber-400/40 flex items-center justify-center text-[10px] group-hover:-translate-x-0.5 transition-all">←</span>
+          <span className="w-5 h-5 rounded-full bg-white/5 border border-white/10 group-hover:border-amber-400/40 flex items-center justify-center text-[10px] group-hover:-translate-x-0.5 transition-all">
+            <ArrowLeft className="w-3 h-3 text-stone-400 group-hover:text-amber-300" strokeWidth={1.5} />
+          </span>
           <span>Volver a la Tienda</span>
         </Link>
       </div>
@@ -104,7 +107,7 @@ function LoginForm() {
           <form onSubmit={handleLogin} className="space-y-4">
             {error && (
               <div className="p-3.5 rounded-2xl bg-red-950/50 border border-red-500/30 text-red-200 text-xs text-center flex items-center justify-center gap-2 shadow-sm">
-                <span>⚠️</span>
+                <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" strokeWidth={1.5} />
                 <span>{error}</span>
               </div>
             )}
@@ -142,7 +145,11 @@ function LoginForm() {
                   className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-500 hover:text-stone-300 text-xs transition-colors p-1"
                   title={showPassword ? 'Ocultar contraseña' : 'Ver contraseña'}
                 >
-                  {showPassword ? '👁️' : '🔒'}
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4 text-stone-400 hover:text-stone-200" strokeWidth={1.5} />
+                  ) : (
+                    <Eye className="w-4 h-4 text-stone-400 hover:text-stone-200" strokeWidth={1.5} />
+                  )}
                 </button>
               </div>
             </div>
@@ -160,7 +167,7 @@ function LoginForm() {
               ) : (
                 <>
                   <span>Acceder a la Consola</span>
-                  <span>→</span>
+                  <ArrowRight className="w-4 h-4 text-stone-950 shrink-0" strokeWidth={2} />
                 </>
               )}
             </button>
@@ -168,7 +175,7 @@ function LoginForm() {
 
           {/* Sello de Seguridad */}
           <div className="pt-2 border-t border-white/10 flex items-center justify-center gap-2 text-[10px] font-sans text-stone-500 text-center">
-            <span>🛡️</span>
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" strokeWidth={1.5} />
             <span>Cifrado TLS 1.3 · Verificación de rol administrativo en Supabase RLS</span>
           </div>
 

@@ -3,6 +3,18 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import {
+    Gem,
+    Crown,
+    Sparkles,
+    Scale,
+    FlaskConical,
+    FileText,
+    ArrowRight,
+    ShieldCheck,
+    Coins,
+    Award
+} from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { SITE_CONFIG } from '@/lib/config';
 import HeroLuxuryShowcase from '@/components/home/HeroLuxuryShowcase';
@@ -401,7 +413,7 @@ export default function HomePageClient({
 
                                             <div className="inline-flex items-center gap-2 text-xs font-sans text-stone-300 group-hover:text-amber-300 group-hover:translate-x-1.5 transition-all tracking-wider uppercase">
                                                 <span>Ver Catálogo</span>
-                                                <span>→</span>
+                                                <ArrowRight className="w-3.5 h-3.5 text-stone-300 group-hover:text-amber-300" strokeWidth={1.5} />
                                             </div>
                                         </div>
                                     </Link>
@@ -443,7 +455,7 @@ export default function HomePageClient({
 
                                             <div className="inline-flex items-center gap-2 text-xs font-sans text-stone-300 group-hover:text-amber-300 group-hover:translate-x-1.5 transition-all tracking-wider uppercase">
                                                 <span>Ver Catálogo</span>
-                                                <span>→</span>
+                                                <ArrowRight className="w-3.5 h-3.5 text-stone-300 group-hover:text-amber-300" strokeWidth={1.5} />
                                             </div>
                                         </div>
                                     </Link>
@@ -503,7 +515,8 @@ export default function HomePageClient({
                                             >
                                                 <div className="flex items-center justify-between mb-1 sm:mb-2">
                                                     <span className="font-serif text-xs sm:text-base font-bold text-amber-300 flex items-center gap-1.5 sm:gap-2 tracking-wide">
-                                                        🇨🇴 Oro Nacional
+                                                        <ShieldCheck className="w-4 h-4 text-amber-400 inline-block shrink-0" strokeWidth={1.5} />
+                                                        Oro Nacional
                                                     </span>
                                                     {goldOrigin === 'nacional' && <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse shadow-[0_0_6px_#fbbf24]" />}
                                                 </div>
@@ -526,7 +539,8 @@ export default function HomePageClient({
                                             >
                                                 <div className="flex items-center justify-between mb-1 sm:mb-2">
                                                     <span className="font-serif text-xs sm:text-base font-bold text-amber-300 flex items-center gap-1.5 sm:gap-2 tracking-wide">
-                                                        🇮🇹 Oro Italiano
+                                                        <Award className="w-4 h-4 text-amber-400 inline-block shrink-0" strokeWidth={1.5} />
+                                                        Oro Italiano
                                                     </span>
                                                     {goldOrigin === 'italiano' && <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse shadow-[0_0_6px_#fbbf24]" />}
                                                 </div>
@@ -540,34 +554,37 @@ export default function HomePageClient({
                                         </div>
                                     </div>
 
-                                    {/* 2. TIPO DE SERVICIO (Segmentado en móvil, lista en desktop) */}
+                                    {/* 2. TIPO DE SERVICIO (Segmentado en móvil, lista en desktop con Iconos Lucide) */}
                                     <div>
                                         <label className="block text-[11px] sm:text-xs font-sans uppercase tracking-[0.2em] text-stone-300 mb-2.5 font-medium">
                                             2. Tipo de Servicio:
                                         </label>
                                         <div className="grid grid-cols-3 sm:grid-cols-1 gap-1.5 sm:gap-2.5">
                                             {[
-                                                { id: 'vender_mi_oro', shortLabel: 'Vender Oro', fullLabel: 'Vender mi Oro / Avalúo de Piezas', icon: '✦' },
-                                                { id: 'fabricar_joya', shortLabel: 'Fabricar', fullLabel: 'Fabricar Joya Personalizada 18K', icon: '◇' },
-                                                { id: 'comprar_joya', shortLabel: 'Comprar', fullLabel: 'Comprar Joya del Catálogo', icon: '◈' },
-                                            ].map((s) => (
-                                                <button
-                                                    key={s.id}
-                                                    type="button"
-                                                    onClick={() => setCalcService(s.id as any)}
-                                                    className={`py-2.5 sm:py-3 px-2 sm:px-4 rounded-xl text-xs font-sans text-center sm:text-left border transition-all duration-200 flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-1 active:scale-[0.98] ${
-                                                        calcService === s.id
-                                                            ? 'bg-amber-500/20 border-amber-400 text-amber-300 font-semibold shadow-[0_0_15px_rgba(245,158,11,0.2)]'
-                                                            : 'bg-stone-900/60 border-white/10 text-stone-300 hover:border-amber-400/30'
-                                                    }`}
-                                                >
-                                                    <span className="tracking-wider uppercase text-[10px] sm:text-xs">
-                                                        <span className="sm:hidden">{s.shortLabel}</span>
-                                                        <span className="hidden sm:inline">{s.fullLabel}</span>
-                                                    </span>
-                                                    <span className="text-amber-400 text-xs sm:text-sm">{s.icon}</span>
-                                                </button>
-                                            ))}
+                                                { id: 'vender_mi_oro', shortLabel: 'Vender Oro', fullLabel: 'Vender mi Oro / Avalúo de Piezas', icon: Coins },
+                                                { id: 'fabricar_joya', shortLabel: 'Fabricar', fullLabel: 'Fabricar Joya Personalizada 18K', icon: Crown },
+                                                { id: 'comprar_joya', shortLabel: 'Comprar', fullLabel: 'Comprar Joya del Catálogo', icon: Gem },
+                                            ].map((s) => {
+                                                const ServiceIcon = s.icon;
+                                                return (
+                                                    <button
+                                                        key={s.id}
+                                                        type="button"
+                                                        onClick={() => setCalcService(s.id as any)}
+                                                        className={`py-2.5 sm:py-3 px-2 sm:px-4 rounded-xl text-xs font-sans text-center sm:text-left border transition-all duration-200 flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-1 active:scale-[0.98] ${
+                                                            calcService === s.id
+                                                                ? 'bg-amber-500/20 border-amber-400 text-amber-300 font-semibold shadow-[0_0_15px_rgba(245,158,11,0.2)]'
+                                                                : 'bg-stone-900/60 border-white/10 text-stone-300 hover:border-amber-400/30'
+                                                        }`}
+                                                    >
+                                                        <span className="tracking-wider uppercase text-[10px] sm:text-xs">
+                                                            <span className="sm:hidden">{s.shortLabel}</span>
+                                                            <span className="hidden sm:inline">{s.fullLabel}</span>
+                                                        </span>
+                                                        <ServiceIcon className="w-3.5 h-3.5 text-amber-400 shrink-0" strokeWidth={1.5} />
+                                                    </button>
+                                                );
+                                            })}
                                         </div>
                                     </div>
 
@@ -653,13 +670,22 @@ export default function HomePageClient({
 
                                         <div className="p-3 sm:p-3.5 rounded-xl bg-stone-950/70 border border-white/10 text-[10.5px] sm:text-[11px] font-sans text-stone-300 leading-relaxed font-light mb-3 sm:mb-4">
                                             {calcService === 'vender_mi_oro' && (
-                                                <span>💎 <strong>Avalúo en Vivo:</strong> Pesaje exacto con balanza analítica calibrada frente a ti y pago inmediato en efectivo o banco con la mejor tasa del mercado.</span>
+                                                <span className="flex items-start gap-2">
+                                                    <Coins className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" strokeWidth={1.5} />
+                                                    <span><strong>Avalúo en Vivo:</strong> Pesaje exacto con balanza analítica calibrada frente a ti y pago inmediato en efectivo o banco con la mejor tasa del mercado.</span>
+                                                </span>
                                             )}
                                             {calcService === 'fabricar_joya' && (
-                                                <span>👑 <strong>Taller Orfebre:</strong> Fabricamos tu pieza personalizada en Oro {goldOrigin === 'nacional' ? 'Nacional' : 'Italiano'} 18K con acabados de alta costura.</span>
+                                                <span className="flex items-start gap-2">
+                                                    <Crown className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" strokeWidth={1.5} />
+                                                    <span><strong>Taller Orfebre:</strong> Fabricamos tu pieza personalizada en Oro {goldOrigin === 'nacional' ? 'Nacional' : 'Italiano'} 18K con acabados de alta costura.</span>
+                                                </span>
                                             )}
                                             {calcService === 'comprar_joya' && (
-                                                <span>✨ <strong>Disponibilidad:</strong> Consulta catálogo físico y entrega inmediata en piezas de {calcGrams} gramos.</span>
+                                                <span className="flex items-start gap-2">
+                                                    <Gem className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" strokeWidth={1.5} />
+                                                    <span><strong>Disponibilidad:</strong> Consulta catálogo físico y entrega inmediata en piezas de {calcGrams} gramos.</span>
+                                                </span>
                                             )}
                                         </div>
                                     </div>
@@ -672,8 +698,10 @@ export default function HomePageClient({
                                             className="relative overflow-hidden w-full py-3 sm:py-3.5 px-4 rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-stone-950 font-sans text-xs font-bold hover:brightness-105 transition-all uppercase tracking-wider shadow-[0_0_25px_rgba(245,158,11,0.35)] flex items-center justify-center gap-2 text-center active:scale-[0.98]"
                                         >
                                             <span className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none animate-liquid-sweep" />
-                                            <span className="relative z-10">{calcService === 'vender_mi_oro' ? 'Consultar Tasa en WhatsApp' : 'Enviar Consulta a WhatsApp'}</span>
-                                            <span className="relative z-10">→</span>
+                                            <span className="relative z-10 flex items-center justify-center gap-1.5">
+                                                <span>{calcService === 'vender_mi_oro' ? 'Consultar Tasa en WhatsApp' : 'Enviar Consulta a WhatsApp'}</span>
+                                                <ArrowRight className="w-3.5 h-3.5 text-stone-950 inline-block" strokeWidth={2} />
+                                            </span>
                                         </a>
 
                                         <p className="text-center text-[10px] font-sans text-stone-400">
@@ -798,10 +826,11 @@ export default function HomePageClient({
                                 })}
                             </div>
 
-                            {/* Indicador táctil móvil para deslizar */}
-                            <div className="sm:hidden flex items-center justify-center gap-2 mt-3 text-[11px] font-mono text-stone-400">
-                                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                                <span>Desliza horizontalmente para ver más joyas ({featuredProducts.length}) →</span>
+                            {/* Indicador táctil móvil para deslizar con rombo de lujo */}
+                            <div className="sm:hidden flex items-center justify-center gap-1.5 mt-3 text-[11px] font-mono text-stone-400">
+                                <span className="inline-block w-1.5 h-1.5 rotate-45 bg-amber-400 mr-1" />
+                                <span>Desliza horizontalmente para ver más joyas ({featuredProducts.length})</span>
+                                <ArrowRight className="w-3 h-3 text-amber-400 inline-block ml-0.5" strokeWidth={1.5} />
                             </div>
                         </>
                     ) : (
@@ -814,10 +843,10 @@ export default function HomePageClient({
                     <div className="mt-8 sm:mt-14 text-center reveal-init">
                         <Link
                             href="/catalogo"
-                            className="inline-flex items-center gap-3 px-8 py-3.5 rounded-full bg-stone-900/80 border border-white/15 text-stone-200 hover:text-amber-300 hover:border-amber-400/50 text-xs font-sans transition-all font-semibold uppercase tracking-wider backdrop-blur-xl active:scale-[0.98] shadow-md"
+                            className="inline-flex items-center gap-3 px-8 py-3.5 rounded-full bg-stone-900/80 border border-white/15 text-stone-200 hover:text-amber-300 hover:border-amber-400/50 text-xs font-sans transition-all font-semibold uppercase tracking-wider backdrop-blur-xl active:scale-[0.98] shadow-md group"
                         >
                             <span>Ver todas las piezas del catálogo</span>
-                            <span>→</span>
+                            <ArrowRight className="w-4 h-4 text-stone-400 group-hover:text-amber-300 group-hover:translate-x-1 transition-all" strokeWidth={1.5} />
                         </Link>
                     </div>
                 </div>
@@ -856,8 +885,8 @@ export default function HomePageClient({
                     {/* 3 PILARES DE SEGURIDAD Y CONFIANZA */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4 mb-8 sm:mb-12">
                         <div className="p-4 sm:p-5 rounded-2xl bg-stone-900/75 border border-white/10 backdrop-blur-xl flex items-start gap-3.5 shadow-lg">
-                            <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-300 shrink-0 text-base">
-                                ⚖️
+                            <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                                <Scale className="w-4 h-4 text-amber-400" strokeWidth={1.5} />
                             </div>
                             <div>
                                 <h4 className="text-xs sm:text-sm font-serif text-stone-100 font-semibold tracking-wide mb-1">
@@ -870,8 +899,8 @@ export default function HomePageClient({
                         </div>
 
                         <div className="p-4 sm:p-5 rounded-2xl bg-stone-900/75 border border-white/10 backdrop-blur-xl flex items-start gap-3.5 shadow-lg">
-                            <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-300 shrink-0 text-base">
-                                🧪
+                            <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                                <FlaskConical className="w-4 h-4 text-amber-400" strokeWidth={1.5} />
                             </div>
                             <div>
                                 <h4 className="text-xs sm:text-sm font-serif text-stone-100 font-semibold tracking-wide mb-1">
@@ -884,8 +913,8 @@ export default function HomePageClient({
                         </div>
 
                         <div className="p-4 sm:p-5 rounded-2xl bg-stone-900/75 border border-white/10 backdrop-blur-xl flex items-start gap-3.5 shadow-lg">
-                            <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-300 shrink-0 text-base">
-                                📜
+                            <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                                <FileText className="w-4 h-4 text-amber-400" strokeWidth={1.5} />
                             </div>
                             <div>
                                 <h4 className="text-xs sm:text-sm font-serif text-stone-100 font-semibold tracking-wide mb-1">
@@ -977,9 +1006,10 @@ export default function HomePageClient({
                             href={CONFIG.googleMapsUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-full bg-stone-900 border border-amber-500/40 text-amber-300 font-sans text-xs hover:bg-amber-400 hover:text-stone-950 transition-all font-semibold uppercase tracking-wider active:scale-[0.98] shadow-md text-center"
+                            className="w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-full bg-stone-900 border border-amber-500/40 text-amber-300 font-sans text-xs hover:bg-amber-400 hover:text-stone-950 transition-all font-semibold uppercase tracking-wider active:scale-[0.98] shadow-md text-center group"
                         >
-                            <span>Abrir en Google Maps (Cómo llegar) →</span>
+                            <span>Abrir en Google Maps (Cómo llegar)</span>
+                            <ArrowRight className="w-4 h-4 text-amber-400 group-hover:text-stone-950 group-hover:translate-x-1 transition-all" strokeWidth={1.5} />
                         </a>
                     </div>
 

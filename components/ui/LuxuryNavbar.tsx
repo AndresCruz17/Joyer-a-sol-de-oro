@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { MapPin, ArrowRight } from 'lucide-react';
 import { SITE_CONFIG, getWhatsAppUrl } from '@/lib/config';
 
 interface NavItem {
@@ -237,9 +238,7 @@ export default function LuxuryNavbar({ initialGoldPrice }: LuxuryNavbarProps = {
                                     <span className="text-base font-sans font-light tracking-wide">
                                         {item.label}
                                     </span>
-                                    <span className="text-stone-600 group-hover:text-amber-300 text-xs transition-colors">
-                                        →
-                                    </span>
+                                    <ArrowRight className="w-3.5 h-3.5 text-stone-600 group-hover:text-amber-300 transition-colors" strokeWidth={1.5} />
                                 </Link>
                             ))}
                         </nav>
@@ -248,7 +247,7 @@ export default function LuxuryNavbar({ initialGoldPrice }: LuxuryNavbarProps = {
                     {/* 4. Footer del Menú: Ubicación, Redes & WhatsApp Concierge */}
                     <div className="pt-6 border-t border-white/10 space-y-4 mt-6">
                         <div className="flex items-start gap-2.5 text-xs text-stone-400 font-sans font-light">
-                            <span className="text-amber-400 text-sm">📍</span>
+                            <MapPin className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" strokeWidth={1.5} />
                             <div>
                                 <span className="text-stone-200 font-medium block">{SITE_CONFIG.address}</span>
                                 <span>{SITE_CONFIG.city}</span>

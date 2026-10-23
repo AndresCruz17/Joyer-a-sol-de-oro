@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import DeleteProductButton from '@/components/admin/DeleteProductButton';
+import { Search, Sparkles, Gem } from 'lucide-react';
 
 export interface DashboardProductItem {
     id: string;
@@ -64,9 +65,7 @@ export default function AdminInventoryTable({ products }: AdminInventoryTablePro
 
                 {/* Buscador */}
                 <div className="relative w-full md:w-96">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-500 text-xs">
-                        🔍
-                    </span>
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none" strokeWidth={1.5} />
                     <input
                         type="text"
                         placeholder="Buscar joya por nombre o categoría..."
@@ -122,7 +121,7 @@ export default function AdminInventoryTable({ products }: AdminInventoryTablePro
                                 : 'bg-stone-950/60 text-stone-400 border border-white/5 hover:border-amber-400/30'
                         }`}
                     >
-                        <span>✦</span>
+                        <Sparkles className="w-3.5 h-3.5 shrink-0" strokeWidth={1.5} />
                         <span>Destacados</span>
                     </button>
 
@@ -137,8 +136,8 @@ export default function AdminInventoryTable({ products }: AdminInventoryTablePro
             <div className="rounded-3xl bg-stone-900/40 border border-white/10 overflow-hidden shadow-2xl backdrop-blur-xl">
                 {filteredProducts.length === 0 ? (
                     <div className="p-16 text-center space-y-4">
-                        <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-stone-500 text-lg mx-auto">
-                            💎
+                        <div className="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto">
+                            <Gem className="w-5 h-5 text-amber-400" strokeWidth={1.5} />
                         </div>
                         <h3 className="font-serif text-lg text-stone-200">No se encontraron piezas</h3>
                         <p className="text-xs text-stone-500 max-w-sm mx-auto leading-relaxed">
@@ -241,8 +240,8 @@ export default function AdminInventoryTable({ products }: AdminInventoryTablePro
                                             <td className="p-4">
                                                 <div className="flex items-center gap-1.5 flex-wrap">
                                                     {item.is_featured && (
-                                                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[10px] font-mono font-semibold">
-                                                            <span>✦</span> Destacada
+                                                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[10px] font-mono font-semibold">
+                                                            <Sparkles className="w-3 h-3 text-amber-300 shrink-0" strokeWidth={1.5} /> Destacada
                                                         </span>
                                                     )}
                                                     <span

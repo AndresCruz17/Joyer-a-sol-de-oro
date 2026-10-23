@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
+import { MapPin, ArrowRight } from 'lucide-react';
 import { SITE_CONFIG, getWhatsAppUrl } from '@/lib/config';
 import LuxuryNavbar from '@/components/ui/LuxuryNavbar';
 
@@ -299,8 +300,9 @@ export default function SobreNosotrosPage() {
                         <p className="text-stone-300 text-xs sm:text-sm font-sans font-light max-w-lg leading-relaxed">
                             Conoce de cerca nuestras vitrinas, realiza el avalúo de tus prendas de oro y recibe orientación personalizada de nuestros orfebres.
                         </p>
-                        <div className="pt-2 text-xs text-stone-400 font-mono">
-                            📍 {SITE_CONFIG.address}, {SITE_CONFIG.city}
+                        <div className="pt-2 text-xs text-stone-400 font-mono flex items-center gap-1.5">
+                            <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" strokeWidth={1.5} />
+                            <span>{SITE_CONFIG.address}, {SITE_CONFIG.city}</span>
                         </div>
                     </div>
 
@@ -309,9 +311,10 @@ export default function SobreNosotrosPage() {
                             href={SITE_CONFIG.googleMapsUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="px-6 py-3.5 rounded-full bg-stone-900 border border-amber-500/40 text-amber-300 hover:bg-amber-400 hover:text-stone-950 font-sans text-xs font-semibold uppercase tracking-wider transition-all text-center active:scale-[0.98]"
+                            className="px-6 py-3.5 rounded-full bg-stone-900 border border-amber-500/40 text-amber-300 hover:bg-amber-400 hover:text-stone-950 font-sans text-xs font-semibold uppercase tracking-wider transition-all text-center active:scale-[0.98] inline-flex items-center justify-center gap-2 group"
                         >
-                            Cómo llegar (Maps) →
+                            <span>Cómo llegar (Maps)</span>
+                            <ArrowRight className="w-3.5 h-3.5 text-amber-400 group-hover:text-stone-950 group-hover:translate-x-1 transition-all" strokeWidth={1.5} />
                         </a>
                     </div>
                 </section>

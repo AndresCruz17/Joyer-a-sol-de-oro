@@ -7,6 +7,7 @@ import ProductGallery from '@/components/product/ProductGallery';
 import ProductSchema from '@/components/seo/ProductSchema';
 import { getWhatsAppUrl, SITE_CONFIG } from '@/lib/config';
 import LuxuryNavbar from '@/components/ui/LuxuryNavbar';
+import { MapPin, ShieldCheck, Scale, Truck, ArrowRight, MessageCircle } from 'lucide-react';
 
 // REVALIDACIÓN INCREMENTAL (ISR) CADA 60 SEGUNDOS
 export const revalidate = 60;
@@ -15,7 +16,7 @@ interface PageProps {
     params: Promise<{ id: string }> | { id: string };
 }
 
-// 💡 OPTIMIZACIÓN: Función cacheada para evitar doble llamada a Supabase entre Metadata y Page
+// OPTIMIZACIÓN: Función cacheada para evitar doble llamada a Supabase entre Metadata y Page
 const getProduct = cache(async (productId: string) => {
     const supabase = await createClient();
     const { data: product, error } = await supabase
@@ -107,13 +108,13 @@ export default async function ProductDetailPage({ params }: PageProps) {
     const priceText = product.price ? `$${product.price.toLocaleString('es-CO')} COP` : 'A consultar';
 
     const whatsappText =
-        `✨ *SOLICITUD DE COTIZACIÓN // SOL DE ORO* ✨\n\n` +
-        `📌 *Joya:* ${product.name}\n` +
-        `🏷️ *Colección:* ${categoryName}\n` +
-        `⚖️ *Peso aprox:* ${weightText}\n` +
-        `💰 *Precio catálogo:* ${priceText}\n` +
-        `👑 *Material:* Oro 18K Ley 750 (Nacional / Italiano)\n` +
-        (imageUrl ? `\n🖼️ *Ver Foto:* ${imageUrl}\n\n` : '\n') +
+        `*SOLICITUD DE COTIZACIÓN // SOL DE ORO*\n\n` +
+        `• Joya: ${product.name}\n` +
+        `• Colección: ${categoryName}\n` +
+        `• Peso aprox: ${weightText}\n` +
+        `• Precio catálogo: ${priceText}\n` +
+        `• Material: Oro 18K Ley 750 (Nacional / Italiano)\n` +
+        (imageUrl ? `\n• Ver Foto: ${imageUrl}\n\n` : '\n') +
         `Hola, quisiera confirmar disponibilidad, tiempo de entrega y métodos de pago para esta pieza. ¡Muchas gracias!`;
 
     const whatsappUrl = getWhatsAppUrl(whatsappText);
@@ -175,7 +176,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                         <div className="p-4 sm:p-5 rounded-3xl bg-stone-900/40 border border-white/10 backdrop-blur-xl flex items-center justify-between gap-4">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-300 text-base shrink-0">
-                                    📍
+                                    <MapPin className="w-5 h-5 text-amber-400" strokeWidth={1.5} />
                                 </div>
                                 <div>
                                     <p className="text-xs font-sans font-medium text-stone-200">
@@ -190,9 +191,10 @@ export default async function ProductDetailPage({ params }: PageProps) {
                                 href={SITE_CONFIG.googleMapsUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-amber-400/40 text-[11px] font-sans text-amber-300 hover:text-amber-200 transition-colors whitespace-nowrap"
+                                className="px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 hover:border-amber-400/40 text-[11px] font-sans text-amber-300 hover:text-amber-200 transition-colors whitespace-nowrap inline-flex items-center gap-1.5"
                             >
-                                Ver Mapa →
+                                <span>Ver Mapa</span>
+                                <ArrowRight className="w-3 h-3" strokeWidth={1.5} />
                             </a>
                         </div>
                     </div>
@@ -311,9 +313,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
                                 rel="noopener noreferrer"
                                 className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-stone-950 font-sans font-bold uppercase tracking-wider text-xs sm:text-sm transition-all shadow-[0_0_30px_rgba(245,158,11,0.25)] hover:shadow-[0_0_45px_rgba(245,158,11,0.4)] flex items-center justify-center gap-3 active:scale-[0.98]"
                             >
-                                <span className="text-base">💬</span>
+                                <MessageCircle className="w-4 h-4 text-stone-950 shrink-0" strokeWidth={2} />
                                 <span>Cotizar esta joya por WhatsApp</span>
-                                <span className="text-stone-900 font-bold">→</span>
+                                <ArrowRight className="w-4 h-4 text-stone-950 shrink-0" strokeWidth={2} />
                             </a>
 
                             <p className="text-center text-[11px] font-sans text-stone-400">
@@ -324,7 +326,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                         {/* Fila de Sellos de Confianza y Respaldo */}
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
                             <div className="p-3 rounded-2xl bg-stone-900/30 border border-white/5 flex items-center gap-3">
-                                <span className="text-amber-400 text-base">🛡️</span>
+                                <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" strokeWidth={1.5} />
                                 <div>
                                     <p className="text-[11px] font-sans font-medium text-stone-200">Garantía Total</p>
                                     <p className="text-[10px] text-stone-400">Ley 750 perpetua</p>
@@ -332,7 +334,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                             </div>
 
                             <div className="p-3 rounded-2xl bg-stone-900/30 border border-white/5 flex items-center gap-3">
-                                <span className="text-amber-400 text-base">⚖️</span>
+                                <Scale className="w-4 h-4 text-amber-400 shrink-0" strokeWidth={1.5} />
                                 <div>
                                     <p className="text-[11px] font-sans font-medium text-stone-200">Pesaje Exacto</p>
                                     <p className="text-[10px] text-stone-400">Balanza de precisión</p>
@@ -340,7 +342,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                             </div>
 
                             <div className="p-3 rounded-2xl bg-stone-900/30 border border-white/5 flex items-center gap-3">
-                                <span className="text-amber-400 text-base">📦</span>
+                                <Truck className="w-4 h-4 text-amber-400 shrink-0" strokeWidth={1.5} />
                                 <div>
                                     <p className="text-[11px] font-sans font-medium text-stone-200">Envío Seguro</p>
                                     <p className="text-[10px] text-stone-400">100% asegurado</p>
@@ -370,7 +372,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                                     className="text-xs font-sans text-amber-300 hover:text-amber-200 uppercase tracking-wider font-semibold transition-colors flex items-center gap-1.5"
                                 >
                                     <span>Ver colección completa</span>
-                                    <span>→</span>
+                                    <ArrowRight className="w-3.5 h-3.5" strokeWidth={1.5} />
                                 </Link>
                             )}
                         </div>

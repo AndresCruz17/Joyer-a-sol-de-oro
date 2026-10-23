@@ -11,6 +11,7 @@ import {
   uploadOptimizedImage,
   MAX_PRODUCT_IMAGES,
 } from '@/lib/storage/image-utils';
+import { ArrowLeft, ArrowRight, AlertTriangle, Camera, Sparkles } from 'lucide-react';
 
 interface CategoryOption {
   id: string;
@@ -213,7 +214,9 @@ export default function EditProductPage() {
             href="/admin/dashboard"
             className="inline-flex items-center gap-2 text-xs font-sans tracking-widest text-stone-400 hover:text-amber-300 transition-colors uppercase group self-start sm:self-auto"
           >
-            <span className="w-5 h-5 rounded-full bg-white/5 border border-white/10 group-hover:border-amber-400/40 flex items-center justify-center text-[10px] group-hover:-translate-x-0.5 transition-all">←</span>
+            <span className="w-5 h-5 rounded-full bg-white/5 border border-white/10 group-hover:border-amber-400/40 flex items-center justify-center text-[10px] group-hover:-translate-x-0.5 transition-all">
+              <ArrowLeft className="w-3 h-3 text-stone-400 group-hover:text-amber-300" strokeWidth={1.5} />
+            </span>
             <span>Cancelar y Volver</span>
           </Link>
         </div>
@@ -237,7 +240,7 @@ export default function EditProductPage() {
         {/* Mensaje de Error */}
         {message && (
           <div className="p-4 rounded-2xl bg-red-950/50 border border-red-500/30 text-red-200 text-xs flex items-center gap-3">
-            <span className="text-base">⚠️</span>
+            <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" strokeWidth={1.5} />
             <span>{message}</span>
           </div>
         )}
@@ -379,8 +382,8 @@ export default function EditProductPage() {
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 />
                 <div className="space-y-2 pointer-events-none">
-                  <div className="w-10 h-10 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-300 text-base mx-auto group-hover:scale-110 transition-transform">
-                    📸
+                  <div className="w-10 h-10 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-300 mx-auto group-hover:scale-110 transition-transform">
+                    <Camera className="w-5 h-5 text-amber-400" strokeWidth={1.5} />
                   </div>
                   <p className="text-xs text-stone-200 font-sans font-medium">
                     Agregar nuevas fotografías a la galería
@@ -407,8 +410,15 @@ export default function EditProductPage() {
                       >
                         <img src={url} alt={`Guardada ${idx + 1}`} className="w-full h-full object-cover" />
                         
-                        <span className="absolute bottom-1.5 left-1.5 right-1.5 bg-stone-950/80 backdrop-blur-sm text-[8px] font-mono text-center text-stone-300 py-0.5 rounded-full border border-white/10">
-                          {idx === 0 ? '✦ Portada' : 'Guardada'}
+                        <span className="absolute bottom-1.5 left-1.5 right-1.5 bg-stone-950/80 backdrop-blur-sm text-[8px] font-mono text-center text-stone-300 py-0.5 rounded-full border border-white/10 flex items-center justify-center gap-1">
+                          {idx === 0 ? (
+                            <>
+                              <Sparkles className="w-2.5 h-2.5 text-amber-300 shrink-0" strokeWidth={1.5} />
+                              <span>Portada</span>
+                            </>
+                          ) : (
+                            'Guardada'
+                          )}
                         </span>
 
                         <button
@@ -458,7 +468,7 @@ export default function EditProductPage() {
               >
                 <div className="space-y-0.5">
                   <div className="flex items-center gap-2">
-                    <span className="text-amber-400 text-sm">✦</span>
+                    <Sparkles className="w-4 h-4 text-amber-400 shrink-0" strokeWidth={1.5} />
                     <span className="text-xs font-sans font-medium text-stone-200">
                       Destacar en Escaparate Principal
                     </span>
@@ -492,7 +502,7 @@ export default function EditProductPage() {
                 ) : (
                   <>
                     <span>Guardar Cambios Orfebres</span>
-                    <span>→</span>
+                    <ArrowRight className="w-4 h-4 text-stone-950 inline-block ml-1" strokeWidth={2} />
                   </>
                 )}
               </button>

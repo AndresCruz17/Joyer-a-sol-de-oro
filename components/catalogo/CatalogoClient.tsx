@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 import { SITE_CONFIG, getWhatsAppUrl } from '@/lib/config';
 import LuxuryNavbar from '@/components/ui/LuxuryNavbar';
+import { Search, Gem } from 'lucide-react';
 
 export interface Category {
   id: string;
@@ -140,9 +141,7 @@ function CatalogoContent({ initialCategories, initialProducts }: CatalogoClientP
 
             {/* Buscador */}
             <div className="relative w-full md:w-96">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-500 text-xs">
-                🔍
-              </span>
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none" strokeWidth={1.5} />
               <input
                 type="text"
                 placeholder="Buscar por anillo, cadena, peso..."
@@ -239,8 +238,8 @@ function CatalogoContent({ initialCategories, initialProducts }: CatalogoClientP
           </div>
         ) : filteredProducts.length === 0 ? (
           <div className="text-center py-20 border border-white/10 rounded-3xl bg-stone-900/30 max-w-md mx-auto p-8 space-y-4">
-            <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-stone-500 text-lg mx-auto">
-              💎
+            <div className="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto">
+              <Gem className="w-5 h-5 text-amber-400" strokeWidth={1.5} />
             </div>
             <h3 className="font-serif text-xl text-stone-200 font-light">No se encontraron joyas</h3>
             <p className="text-xs text-stone-400 font-sans leading-relaxed">
@@ -265,13 +264,14 @@ function CatalogoContent({ initialCategories, initialProducts }: CatalogoClientP
               const itemImage = item.image_url || '';
 
               const whatsappText =
-                `✨ *COTIZACIÓN DE JOYA // SOL DE ORO* ✨\n\n` +
-                `📌 *Joya:* ${item.name}\n` +
-                `🏷️ *Colección:* ${categoryName}\n` +
-                `⚖️ *Peso aprox:* ${itemWeight}\n` +
-                `💰 *Precio catálogo:* ${itemPrice}\n` +
-                `👑 *Material:* Oro 18K Ley 750\n` +
-                (itemImage ? `\n🖼️ *Ver Foto:* ${itemImage}\n\n` : '\n') +
+                `*SOL DE ORO // ALTA JOYERÍA*\n` +
+                `Solicitud de cotización oficial\n\n` +
+                `• *Joya:* ${item.name}\n` +
+                `• *Colección:* ${categoryName}\n` +
+                `• *Peso aprox:* ${itemWeight}\n` +
+                `• *Precio catálogo:* ${itemPrice}\n` +
+                `• *Material:* Oro 18K Ley 750\n` +
+                (itemImage ? `\n• *Ver Foto:* ${itemImage}\n\n` : '\n') +
                 `Hola, me interesa conocer disponibilidad y métodos de pago para esta pieza.`;
 
               const whatsappUrl = getWhatsAppUrl(whatsappText);

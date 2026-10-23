@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import NeonSparkles from '@/components/ui/NeonSparkles';
 import { useScrollProgress } from '@/lib/hooks/useScrollProgress';
+import { Sparkles, ShieldCheck, Coins, Hammer } from 'lucide-react';
 
 interface HeroProps {
     storeHeroBgUrl?: string;
@@ -96,8 +97,8 @@ export default function HeroFullscreenGrow({
 
                             {/* CÁPSULA DINÁMICA DE COTIZACIÓN TIPO TERMINAL LUXURY */}
                             <div className="min-h-[56px] flex items-center justify-center mb-8">
-                                <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-stone-900/70 border border-amber-500/30 backdrop-blur-xl shadow-[0_0_30px_rgba(245,158,11,0.15)] group hover:border-amber-400/60 transition-all">
-                                    <span className="text-amber-400 text-xs animate-sparkle">✦</span>
+                                <div className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-stone-900/70 border border-amber-500/30 backdrop-blur-xl shadow-[0_0_30px_rgba(245,158,11,0.15)] group hover:border-amber-400/60 transition-all">
+                                    <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" strokeWidth={1.5} />
                                     <p className="text-transparent bg-clip-text bg-gradient-to-r from-amber-100 via-yellow-200 to-amber-300 font-sans text-xs sm:text-base tracking-wide font-medium">
                                         {currentText}
                                     </p>
@@ -145,7 +146,7 @@ export default function HeroFullscreenGrow({
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4 w-full pt-4 border-t border-amber-500/10">
                                 <div className="p-3.5 rounded-2xl bg-stone-900/40 border border-stone-800/80 backdrop-blur-md flex items-center gap-3 hover:border-amber-500/30 transition-all">
                                     <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 text-sm shrink-0">
-                                        ✦
+                                        <ShieldCheck className="w-4 h-4 text-amber-400" strokeWidth={1.5} />
                                     </div>
                                     <div className="text-left">
                                         <div className="text-xs font-semibold text-stone-100">Garantía Ley 750</div>
@@ -155,7 +156,7 @@ export default function HeroFullscreenGrow({
 
                                 <div className="p-3.5 rounded-2xl bg-stone-900/40 border border-stone-800/80 backdrop-blur-md flex items-center gap-3 hover:border-amber-500/30 transition-all">
                                     <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 text-sm shrink-0">
-                                        ⚡
+                                        <Coins className="w-4 h-4 text-amber-400" strokeWidth={1.5} />
                                     </div>
                                     <div className="text-left">
                                         <div className="text-xs font-semibold text-stone-100">Pago Inmediato</div>
@@ -165,7 +166,7 @@ export default function HeroFullscreenGrow({
 
                                 <div className="p-3.5 rounded-2xl bg-stone-900/40 border border-stone-800/80 backdrop-blur-md flex items-center gap-3 hover:border-amber-500/30 transition-all">
                                     <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 text-sm shrink-0">
-                                        ⚒
+                                        <Hammer className="w-4 h-4 text-amber-400" strokeWidth={1.5} />
                                     </div>
                                     <div className="text-left">
                                         <div className="text-xs font-semibold text-stone-100">Taller Orfebre</div>

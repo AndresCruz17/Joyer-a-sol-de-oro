@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Gem } from 'lucide-react';
 
 interface ProductGalleryProps {
     mainImageUrl: string | null;
@@ -25,7 +26,7 @@ export default function ProductGallery({
     if (allImages.length === 0) {
         return (
             <div className="relative rounded-3xl overflow-hidden border border-white/10 bg-stone-900/40 aspect-square flex flex-col items-center justify-center text-stone-500 font-serif text-base p-8 text-center backdrop-blur-xl">
-                <span className="text-3xl mb-2 opacity-40">💎</span>
+                <Gem className="w-8 h-8 mb-2 text-amber-400/40" strokeWidth={1.5} />
                 Fotografía oficial en proceso de digitalización
             </div>
         );
