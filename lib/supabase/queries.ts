@@ -1,5 +1,13 @@
 import { createClient } from './server';
 
+function handleQueryError(context: string, error: unknown) {
+  const err = error as { message?: string; details?: string };
+  if (err?.message?.includes('fetch failed') || err?.details?.includes('ENOTFOUND')) {
+    console.warn(`\n⚠️  [Supabase Conexión]: El servidor no pudo conectarse a Supabase (${context}). Si usas el plan gratuito, el proyecto puede estar pausado por inactividad. Reactívalo en tu dashboard de Supabase (https://supabase.com/dashboard) o verifica las credenciales en .env.local.\n`);
+  }
+  console.error(`Error al obtener ${context}:`, error);
+}
+
 /**
  * Obtiene todas las categorías ordenadas alfabéticamente
  */
@@ -11,7 +19,7 @@ export async function getCategories() {
     .order('name', { ascending: true });
 
   if (error) {
-    console.error('Error al obtener categorías:', error);
+    handleQueryError('categorías', error);
     return [];
   }
 
@@ -32,7 +40,7 @@ export async function getFeaturedProducts(limit = 6) {
     .limit(limit);
 
   if (error) {
-    console.error('Error al obtener productos destacados:', error);
+    handleQueryError('productos destacados', error);
     return [];
   }
 
@@ -51,7 +59,7 @@ export async function getAllActiveProducts() {
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Error al obtener productos del catálogo:', error);
+    handleQueryError('productos del catálogo', error);
     return [];
   }
 
@@ -71,7 +79,7 @@ export async function getProductsByCategorySlug(categorySlug: string) {
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Error al obtener productos por categoría:', error);
+    handleQueryError('productos por categoría', error);
     return [];
   }
 
@@ -91,7 +99,7 @@ export async function getProductBySlug(productSlug: string) {
     .maybeSingle();
 
   if (error) {
-    console.error('Error al obtener producto por slug:', error);
+    handleQueryError('producto por slug', error);
     return null;
   }
 
@@ -111,7 +119,7 @@ export async function getProductById(productId: string) {
     .maybeSingle();
 
   if (error) {
-    console.error('Error al obtener producto por ID:', error);
+    handleQueryError('producto por ID', error);
     return null;
   }
 
@@ -132,7 +140,7 @@ export async function getRelatedActiveProducts(categoryId: string, excludeProduc
     .limit(limit);
 
   if (error) {
-    console.error('Error al obtener productos relacionados:', error);
+    handleQueryError('productos relacionados', error);
     return [];
   }
 

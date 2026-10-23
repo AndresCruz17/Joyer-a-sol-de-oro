@@ -46,11 +46,13 @@ export const metadata: Metadata = {
 export const revalidate = 60;
 
 import { getCategories, getFeaturedProducts } from '@/lib/supabase/queries';
+import { getLiveGoldPrice } from '@/lib/gold/gold-service';
 
 export default async function Page() {
-  const [categoriesData, featuredProductsData] = await Promise.all([
+  const [categoriesData, featuredProductsData, goldPriceData] = await Promise.all([
     getCategories(),
     getFeaturedProducts(6),
+    getLiveGoldPrice(),
   ]);
 
   const initialCategories = (categoriesData || []).map((cat) => ({
@@ -75,6 +77,7 @@ export default async function Page() {
     <HomePageClient
       initialCategories={initialCategories}
       initialFeaturedProducts={initialFeaturedProducts}
+      initialGoldPrice={goldPriceData}
     />
   );
 }

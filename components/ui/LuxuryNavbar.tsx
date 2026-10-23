@@ -11,6 +11,9 @@ interface NavItem {
     sectionId?: string;
 }
 
+import { useGoldPrice } from '@/lib/hooks/useGoldPrice';
+import { GoldPriceData } from '@/lib/gold/gold-types';
+
 const NAV_ITEMS: NavItem[] = [
     { label: 'Colecciones', href: '/#colecciones', sectionId: 'colecciones' },
     { label: 'Catálogo', href: '/catalogo' },
@@ -19,8 +22,13 @@ const NAV_ITEMS: NavItem[] = [
     { label: 'Ubicación', href: '/#ubicacion', sectionId: 'ubicacion' },
 ];
 
-export default function LuxuryNavbar() {
+interface LuxuryNavbarProps {
+    initialGoldPrice?: GoldPriceData;
+}
+
+export default function LuxuryNavbar({ initialGoldPrice }: LuxuryNavbarProps = {}) {
     const pathname = usePathname();
+    const { goldPrice } = useGoldPrice(initialGoldPrice);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
 
@@ -130,10 +138,11 @@ export default function LuxuryNavbar() {
                     <div className="flex items-center gap-2.5 sm:gap-3">
                         <Link
                             href={isHome ? '#cotizador' : '/#cotizador'}
-                            className="hidden sm:inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] sm:text-[11px] font-sans tracking-widest uppercase transition-all active:scale-[0.97]"
+                            className="hidden sm:inline-flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-full bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] sm:text-[11px] font-sans tracking-wide transition-all active:scale-[0.97]"
+                            title={`Tasa oficial en vivo: ${goldPrice.formatted_18k} por gramo de Oro 18K`}
                         >
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                            <span>Tasa 18K</span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_6px_#34d399]" />
+                            <span className="font-mono font-medium">18K: {goldPrice.formatted_18k}/g</span>
                         </Link>
 
                         {/* Botón Móvil Minimalista */}
@@ -203,10 +212,10 @@ export default function LuxuryNavbar() {
                                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" />
                                     <div>
                                         <span className="text-[11px] font-sans font-medium text-stone-100 block">
-                                            Oro 18K Ley 750
+                                            Oro 18K Ley 750 · {goldPrice.formatted_18k}/g
                                         </span>
                                         <span className="text-[9px] font-mono text-emerald-400 uppercase tracking-wider">
-                                            Tasa de Cotización en Vivo
+                                            {goldPrice.isLive ? 'Cotización GoldAPI.io en Vivo' : 'Tasa Oficial del Día'}
                                         </span>
                                     </div>
                                 </div>

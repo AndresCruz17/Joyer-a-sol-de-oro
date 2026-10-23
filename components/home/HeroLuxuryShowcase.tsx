@@ -4,10 +4,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import GoldDustParticles from '@/components/ui/GoldDustParticles';
 
+import { GoldPriceData } from '@/lib/gold/gold-types';
+
 interface HeroLuxuryShowcaseProps {
     storeHeroBgUrl?: string;
     whatsappHeroUrl: string;
     phrases?: string[];
+    goldPrice?: GoldPriceData;
 }
 
 const DEFAULT_PHRASES = [
@@ -22,6 +25,7 @@ export default function HeroLuxuryShowcase({
     storeHeroBgUrl = '/local.webp',
     whatsappHeroUrl,
     phrases = DEFAULT_PHRASES,
+    goldPrice,
 }: HeroLuxuryShowcaseProps) {
     const [mounted, setMounted] = useState(false);
 
@@ -216,7 +220,9 @@ export default function HeroLuxuryShowcase({
 
                     <div className="overflow-hidden whitespace-nowrap flex-1">
                         <div className="animate-marquee flex items-center gap-10 text-[10px] sm:text-[11px] font-sans tracking-widest uppercase text-stone-300">
-                            <span className="text-amber-300 font-semibold">TASA ORO 18K: MÁXIMA COTIZACIÓN GARANTIZADA</span>
+                            <span className="text-amber-300 font-semibold font-mono">
+                                TASA ORO 18K EN VIVO: {goldPrice ? `${goldPrice.formatted_18k}/G` : 'MÁXIMA COTIZACIÓN GARANTIZADA'}
+                            </span>
                             <span className="text-amber-500">✦</span>
                             <span>COMPRAVENTA CON PAGO INMEDIATO EN EFECTIVO Y BANCO</span>
                             <span className="text-amber-500">✦</span>
@@ -228,7 +234,9 @@ export default function HeroLuxuryShowcase({
                             <span className="text-amber-500">✦</span>
 
                             {/* Duplicado para ciclo continuo infinito */}
-                            <span className="text-amber-300 font-semibold">TASA ORO 18K: MÁXIMA COTIZACIÓN GARANTIZADA</span>
+                            <span className="text-amber-300 font-semibold font-mono">
+                                TASA ORO 18K EN VIVO: {goldPrice ? `${goldPrice.formatted_18k}/G` : 'MÁXIMA COTIZACIÓN GARANTIZADA'}
+                            </span>
                             <span className="text-amber-500">✦</span>
                             <span>COMPRAVENTA CON PAGO INMEDIATO EN EFECTIVO Y BANCO</span>
                             <span className="text-amber-500">✦</span>

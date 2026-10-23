@@ -207,3 +207,12 @@ html {
 .delay-stagger-2 { transition-delay: 200ms; }
 .delay-stagger-3 { transition-delay: 300ms; }
 .delay-stagger-4 { transition-delay: 400ms; }
+
+/* Ocultar barra de scroll en carruseles táctiles móviles */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}

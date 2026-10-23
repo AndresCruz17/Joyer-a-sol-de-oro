@@ -24,6 +24,7 @@ export default function AdminCategoriasPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   // Estado de edición (null = creando nueva categoría)
@@ -49,12 +50,24 @@ export default function AdminCategoriasPage() {
 
   const fetchCategories = async () => {
     setFetching(true);
-    const { data } = await supabase
-      .from('categories')
-      .select('id, name, slug, image_url, description')
-      .order('name');
-    if (data) setCategories(data);
-    setFetching(false);
+    setFetchError(null);
+    try {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('id, name, slug, image_url, description')
+        .order('name');
+      if (error) {
+        console.error('Error al cargar colecciones:', error);
+        setFetchError(error.message || 'Error de conexión con la base de datos');
+      } else if (data) {
+        setCategories(data);
+      }
+    } catch (err: unknown) {
+      console.error('Excepción al cargar colecciones:', err);
+      setFetchError(err instanceof Error ? err.message : 'Error inesperado de red');
+    } finally {
+      setFetching(false);
+    }
   };
 
   useEffect(() => {
@@ -399,6 +412,26 @@ export default function AdminCategoriasPage() {
               {fetching ? (
                 <div className="p-12 text-center text-xs font-mono text-stone-500 animate-pulse">
                   Cargando líneas orfebres...
+                </div>
+              ) : fetchError ? (
+                <div className="p-8 rounded-2xl bg-amber-500/5 border border-amber-500/20 text-center space-y-3">
+                  <div className="w-10 h-10 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-300 text-sm">
+                    ✦
+                  </div>
+                  <h3 className="text-xs font-serif text-amber-300 tracking-wide uppercase">
+                    Inconveniente de Conexión con Supabase
+                  </h3>
+                  <p className="text-[11px] text-stone-400 max-w-md mx-auto font-sans font-light leading-relaxed">
+                    No fue posible sincronizar las colecciones ({fetchError}). Si tu proyecto en Supabase está en pausa por inactividad o la URL fue actualizada, reactívalo en el dashboard de Supabase y pulsa reintentar.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={fetchCategories}
+                    className="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-stone-900 border border-white/10 hover:border-amber-400/40 text-amber-300 hover:text-amber-200 text-xs font-sans transition-all cursor-pointer active:scale-95"
+                  >
+                    <span>Reintentar Conexión</span>
+                    <span>↻</span>
+                  </button>
                 </div>
               ) : categories.length === 0 ? (
                 <div className="p-12 text-center text-xs text-stone-500 font-sans">

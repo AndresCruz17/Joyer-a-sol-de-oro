@@ -7,6 +7,8 @@ import { createClient } from '@/lib/supabase/client';
 import { SITE_CONFIG } from '@/lib/config';
 import HeroLuxuryShowcase from '@/components/home/HeroLuxuryShowcase';
 import LuxuryNavbar from '@/components/ui/LuxuryNavbar';
+import { GoldPriceData, calculateGoldValuation } from '@/lib/gold/gold-types';
+import { useGoldPrice } from '@/lib/hooks/useGoldPrice';
 
 const CONFIG = {
     url: SITE_CONFIG.url,
@@ -74,13 +76,16 @@ interface Product {
 export interface HomePageClientProps {
     initialCategories?: Category[];
     initialFeaturedProducts?: Product[];
+    initialGoldPrice?: GoldPriceData;
 }
 
 export default function HomePageClient({
     initialCategories,
     initialFeaturedProducts,
+    initialGoldPrice,
 }: HomePageClientProps = {}) {
     const supabase = createClient();
+    const { goldPrice } = useGoldPrice(initialGoldPrice);
 
     const [categories, setCategories] = useState<Category[]>(initialCategories || []);
     const [featuredProducts, setFeaturedProducts] = useState<Product[]>(initialFeaturedProducts || []);
@@ -126,13 +131,21 @@ export default function HomePageClient({
                     }
                 });
             },
-            { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
+            { threshold: 0.05, rootMargin: '0px 0px 50px 0px' }
         );
 
         const elements = document.querySelectorAll('.reveal-init');
         elements.forEach((el) => observer.observe(el));
 
-        return () => observer.disconnect();
+        // Safety Fallback: asegurar que todos los elementos sean visibles tras 600ms
+        const safetyTimer = setTimeout(() => {
+            elements.forEach((el) => el.classList.add('reveal-active'));
+        }, 600);
+
+        return () => {
+            observer.disconnect();
+            clearTimeout(safetyTimer);
+        };
     }, [categories, featuredProducts, loading]);
 
     useEffect(() => {
@@ -208,21 +221,26 @@ export default function HomePageClient({
 
     const getCalcWhatsappUrl = () => {
         const goldTypeName = goldOrigin === 'nacional' ? 'Oro Nacional 18K Ley 750 (Orfebre Macizo)' : 'Oro Italiano 18K Ley 750 (Tejido Europeo)';
+        const valuation = calculateGoldValuation(calcGrams, calcService, goldOrigin, goldPrice.price_gram_18k);
         let headerText = '';
         if (calcService === 'vender_mi_oro') {
             headerText = `*SOLICITUD DE AVALÚO // VENTA DE ORO*\n` +
                 `• Tipo / Ley: ${goldTypeName}\n` +
-                `• Peso estimado: ${calcGrams} Gramos\n` +
-                `Hola, me interesa agendar una cita o consultar la tasa de compra en vivo por gramo para vender mi oro.`;
+                `• Peso a evaluar: ${calcGrams} Gramos\n` +
+                `• Tasa en vivo 18K: ${goldPrice.formatted_18k}/g\n` +
+                `• Avalúo aproximado: ${valuation.formattedTotal}\n` +
+                `Hola, me interesa agendar una cita o confirmar la tasa de compra en vivo para vender mi oro.`;
         } else if (calcService === 'fabricar_joya') {
             headerText = `*COTIZACIÓN DE FABRICACIÓN A MEDIDA*\n` +
                 `• Tipo de Oro: ${goldTypeName}\n` +
                 `• Peso aproximado: ${calcGrams} Gramos\n` +
+                `• Presupuesto estimado: ${valuation.formattedTotal}\n` +
                 `Hola, deseo cotizar la elaboración personalizada de una pieza con estas características.`;
         } else {
             headerText = `*CONSULTA DE DISPONIBILIDAD DE JOYA*\n` +
                 `• Línea de Oro: ${goldTypeName}\n` +
                 `• Rango de peso: ${calcGrams} Gramos\n` +
+                `• Valor aproximado en vitrina: ${valuation.formattedTotal}\n` +
                 `Hola, me gustaría conocer qué diseños tienen disponibles en inventario en este peso.`;
         }
         return `https://wa.me/${CONFIG.phoneWhatsapp}?text=${encodeURIComponent(headerText)}`;
@@ -292,13 +310,14 @@ export default function HomePageClient({
             />
 
             {/* LUXURY NAVBAR GLOBAL (GLASSMORPHISM DE ALTA GAMA & MENÚ EDITORIAL) */}
-            <LuxuryNavbar />
+            <LuxuryNavbar initialGoldPrice={goldPrice} />
 
             {/* HERO SECTION REDISEÑADO (Composición Monumental, Sello Ley 750 & Consola Glass Atelier) */}
             <HeroLuxuryShowcase
                 storeHeroBgUrl={CONFIG.storeHeroBgUrl}
                 phrases={TYPEWRITER_PHRASES}
                 whatsappHeroUrl={whatsappHeroUrl}
+                goldPrice={goldPrice}
             />
 
             {/* CARRUSEL DE COLECCIONES */}
@@ -440,104 +459,113 @@ export default function HomePageClient({
             </section>
 
             {/* CALCULADORA & COTIZACIÓN LUXURY EN CONSOLA GLASS ATELIER */}
-            <section id="cotizador" className="py-28 sm:py-36 px-6 border-t border-white/10 bg-gradient-to-b from-stone-950 via-stone-900/30 to-stone-950 relative overflow-hidden">
+            <section id="cotizador" className="py-14 sm:py-32 px-4 sm:px-6 border-t border-white/10 bg-gradient-to-b from-stone-950 via-stone-900/30 to-stone-950 relative overflow-hidden">
                 {/* Luces volumétricas secundarias de fondo */}
                 <div className="absolute top-1/3 left-1/4 w-[500px] h-[400px] bg-amber-500/10 blur-[150px] pointer-events-none -z-10" />
                 <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[400px] bg-yellow-500/10 blur-[150px] pointer-events-none -z-10" />
 
                 <div className="max-w-5xl mx-auto">
                     {/* Header con Indicador en Vivo */}
-                    <div className="text-center mb-12 reveal-init">
-                        <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-sans mb-4 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
+                    <div className="text-center mb-8 sm:mb-12 reveal-init">
+                        <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] sm:text-xs font-sans mb-3 sm:mb-4 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
                             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" />
-                            <span className="font-semibold uppercase tracking-wider">Indicador de Cotización en Vivo // Oro 18K Ley 750</span>
+                            <span className="font-semibold uppercase tracking-wider">Cotización en Vivo // Oro 18K Ley 750</span>
                         </div>
-                        <h2 className="font-serif text-3xl sm:text-5xl text-stone-100 tracking-tight mb-3">Calculadora & Avalúos de Oro</h2>
+                        <h2 className="font-serif text-2xl sm:text-4xl lg:text-5xl text-stone-100 tracking-tight mb-2 sm:mb-3">Calculadora & Avalúos de Oro</h2>
                         <p className="text-stone-300 text-xs sm:text-sm font-sans font-light max-w-2xl mx-auto">
                             Comercializamos <strong className="text-stone-100 font-medium">Oro Nacional</strong> (macizo orfebre) y <strong className="text-stone-100 font-medium">Oro Italiano</strong> (tejidos europeos de precisión), ambos garantizados en <strong className="text-amber-300 font-medium">18 Kilates Ley 750</strong>.
                         </p>
                     </div>
 
                     {/* Consola de Cristal Double-Bezel */}
-                    <div className="p-2 sm:p-3 rounded-[2.5rem] bg-white/[0.03] border border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.8)] backdrop-blur-md reveal-init">
-                        <div className="p-7 sm:p-12 rounded-[calc(2.5rem-0.75rem)] bg-stone-950/80 border border-white/10 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.12)]">
+                    <div className="p-1.5 sm:p-3 rounded-3xl sm:rounded-[2.5rem] bg-white/[0.03] border border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.8)] backdrop-blur-md reveal-init">
+                        <div className="p-4 sm:p-10 lg:p-12 rounded-[1.25rem] sm:rounded-[calc(2.5rem-0.75rem)] bg-stone-950/80 border border-white/10 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.12)]">
 
-                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-start">
 
                                 {/* Controles Interactivos (Columna Izquierda) */}
-                                <div className="lg:col-span-7 space-y-7">
+                                <div className="lg:col-span-7 space-y-5 sm:space-y-7">
 
                                     {/* 1. SELECCIÓN DE LÍNEA DE ORO (NACIONAL VS ITALIANO) */}
                                     <div>
-                                        <label className="block text-xs font-sans uppercase tracking-[0.2em] text-stone-300 mb-3 font-medium">
+                                        <label className="block text-[11px] sm:text-xs font-sans uppercase tracking-[0.2em] text-stone-300 mb-2.5 font-medium">
                                             1. Selección de Línea de Oro 18K:
                                         </label>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                                        <div className="grid grid-cols-2 gap-2 sm:gap-3.5">
                                             <button
                                                 type="button"
                                                 onClick={() => setGoldOrigin('nacional')}
-                                                className={`p-4 rounded-2xl text-left border transition-all duration-200 flex flex-col justify-between active:scale-[0.98] ${
+                                                className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl text-left border transition-all duration-200 flex flex-col justify-between active:scale-[0.98] ${
                                                     goldOrigin === 'nacional'
                                                         ? 'bg-amber-500/15 border-amber-400 text-stone-100 shadow-[0_0_20px_rgba(245,158,11,0.2)] ring-1 ring-amber-400'
                                                         : 'bg-stone-900/60 border-white/10 text-stone-400 hover:border-amber-400/40 hover:text-stone-200'
                                                 }`}
                                             >
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <span className="font-serif text-sm sm:text-base font-bold text-amber-300 flex items-center gap-2 tracking-wide">
-                                                        🇨🇴 Oro Nacional 18K
+                                                <div className="flex items-center justify-between mb-1 sm:mb-2">
+                                                    <span className="font-serif text-xs sm:text-base font-bold text-amber-300 flex items-center gap-1.5 sm:gap-2 tracking-wide">
+                                                        🇨🇴 Oro Nacional
                                                     </span>
                                                     {goldOrigin === 'nacional' && <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse shadow-[0_0_6px_#fbbf24]" />}
                                                 </div>
-                                                <p className="text-[11px] text-stone-400 font-sans font-light leading-relaxed">
+                                                <p className="hidden sm:block text-[11px] text-stone-400 font-sans font-light leading-relaxed">
                                                     Hechura orfebre maciza y tradicional. Máxima resistencia y forja a medida.
                                                 </p>
+                                                <span className="sm:hidden text-[10px] text-stone-400 font-sans font-light">
+                                                    Macizo tradicional
+                                                </span>
                                             </button>
 
                                             <button
                                                 type="button"
                                                 onClick={() => setGoldOrigin('italiano')}
-                                                className={`p-4 rounded-2xl text-left border transition-all duration-200 flex flex-col justify-between active:scale-[0.98] ${
+                                                className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl text-left border transition-all duration-200 flex flex-col justify-between active:scale-[0.98] ${
                                                     goldOrigin === 'italiano'
                                                         ? 'bg-amber-500/15 border-amber-400 text-stone-100 shadow-[0_0_20px_rgba(245,158,11,0.2)] ring-1 ring-amber-400'
                                                         : 'bg-stone-900/60 border-white/10 text-stone-400 hover:border-amber-400/40 hover:text-stone-200'
                                                 }`}
                                             >
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <span className="font-serif text-sm sm:text-base font-bold text-amber-300 flex items-center gap-2 tracking-wide">
-                                                        🇮🇹 Oro Italiano 18K
+                                                <div className="flex items-center justify-between mb-1 sm:mb-2">
+                                                    <span className="font-serif text-xs sm:text-base font-bold text-amber-300 flex items-center gap-1.5 sm:gap-2 tracking-wide">
+                                                        🇮🇹 Oro Italiano
                                                     </span>
                                                     {goldOrigin === 'italiano' && <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse shadow-[0_0_6px_#fbbf24]" />}
                                                 </div>
-                                                <p className="text-[11px] text-stone-400 font-sans font-light leading-relaxed">
+                                                <p className="hidden sm:block text-[11px] text-stone-400 font-sans font-light leading-relaxed">
                                                     Tejidos europeos de alta precisión, pulido espejo y broches reforzados.
                                                 </p>
+                                                <span className="sm:hidden text-[10px] text-stone-400 font-sans font-light">
+                                                    Tejido europeo
+                                                </span>
                                             </button>
                                         </div>
                                     </div>
 
-                                    {/* 2. TIPO DE SERVICIO */}
+                                    {/* 2. TIPO DE SERVICIO (Segmentado en móvil, lista en desktop) */}
                                     <div>
-                                        <label className="block text-xs font-sans uppercase tracking-[0.2em] text-stone-300 mb-3 font-medium">
+                                        <label className="block text-[11px] sm:text-xs font-sans uppercase tracking-[0.2em] text-stone-300 mb-2.5 font-medium">
                                             2. Tipo de Servicio:
                                         </label>
-                                        <div className="grid grid-cols-1 gap-2.5">
+                                        <div className="grid grid-cols-3 sm:grid-cols-1 gap-1.5 sm:gap-2.5">
                                             {[
-                                                { id: 'vender_mi_oro', label: 'Vender mi Oro / Avalúo de Piezas', icon: '✦' },
-                                                { id: 'fabricar_joya', label: 'Fabricar Joya Personalizada 18K', icon: '◇' },
-                                                { id: 'comprar_joya', label: 'Comprar Joya del Catálogo', icon: '◈' },
+                                                { id: 'vender_mi_oro', shortLabel: 'Vender Oro', fullLabel: 'Vender mi Oro / Avalúo de Piezas', icon: '✦' },
+                                                { id: 'fabricar_joya', shortLabel: 'Fabricar', fullLabel: 'Fabricar Joya Personalizada 18K', icon: '◇' },
+                                                { id: 'comprar_joya', shortLabel: 'Comprar', fullLabel: 'Comprar Joya del Catálogo', icon: '◈' },
                                             ].map((s) => (
                                                 <button
                                                     key={s.id}
                                                     type="button"
                                                     onClick={() => setCalcService(s.id as any)}
-                                                    className={`py-3 px-4 rounded-xl text-xs font-sans text-left border transition-all duration-200 flex items-center justify-between active:scale-[0.98] ${
+                                                    className={`py-2.5 sm:py-3 px-2 sm:px-4 rounded-xl text-xs font-sans text-center sm:text-left border transition-all duration-200 flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-1 active:scale-[0.98] ${
                                                         calcService === s.id
                                                             ? 'bg-amber-500/20 border-amber-400 text-amber-300 font-semibold shadow-[0_0_15px_rgba(245,158,11,0.2)]'
                                                             : 'bg-stone-900/60 border-white/10 text-stone-300 hover:border-amber-400/30'
                                                     }`}
                                                 >
-                                                    <span className="tracking-wider uppercase">{s.label}</span>
-                                                    <span className="text-amber-400">{s.icon}</span>
+                                                    <span className="tracking-wider uppercase text-[10px] sm:text-xs">
+                                                        <span className="sm:hidden">{s.shortLabel}</span>
+                                                        <span className="hidden sm:inline">{s.fullLabel}</span>
+                                                    </span>
+                                                    <span className="text-amber-400 text-xs sm:text-sm">{s.icon}</span>
                                                 </button>
                                             ))}
                                         </div>
@@ -545,11 +573,11 @@ export default function HomePageClient({
 
                                     {/* 3. GRAMAJE */}
                                     <div>
-                                        <div className="flex justify-between items-center mb-3">
-                                            <label className="text-xs font-sans uppercase tracking-[0.2em] text-stone-300 font-medium">
+                                        <div className="flex justify-between items-center mb-2 sm:mb-3">
+                                            <label className="text-[11px] sm:text-xs font-sans uppercase tracking-[0.2em] text-stone-300 font-medium">
                                                 3. Gramaje Estimado:
                                             </label>
-                                            <span className="text-amber-300 font-mono text-sm font-bold bg-stone-900/90 px-3.5 py-1 rounded-lg border border-amber-500/40 tracking-wider shadow-sm">
+                                            <span className="text-amber-300 font-mono text-xs sm:text-sm font-bold bg-stone-900/90 px-3 py-1 rounded-lg border border-amber-500/40 tracking-wider shadow-sm">
                                                 {calcGrams} Gramos
                                             </span>
                                         </div>
@@ -559,53 +587,71 @@ export default function HomePageClient({
                                             max="50"
                                             value={calcGrams}
                                             onChange={(e) => setCalcGrams(Number(e.target.value))}
-                                            className="w-full accent-amber-400 bg-stone-900 h-2.5 rounded-lg cursor-pointer"
+                                            className="w-full accent-amber-400 bg-stone-900 h-2 sm:h-2.5 rounded-lg cursor-pointer"
                                         />
-                                        <div className="flex justify-between text-[10px] font-sans text-stone-400 mt-2">
-                                            <span>1g (Dije / Anillo)</span>
+                                        <div className="flex justify-between text-[9px] sm:text-[10px] font-sans text-stone-400 mt-1.5 sm:mt-2">
+                                            <span>1g (Dije/Anillo)</span>
                                             <span>15g (Cadena)</span>
-                                            <span>50g+ (Alta Joyería / Lote)</span>
+                                            <span>50g+ (Lote/Alta Joyería)</span>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Ficha Resumen & Cotización en Vivo (Columna Derecha) */}
-                                <div className="lg:col-span-5 p-6 sm:p-7 rounded-2xl bg-stone-900/60 border border-white/15 flex flex-col justify-between h-full space-y-6 shadow-xl relative overflow-hidden backdrop-blur-xl">
+                                <div className="lg:col-span-5 p-4 sm:p-7 rounded-2xl bg-stone-900/60 border border-white/15 flex flex-col justify-between h-full space-y-4 sm:space-y-6 shadow-xl relative overflow-hidden backdrop-blur-xl mt-2 lg:mt-0">
 
                                     {/* Brillo sutil de fondo */}
                                     <div className="absolute top-0 right-0 w-36 h-36 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
 
                                     <div>
-                                        <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/10">
-                                            <span className="text-[10px] font-sans uppercase tracking-widest text-emerald-400 flex items-center gap-1.5 font-semibold">
-                                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                                                Tasa del Día Activa
+                                        <div className="flex items-center justify-between mb-3 sm:mb-4 pb-2.5 sm:pb-3 border-b border-white/10">
+                                            <span className="text-[9.5px] sm:text-[10px] font-sans uppercase tracking-wider text-emerald-400 flex items-center gap-1.5 font-semibold">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_6px_#34d399]" />
+                                                Tasa en Vivo 18K: {goldPrice.formatted_18k}/g
                                             </span>
-                                            <span className="text-[10px] font-mono text-amber-300 tracking-wider">
-                                                Pureza Ley 750 (18K)
+                                            <span className="text-[9.5px] sm:text-[10px] font-mono text-stone-400">
+                                                {goldPrice.lastUpdatedLabel}
                                             </span>
                                         </div>
 
-                                        <div className="space-y-3.5 mb-5">
-                                            <div className="flex justify-between items-center text-xs">
+                                        {/* CAJA DE VALORACIÓN / COTIZACIÓN EN VIVO */}
+                                        {(() => {
+                                            const valuation = calculateGoldValuation(calcGrams, calcService, goldOrigin, goldPrice.price_gram_18k);
+                                            return (
+                                                <div className="p-3 sm:p-4 rounded-xl bg-gradient-to-br from-amber-500/10 via-stone-900/80 to-stone-950 border border-amber-400/30 text-center space-y-0.5 sm:space-y-1 mb-3 sm:mb-5 shadow-[0_0_20px_rgba(245,158,11,0.1)]">
+                                                    <span className="text-[9.5px] sm:text-[10px] font-mono uppercase tracking-widest text-amber-300/80 block">
+                                                        {calcService === 'vender_mi_oro' ? 'Avalúo Estimado de Compra' : 'Presupuesto Estimado'} ({calcGrams}g)
+                                                    </span>
+                                                    <div className="font-serif text-xl sm:text-3xl text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-500 font-bold">
+                                                        {valuation.formattedTotal}
+                                                    </div>
+                                                    <span className="text-[9.5px] sm:text-[10px] font-sans text-stone-400 block font-light">
+                                                        {valuation.notes}
+                                                    </span>
+                                                </div>
+                                            );
+                                        })()}
+
+                                        <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-5 text-[11px] sm:text-xs">
+                                            <div className="flex justify-between items-center">
                                                 <span className="text-stone-400 font-sans">Línea Seleccionada:</span>
                                                 <span className="text-amber-300 font-serif font-semibold tracking-wide">
                                                     {goldOrigin === 'nacional' ? 'Oro Nacional 18K' : 'Oro Italiano 18K'}
                                                 </span>
                                             </div>
-                                            <div className="flex justify-between items-center text-xs">
+                                            <div className="flex justify-between items-center">
                                                 <span className="text-stone-400 font-sans">Peso a Evaluar:</span>
-                                                <span className="text-stone-100 font-mono font-bold text-sm tracking-wide">
+                                                <span className="text-stone-100 font-mono font-bold tracking-wide">
                                                     {calcGrams}g
                                                 </span>
                                             </div>
-                                            <div className="flex justify-between items-center text-xs">
+                                            <div className="flex justify-between items-center">
                                                 <span className="text-stone-400 font-sans">Certificación:</span>
-                                                <span className="text-amber-300 font-sans font-medium tracking-wide">Garantía Permanente</span>
+                                                <span className="text-amber-300 font-sans font-medium tracking-wide">Garantía Permanente Ley 750</span>
                                             </div>
                                         </div>
 
-                                        <div className="p-4 rounded-xl bg-stone-950/70 border border-white/10 text-[11px] font-sans text-stone-300 leading-relaxed font-light mb-4">
+                                        <div className="p-3 sm:p-3.5 rounded-xl bg-stone-950/70 border border-white/10 text-[10.5px] sm:text-[11px] font-sans text-stone-300 leading-relaxed font-light mb-3 sm:mb-4">
                                             {calcService === 'vender_mi_oro' && (
                                                 <span>💎 <strong>Avalúo en Vivo:</strong> Pesaje exacto con balanza analítica calibrada frente a ti y pago inmediato en efectivo o banco con la mejor tasa del mercado.</span>
                                             )}
@@ -618,15 +664,15 @@ export default function HomePageClient({
                                         </div>
                                     </div>
 
-                                    <div className="space-y-2.5">
+                                    <div className="space-y-2">
                                         <a
                                             href={getCalcWhatsappUrl()}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="relative overflow-hidden w-full py-3.5 px-5 rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-stone-950 font-sans text-xs font-bold hover:brightness-105 transition-all uppercase tracking-wider shadow-[0_0_25px_rgba(245,158,11,0.35)] flex items-center justify-center gap-2 text-center active:scale-[0.98]"
+                                            className="relative overflow-hidden w-full py-3 sm:py-3.5 px-4 rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-stone-950 font-sans text-xs font-bold hover:brightness-105 transition-all uppercase tracking-wider shadow-[0_0_25px_rgba(245,158,11,0.35)] flex items-center justify-center gap-2 text-center active:scale-[0.98]"
                                         >
                                             <span className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none animate-liquid-sweep" />
-                                            <span className="relative z-10">{calcService === 'vender_mi_oro' ? 'Consultar Tasa en Vivo en WhatsApp' : 'Enviar Consulta a WhatsApp'}</span>
+                                            <span className="relative z-10">{calcService === 'vender_mi_oro' ? 'Consultar Tasa en WhatsApp' : 'Enviar Consulta a WhatsApp'}</span>
                                             <span className="relative z-10">→</span>
                                         </a>
 
@@ -643,113 +689,121 @@ export default function HomePageClient({
                 </div>
             </section>
 
-            {/* PRODUCTOS DESTACADOS */}
-            <section id="destacados" className="py-28 sm:py-36 px-6 border-t border-white/10 bg-gradient-to-b from-stone-950 via-stone-900/15 to-stone-950 relative">
+            {/* PRODUCTOS DESTACADOS (CARRUSEL TÁCTIL EN MÓVIL // GRILLA EN DESKTOP) */}
+            <section id="destacados" className="py-14 sm:py-32 px-4 sm:px-6 border-t border-white/10 bg-gradient-to-b from-stone-950 via-stone-900/15 to-stone-950 relative">
                 <div className="max-w-7xl mx-auto">
-                    <div className="text-center mb-16 reveal-init">
+                    <div className="text-center mb-8 sm:mb-16 reveal-init">
                         <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-300 text-[10px] uppercase tracking-[0.25em] font-medium mb-3 backdrop-blur-sm">
                             <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
                             <span>Selección del Taller // Piezas Maestras</span>
                         </div>
-                        <h2 className="font-serif text-3xl sm:text-5xl text-stone-100 tracking-tight mb-4">Joyas Destacadas</h2>
+                        <h2 className="font-serif text-3xl sm:text-5xl text-stone-100 tracking-tight mb-2 sm:mb-4">Joyas Destacadas</h2>
                         <p className="text-stone-300 text-xs sm:text-sm font-sans font-light max-w-xl mx-auto">
                             Joyas elaboradas minuciosamente con altos estándares de pureza Ley 750 y acabado pulido espejo.
                         </p>
                     </div>
 
                     {loading ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div className="flex sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8 overflow-x-auto sm:overflow-visible pb-4 sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0 no-scrollbar">
                             {[1, 2, 3].map((i) => (
-                                <div key={i} className="h-96 rounded-3xl bg-stone-900/50 border border-white/10 animate-pulse" />
+                                <div key={i} className="w-[82vw] xs:w-[78vw] sm:w-auto shrink-0 sm:shrink h-96 rounded-3xl bg-stone-900/50 border border-white/10 animate-pulse" />
                             ))}
                         </div>
                     ) : featuredProducts.length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {featuredProducts.map((item, idx) => {
-                                const categoryName = (Array.isArray(item.categories) ? item.categories[0]?.name : item.categories?.name) || 'Oro 18K';
-                                const itemWeight = item.weight_grams ? `${item.weight_grams}g` : 'A consultar';
-                                const itemPrice = item.price ? `$${item.price.toLocaleString('es-CO')} COP` : 'A consultar';
-                                const itemImage = item.image_url || '';
+                        <>
+                            <div className="flex sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8 overflow-x-auto sm:overflow-visible snap-x snap-mandatory pb-4 sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0 no-scrollbar">
+                                {featuredProducts.map((item, idx) => {
+                                    const categoryName = (Array.isArray(item.categories) ? item.categories[0]?.name : item.categories?.name) || 'Oro 18K';
+                                    const itemWeight = item.weight_grams ? `${item.weight_grams}g` : 'A consultar';
+                                    const itemPrice = item.price ? `$${item.price.toLocaleString('es-CO')} COP` : 'A consultar';
+                                    const itemImage = item.image_url || '';
 
-                                const whatsappText =
-                                    `*COTIZACIÓN DE JOYA DESTACADA // SOL DE ORO*\n\n` +
-                                    `• Joya: ${item.name}\n` +
-                                    `• Categoría: ${categoryName}\n` +
-                                    `• Peso: ${itemWeight}\n` +
-                                    `• Precio: ${itemPrice}\n\n` +
-                                    `Hola, me interesa obtener más detalles sobre esta pieza.`;
+                                    const whatsappText =
+                                        `*COTIZACIÓN DE JOYA DESTACADA // SOL DE ORO*\n\n` +
+                                        `• Joya: ${item.name}\n` +
+                                        `• Categoría: ${categoryName}\n` +
+                                        `• Peso: ${itemWeight}\n` +
+                                        `• Precio: ${itemPrice}\n\n` +
+                                        `Hola, me interesa obtener más detalles sobre esta pieza.`;
 
-                                return (
-                                    <div
-                                        key={item.id}
-                                        className={`group rounded-3xl bg-stone-900/50 border border-white/10 hover:border-amber-400/50 transition-all duration-300 overflow-hidden flex flex-col justify-between shadow-[0_8px_30px_rgba(0,0,0,0.5)] hover:shadow-[0_12px_40px_rgba(245,158,11,0.15)] reveal-init delay-stagger-${(idx % 3) + 1}`}
-                                    >
-                                        <Link href={`/producto/${item.id}`} className="relative aspect-square w-full overflow-hidden bg-stone-950 block">
-                                            {itemImage ? (
-                                                <img
-                                                    src={itemImage}
-                                                    alt={`${item.name} - Sol de Oro Joyería`}
-                                                    loading="lazy"
-                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 brightness-95"
-                                                />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-stone-600 font-serif">
-                                                    Sin Foto
-                                                </div>
-                                            )}
-                                            <span className="absolute top-4 left-4 text-[10px] font-sans bg-stone-950/80 backdrop-blur-md text-amber-300 border border-white/15 px-3 py-1 rounded-full uppercase tracking-wider">
-                                                {categoryName}
-                                            </span>
-                                        </Link>
-
-                                        <div className="p-6 sm:p-7 flex-1 flex flex-col justify-between">
-                                            <div>
-                                                <Link href={`/producto/${item.id}`}>
-                                                    <h3 className="font-serif text-xl sm:text-2xl text-stone-100 group-hover:text-amber-300 transition-colors tracking-wide mb-2">
-                                                        {item.name}
-                                                    </h3>
-                                                </Link>
-                                                {item.description && (
-                                                    <p className="text-xs text-stone-400 font-sans font-light line-clamp-2 mb-4 leading-relaxed">
-                                                        {item.description}
-                                                    </p>
+                                    return (
+                                        <div
+                                            key={item.id}
+                                            className={`w-[82vw] xs:w-[78vw] sm:w-auto shrink-0 sm:shrink snap-center group rounded-3xl bg-stone-900/50 border border-white/10 hover:border-amber-400/50 transition-all duration-300 overflow-hidden flex flex-col justify-between shadow-[0_8px_30px_rgba(0,0,0,0.5)] hover:shadow-[0_12px_40px_rgba(245,158,11,0.15)] reveal-init delay-stagger-${(idx % 3) + 1}`}
+                                        >
+                                            <Link href={`/producto/${item.id}`} className="relative aspect-square w-full overflow-hidden bg-stone-950 block">
+                                                {itemImage ? (
+                                                    <img
+                                                        src={itemImage}
+                                                        alt={`${item.name} - Sol de Oro Joyería`}
+                                                        loading="lazy"
+                                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 brightness-95"
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-stone-600 font-serif">
+                                                        Sin Foto
+                                                    </div>
                                                 )}
-                                            </div>
+                                                <span className="absolute top-3.5 left-3.5 text-[10px] font-sans bg-stone-950/80 backdrop-blur-md text-amber-300 border border-white/15 px-3 py-1 rounded-full uppercase tracking-wider">
+                                                    {categoryName}
+                                                </span>
+                                            </Link>
 
-                                            <div className="pt-5 border-t border-white/10 flex items-center justify-between">
+                                            <div className="p-5 sm:p-7 flex-1 flex flex-col justify-between">
                                                 <div>
-                                                    {item.weight_grams && (
-                                                        <span className="text-[10px] font-mono text-stone-400 block uppercase tracking-wider">
-                                                            Peso: {item.weight_grams}g
-                                                        </span>
+                                                    <Link href={`/producto/${item.id}`}>
+                                                        <h3 className="font-serif text-lg sm:text-2xl text-stone-100 group-hover:text-amber-300 transition-colors tracking-wide mb-1.5 sm:mb-2 line-clamp-1">
+                                                            {item.name}
+                                                        </h3>
+                                                    </Link>
+                                                    {item.description && (
+                                                        <p className="text-xs text-stone-400 font-sans font-light line-clamp-2 mb-3 sm:mb-4 leading-relaxed">
+                                                            {item.description}
+                                                        </p>
                                                     )}
-                                                    <span className="text-amber-400 font-bold">
-                                                        {item.price ? (
-                                                            <>
-                                                                <span className="font-sans text-xs text-amber-500/80 mr-0.5">$</span>
-                                                                <span className="font-serif text-lg tracking-wide text-amber-300">{item.price.toLocaleString('es-CO')}</span>
-                                                                <span className="font-sans text-[10px] text-stone-400 ml-1">COP</span>
-                                                            </>
-                                                        ) : (
-                                                            <span className="font-sans text-xs text-amber-400">A consultar</span>
-                                                        )}
-                                                    </span>
                                                 </div>
 
-                                                <a
-                                                    href={`https://wa.me/${CONFIG.phoneWhatsapp}?text=${encodeURIComponent(whatsappText)}`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="px-5 py-2 rounded-full bg-amber-500/10 border border-amber-500/40 text-amber-300 hover:bg-amber-400 hover:text-stone-950 text-xs font-sans font-semibold uppercase tracking-wider transition-all active:scale-[0.97]"
-                                                >
-                                                    Cotizar
-                                                </a>
+                                                <div className="pt-4 sm:pt-5 border-t border-white/10 flex items-center justify-between gap-2">
+                                                    <div>
+                                                        {item.weight_grams && (
+                                                            <span className="text-[10px] font-mono text-stone-400 block uppercase tracking-wider">
+                                                                Peso: {item.weight_grams}g
+                                                            </span>
+                                                        )}
+                                                        <span className="text-amber-400 font-bold">
+                                                            {item.price ? (
+                                                                <>
+                                                                    <span className="font-sans text-xs text-amber-500/80 mr-0.5">$</span>
+                                                                    <span className="font-serif text-base sm:text-lg tracking-wide text-amber-300">{item.price.toLocaleString('es-CO')}</span>
+                                                                    <span className="font-sans text-[10px] text-stone-400 ml-1">COP</span>
+                                                                </>
+                                                            ) : (
+                                                                <span className="font-sans text-xs text-amber-400">A consultar</span>
+                                                            )}
+                                                        </span>
+                                                    </div>
+
+                                                    <a
+                                                        href={`https://wa.me/${CONFIG.phoneWhatsapp}?text=${encodeURIComponent(whatsappText)}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="px-4 sm:px-5 py-2 rounded-full bg-amber-500/10 border border-amber-500/40 text-amber-300 hover:bg-amber-400 hover:text-stone-950 text-xs font-sans font-semibold uppercase tracking-wider transition-all active:scale-[0.97] shrink-0"
+                                                    >
+                                                        Cotizar
+                                                    </a>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Indicador táctil móvil para deslizar */}
+                            <div className="sm:hidden flex items-center justify-center gap-2 mt-3 text-[11px] font-mono text-stone-400">
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                                <span>Desliza horizontalmente para ver más joyas ({featuredProducts.length}) →</span>
+                            </div>
+                        </>
                     ) : (
                         <div className="text-center py-12 border border-white/10 rounded-3xl bg-stone-900/30 max-w-md mx-auto">
                             <p className="font-serif text-stone-300 mb-2">No hay joyas destacadas aún</p>
@@ -757,7 +811,7 @@ export default function HomePageClient({
                         </div>
                     )}
 
-                    <div className="mt-14 text-center reveal-init">
+                    <div className="mt-8 sm:mt-14 text-center reveal-init">
                         <Link
                             href="/catalogo"
                             className="inline-flex items-center gap-3 px-8 py-3.5 rounded-full bg-stone-900/80 border border-white/15 text-stone-200 hover:text-amber-300 hover:border-amber-400/50 text-xs font-sans transition-all font-semibold uppercase tracking-wider backdrop-blur-xl active:scale-[0.98] shadow-md"
@@ -769,36 +823,101 @@ export default function HomePageClient({
                 </div>
             </section>
 
-            {/* PREGUNTAS FRECUENTES - ACORDEÓN EDITORIAL MINIMALISTA */}
-            <section id="faqs" className="py-28 sm:py-36 px-6 border-t border-white/10 bg-stone-950 relative">
-                <div className="max-w-4xl mx-auto">
-                    <div className="text-center mb-16 reveal-init">
-                        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-300 text-[10px] uppercase tracking-[0.25em] font-medium mb-3 backdrop-blur-sm">
+            {/* PREGUNTAS FRECUENTES // TRANSPARENCIA GARANTIZADA CON FONDO_2.WEBP DE FONDO */}
+            <section id="faqs" className="py-20 sm:py-36 px-4 sm:px-6 border-t border-white/10 bg-stone-950 relative overflow-hidden">
+                {/* 1. FONDO REAL DEL NEGOCIO (FONDO_2.WEBP) DETRÁS DE TODO, EXACTAMENTE IGUAL QUE EN EL HERO */}
+                <div
+                    className="absolute inset-0 bg-cover bg-center bg-no-repeat pointer-events-none opacity-65 scale-100"
+                    style={{
+                        backgroundImage: `url('/Fondo_2.webp')`,
+                    }}
+                />
+
+                {/* Gradientes transparentes y viñeta cálida que dejan ver el fondo pero aseguran legibilidad óptima */}
+                <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/60 to-stone-950/80 pointer-events-none" />
+                <div className="absolute inset-0 bg-radial-[circle_at_center] from-transparent via-stone-950/40 to-stone-950/90 pointer-events-none" />
+
+                {/* Resplandor cálido de luz ámbar */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[450px] bg-amber-500/10 rounded-full blur-[140px] pointer-events-none" />
+
+                {/* 2. CONTENIDO CENTRADO CON GARANTÍAS Y ACORDEÓN DE TRANSPARENCIA (100% VISIBLE) */}
+                <div className="max-w-4xl mx-auto relative z-10">
+                    <div className="text-center mb-8 sm:mb-12">
+                        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-stone-900/80 border border-amber-500/30 text-amber-300 text-[10px] uppercase tracking-[0.25em] font-medium mb-3 backdrop-blur-md shadow-lg">
                             <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                            <span>Transparencia & Seguridad // Preguntas Frecuentes</span>
+                            <span>Transparencia & Seguridad // Garantía Certificada</span>
                         </div>
-                        <h2 className="font-serif text-3xl sm:text-5xl text-stone-100 tracking-tight">Transparencia Garantizada</h2>
+                        <h2 className="font-serif text-3xl sm:text-5xl text-stone-100 tracking-tight mb-3">Transparencia Garantizada</h2>
+                        <p className="text-stone-300 text-xs sm:text-sm font-sans font-light max-w-xl mx-auto">
+                            Comercio formal, pesaje analítico a la vista de nuestros clientes y respaldo directo en nuestra sede física.
+                        </p>
                     </div>
 
-                    <div className="divide-y divide-white/10">
+                    {/* 3 PILARES DE SEGURIDAD Y CONFIANZA */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4 mb-8 sm:mb-12">
+                        <div className="p-4 sm:p-5 rounded-2xl bg-stone-900/75 border border-white/10 backdrop-blur-xl flex items-start gap-3.5 shadow-lg">
+                            <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-300 shrink-0 text-base">
+                                ⚖️
+                            </div>
+                            <div>
+                                <h4 className="text-xs sm:text-sm font-serif text-stone-100 font-semibold tracking-wide mb-1">
+                                    Balanzas Analíticas
+                                </h4>
+                                <p className="text-[11px] text-stone-400 font-sans font-light leading-relaxed">
+                                    Pesaje milimétrico frente a ti con calibración certificada. Cero aproximaciones.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="p-4 sm:p-5 rounded-2xl bg-stone-900/75 border border-white/10 backdrop-blur-xl flex items-start gap-3.5 shadow-lg">
+                            <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-300 shrink-0 text-base">
+                                🧪
+                            </div>
+                            <div>
+                                <h4 className="text-xs sm:text-sm font-serif text-stone-100 font-semibold tracking-wide mb-1">
+                                    Prueba Química en Vivo
+                                </h4>
+                                <p className="text-[11px] text-stone-400 font-sans font-light leading-relaxed">
+                                    Verificación instantánea con ácido de pureza Ley 750 (18K) ante tus ojos.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="p-4 sm:p-5 rounded-2xl bg-stone-900/75 border border-white/10 backdrop-blur-xl flex items-start gap-3.5 shadow-lg">
+                            <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-300 shrink-0 text-base">
+                                📜
+                            </div>
+                            <div>
+                                <h4 className="text-xs sm:text-sm font-serif text-stone-100 font-semibold tracking-wide mb-1">
+                                    Garantía Escrita
+                                </h4>
+                                <p className="text-[11px] text-stone-400 font-sans font-light leading-relaxed">
+                                    Certificado físico que respalda la autenticidad y pureza de tu joya de por vida.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* ACORDEÓN DE PREGUNTAS FRECUENTES */}
+                    <div className="rounded-3xl bg-stone-900/75 border border-white/15 backdrop-blur-xl p-5 sm:p-10 shadow-[0_20px_60px_rgba(0,0,0,0.8)] divide-y divide-white/10">
                         {FAQS.map((faq, idx) => (
                             <div
                                 key={idx}
-                                className="py-7 reveal-init"
+                                className="py-5 sm:py-6 first:pt-0 last:pb-0"
                             >
                                 <button
                                     onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-                                    className="w-full text-left font-serif text-stone-100 hover:text-amber-300 flex items-center justify-between gap-6 text-lg sm:text-xl tracking-wide transition-colors group"
+                                    className="w-full text-left font-serif text-stone-100 hover:text-amber-300 flex items-center justify-between gap-4 text-base sm:text-xl tracking-wide transition-colors group"
                                 >
                                     <span>{faq.q}</span>
-                                    <span className={`w-8 h-8 rounded-full border border-white/15 flex items-center justify-center text-amber-400 text-base transition-transform duration-300 shrink-0 ${
-                                        openFaq === idx ? 'rotate-45 bg-amber-400/10 border-amber-500/40' : 'group-hover:border-amber-400/40'
+                                    <span className={`w-8 h-8 rounded-full border border-white/20 flex items-center justify-center text-amber-400 text-base transition-transform duration-300 shrink-0 ${
+                                        openFaq === idx ? 'rotate-45 bg-amber-400/15 border-amber-500/50' : 'group-hover:border-amber-400/40 bg-stone-900/50'
                                     }`}>
                                         +
                                     </span>
                                 </button>
                                 {openFaq === idx && (
-                                    <div className="text-stone-300 text-xs sm:text-sm font-sans font-light leading-relaxed pt-4 max-w-3xl animate-fadeIn">
+                                    <div className="text-stone-300 text-xs sm:text-sm font-sans font-light leading-relaxed pt-3.5 max-w-3xl animate-fadeIn">
                                         {faq.a}
                                     </div>
                                 )}
