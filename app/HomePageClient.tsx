@@ -19,6 +19,7 @@ import { createClient } from '@/lib/supabase/client';
 import { SITE_CONFIG } from '@/lib/config';
 import HeroLuxuryShowcase from '@/components/home/HeroLuxuryShowcase';
 import LuxuryNavbar from '@/components/ui/LuxuryNavbar';
+import FadeIn from '@/components/ui/FadeIn';
 import { GoldPriceData, calculateGoldValuation } from '@/lib/gold/gold-types';
 import { useGoldPrice } from '@/lib/hooks/useGoldPrice';
 
@@ -338,31 +339,33 @@ export default function HomePageClient({
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-amber-500/5 blur-[160px] pointer-events-none -z-10" />
 
                 <div className="max-w-7xl mx-auto">
-                    <div className="flex flex-col md:flex-row md:items-end justify-between mb-14 gap-6 reveal-init">
-                        <div>
-                            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-300 text-[10px] uppercase tracking-[0.25em] font-medium mb-3 backdrop-blur-sm">
-                                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shadow-[0_0_6px_#fbbf24]" />
-                                <span>Galería Oficial // Oro 18K Ley 750</span>
+                    <FadeIn>
+                        <div className="flex flex-col md:flex-row md:items-end justify-between mb-14 gap-6">
+                            <div>
+                                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-300 text-[10px] uppercase tracking-[0.25em] font-medium mb-3 backdrop-blur-sm">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shadow-[0_0_6px_#fbbf24]" />
+                                    <span>Galería Oficial // Oro 18K Ley 750</span>
+                                </div>
+                                <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-stone-100 tracking-tight">
+                                    Colecciones de la Casa
+                                </h2>
+                                <p className="text-stone-300 text-xs sm:text-sm font-sans font-light mt-2 max-w-lg">
+                                    Piezas exclusivas forjadas a mano en Oro Nacional e importación de tejidos europeos con garantía permanente de pureza.
+                                </p>
                             </div>
-                            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-stone-100 tracking-tight">
-                                Colecciones de la Casa
-                            </h2>
-                            <p className="text-stone-300 text-xs sm:text-sm font-sans font-light mt-2 max-w-lg">
-                                Piezas exclusivas forjadas a mano en Oro Nacional e importación de tejidos europeos con garantía permanente de pureza.
-                            </p>
+                            <div className="shrink-0">
+                                <Link
+                                    href="/catalogo"
+                                    className="group shine-effect inline-flex items-center gap-3 px-6 py-2.5 rounded-full bg-stone-900/70 border border-white/15 hover:border-amber-400/40 text-stone-200 hover:text-amber-300 text-xs font-sans tracking-widest uppercase backdrop-blur-xl transition-all active:scale-[0.98] shadow-md"
+                                >
+                                    <span>Explorar Catálogo Completo</span>
+                                    <span className="w-6 h-6 rounded-full bg-white/5 group-hover:bg-amber-400/20 flex items-center justify-center transition-colors">
+                                        <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+                                    </span>
+                                </Link>
+                            </div>
                         </div>
-                        <div className="shrink-0">
-                            <Link
-                                href="/catalogo"
-                                className="group inline-flex items-center gap-3 px-6 py-2.5 rounded-full bg-stone-900/70 border border-white/15 hover:border-amber-400/40 text-stone-200 hover:text-amber-300 text-xs font-sans tracking-widest uppercase backdrop-blur-xl transition-all active:scale-[0.98] shadow-md"
-                            >
-                                <span>Explorar Catálogo Completo</span>
-                                <span className="w-6 h-6 rounded-full bg-white/5 group-hover:bg-amber-400/20 flex items-center justify-center transition-colors">
-                                    <span className="group-hover:translate-x-0.5 transition-transform">→</span>
-                                </span>
-                            </Link>
-                        </div>
-                    </div>
+                    </FadeIn>
 
                     {/* CONTENEDOR CON SCROLL INFINITO Y REVELACIÓN AL SCROLL */}
                     <div
@@ -384,7 +387,7 @@ export default function HomePageClient({
                                     <Link
                                         key={cat.id}
                                         href={`/catalogo?categoria=${cat.id}`}
-                                        className="group relative w-[270px] xs:w-[300px] sm:w-[350px] h-[400px] sm:h-[460px] aspect-[3/4] rounded-3xl overflow-hidden border border-white/10 hover:border-amber-400/60 shadow-[0_10px_35px_rgba(0,0,0,0.6)] hover:shadow-[0_15px_45px_rgba(245,158,11,0.2)] transition-all duration-500 shrink-0 bg-stone-900 snap-start"
+                                        className="group shine-effect relative w-[270px] xs:w-[300px] sm:w-[350px] h-[400px] sm:h-[460px] aspect-[3/4] rounded-3xl overflow-hidden border border-white/10 hover:border-amber-400/60 shadow-[0_10px_35px_rgba(0,0,0,0.6)] hover:shadow-[0_15px_45px_rgba(245,158,11,0.2)] transition-all duration-500 shrink-0 bg-stone-900 snap-start"
                                     >
                                         {cat.image_url ? (
                                             <Image
@@ -393,7 +396,7 @@ export default function HomePageClient({
                                                 fill
                                                 sizes="(max-width: 640px) 270px, (max-width: 1024px) 350px, 350px"
                                                 quality={85}
-                                                className="object-cover group-hover:scale-108 transition-transform duration-700 ease-out brightness-90"
+                                                className="object-cover transition-transform duration-700 ease-out group-hover:scale-105 brightness-90"
                                             />
                                         ) : (
                                             <div className="w-full h-full flex flex-col items-center justify-center bg-stone-900 text-stone-500">
@@ -426,7 +429,7 @@ export default function HomePageClient({
                                         href={`/catalogo?categoria=${cat.id}`}
                                         aria-hidden="true"
                                         tabIndex={-1}
-                                        className="group relative w-[270px] xs:w-[300px] sm:w-[350px] h-[400px] sm:h-[460px] aspect-[3/4] rounded-3xl overflow-hidden border border-white/10 hover:border-amber-400/60 shadow-[0_10px_35px_rgba(0,0,0,0.6)] hover:shadow-[0_15px_45px_rgba(245,158,11,0.2)] transition-all duration-500 shrink-0 bg-stone-900 snap-start"
+                                        className="group shine-effect relative w-[270px] xs:w-[300px] sm:w-[350px] h-[400px] sm:h-[460px] aspect-[3/4] rounded-3xl overflow-hidden border border-white/10 hover:border-amber-400/60 shadow-[0_10px_35px_rgba(0,0,0,0.6)] hover:shadow-[0_15px_45px_rgba(245,158,11,0.2)] transition-all duration-500 shrink-0 bg-stone-900 snap-start"
                                     >
                                         {cat.image_url ? (
                                             <Image
@@ -435,7 +438,7 @@ export default function HomePageClient({
                                                 fill
                                                 sizes="(max-width: 640px) 270px, (max-width: 1024px) 350px, 350px"
                                                 quality={85}
-                                                className="object-cover group-hover:scale-108 transition-transform duration-700 ease-out brightness-90"
+                                                className="object-cover transition-transform duration-700 ease-out group-hover:scale-105 brightness-90"
                                             />
                                         ) : (
                                             <div className="w-full h-full flex flex-col items-center justify-center bg-stone-900 text-stone-500">
@@ -478,22 +481,25 @@ export default function HomePageClient({
 
                 <div className="max-w-5xl mx-auto">
                     {/* Header con Indicador en Vivo */}
-                    <div className="text-center mb-8 sm:mb-12 reveal-init">
-                        <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] sm:text-xs font-sans mb-3 sm:mb-4 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
-                            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" />
-                            <span className="font-semibold uppercase tracking-wider">Cotización en Vivo // Oro 18K Ley 750</span>
+                    <FadeIn>
+                        <div className="text-center mb-8 sm:mb-12">
+                            <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] sm:text-xs font-sans mb-3 sm:mb-4 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
+                                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" />
+                                <span className="font-semibold uppercase tracking-wider">Cotización en Vivo // Oro 18K Ley 750</span>
+                            </div>
+                            <h2 className="font-serif text-2xl sm:text-4xl lg:text-5xl text-stone-100 tracking-tight mb-2 sm:mb-3">Calculadora & Avalúos de Oro</h2>
+                            <p className="text-stone-300 text-xs sm:text-sm font-sans font-light max-w-2xl mx-auto">
+                                Comercializamos <strong className="text-stone-100 font-medium">Oro Nacional</strong> (macizo orfebre) y <strong className="text-stone-100 font-medium">Oro Italiano</strong> (tejidos europeos de precisión), ambos garantizados en <strong className="text-amber-300 font-medium">18 Kilates Ley 750</strong>.
+                            </p>
                         </div>
-                        <h2 className="font-serif text-2xl sm:text-4xl lg:text-5xl text-stone-100 tracking-tight mb-2 sm:mb-3">Calculadora & Avalúos de Oro</h2>
-                        <p className="text-stone-300 text-xs sm:text-sm font-sans font-light max-w-2xl mx-auto">
-                            Comercializamos <strong className="text-stone-100 font-medium">Oro Nacional</strong> (macizo orfebre) y <strong className="text-stone-100 font-medium">Oro Italiano</strong> (tejidos europeos de precisión), ambos garantizados en <strong className="text-amber-300 font-medium">18 Kilates Ley 750</strong>.
-                        </p>
-                    </div>
+                    </FadeIn>
 
                     {/* Consola de Cristal Double-Bezel */}
-                    <div className="p-1.5 sm:p-3 rounded-3xl sm:rounded-[2.5rem] bg-white/[0.03] border border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.8)] backdrop-blur-md reveal-init">
-                        <div className="p-4 sm:p-10 lg:p-12 rounded-[1.25rem] sm:rounded-[calc(2.5rem-0.75rem)] bg-stone-950/80 border border-white/10 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.12)]">
+                    <FadeIn delay={0.15}>
+                        <div className="p-1.5 sm:p-3 rounded-3xl sm:rounded-[2.5rem] bg-white/[0.03] border border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.8)] backdrop-blur-md">
+                            <div className="p-4 sm:p-10 lg:p-12 rounded-[1.25rem] sm:rounded-[calc(2.5rem-0.75rem)] bg-stone-950/80 border border-white/10 backdrop-blur-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.12)]">
 
-                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-start">
+                                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-start">
 
                                 {/* Controles Interactivos (Columna Izquierda) */}
                                 <div className="lg:col-span-7 space-y-5 sm:space-y-7">
@@ -695,7 +701,7 @@ export default function HomePageClient({
                                             href={getCalcWhatsappUrl()}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="relative overflow-hidden w-full py-3 sm:py-3.5 px-4 rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-stone-950 font-sans text-xs font-bold hover:brightness-105 transition-all uppercase tracking-wider shadow-[0_0_25px_rgba(245,158,11,0.35)] flex items-center justify-center gap-2 text-center active:scale-[0.98]"
+                                            className="group relative overflow-hidden shine-effect w-full py-3 sm:py-3.5 px-4 rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-stone-950 font-sans text-xs font-bold hover:brightness-105 transition-all uppercase tracking-wider shadow-[0_0_25px_rgba(245,158,11,0.35)] flex items-center justify-center gap-2 text-center active:scale-[0.98]"
                                         >
                                             <span className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none animate-liquid-sweep" />
                                             <span className="relative z-10 flex items-center justify-center gap-1.5">
@@ -714,22 +720,25 @@ export default function HomePageClient({
 
                         </div>
                     </div>
+                    </FadeIn>
                 </div>
             </section>
 
             {/* PRODUCTOS DESTACADOS (CARRUSEL TÁCTIL EN MÓVIL // GRILLA EN DESKTOP) */}
             <section id="destacados" className="py-14 sm:py-32 px-4 sm:px-6 border-t border-white/10 bg-gradient-to-b from-stone-950 via-stone-900/15 to-stone-950 relative">
                 <div className="max-w-7xl mx-auto">
-                    <div className="text-center mb-8 sm:mb-16 reveal-init">
-                        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-300 text-[10px] uppercase tracking-[0.25em] font-medium mb-3 backdrop-blur-sm">
-                            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                            <span>Selección del Taller // Piezas Maestras</span>
+                    <FadeIn>
+                        <div className="text-center mb-8 sm:mb-16">
+                            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-300 text-[10px] uppercase tracking-[0.25em] font-medium mb-3 backdrop-blur-sm">
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                                <span>Selección del Taller // Piezas Maestras</span>
+                            </div>
+                            <h2 className="font-serif text-3xl sm:text-5xl text-stone-100 tracking-tight mb-2 sm:mb-4">Joyas Destacadas</h2>
+                            <p className="text-stone-300 text-xs sm:text-sm font-sans font-light max-w-xl mx-auto">
+                                Joyas elaboradas minuciosamente con altos estándares de pureza Ley 750 y acabado pulido espejo.
+                            </p>
                         </div>
-                        <h2 className="font-serif text-3xl sm:text-5xl text-stone-100 tracking-tight mb-2 sm:mb-4">Joyas Destacadas</h2>
-                        <p className="text-stone-300 text-xs sm:text-sm font-sans font-light max-w-xl mx-auto">
-                            Joyas elaboradas minuciosamente con altos estándares de pureza Ley 750 y acabado pulido espejo.
-                        </p>
-                    </div>
+                    </FadeIn>
 
                     {loading ? (
                         <div className="flex sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8 overflow-x-auto sm:overflow-visible pb-4 sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0 no-scrollbar">
@@ -755,73 +764,78 @@ export default function HomePageClient({
                                         `Hola, me interesa obtener más detalles sobre esta pieza.`;
 
                                     return (
-                                        <div
+                                        <FadeIn
                                             key={item.id}
-                                            className={`w-[82vw] xs:w-[78vw] sm:w-auto shrink-0 sm:shrink snap-center group rounded-3xl bg-stone-900/50 border border-white/10 hover:border-amber-400/50 transition-all duration-300 overflow-hidden flex flex-col justify-between shadow-[0_8px_30px_rgba(0,0,0,0.5)] hover:shadow-[0_12px_40px_rgba(245,158,11,0.15)] reveal-init delay-stagger-${(idx % 3) + 1}`}
+                                            delay={(idx % 3) * 0.1}
+                                            className="w-[82vw] xs:w-[78vw] sm:w-auto shrink-0 sm:shrink snap-center"
                                         >
-                                            <Link href={`/producto/${item.id}`} className="relative aspect-square w-full overflow-hidden bg-stone-950 block">
-                                                {itemImage ? (
-                                                    <img
-                                                        src={itemImage}
-                                                        alt={`${item.name} - Sol de Oro Joyería`}
-                                                        loading="lazy"
-                                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 brightness-95"
-                                                    />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-stone-600 font-serif">
-                                                        Sin Foto
-                                                    </div>
-                                                )}
-                                                <span className="absolute top-3.5 left-3.5 text-[10px] font-sans bg-stone-950/80 backdrop-blur-md text-amber-300 border border-white/15 px-3 py-1 rounded-full uppercase tracking-wider">
-                                                    {categoryName}
-                                                </span>
-                                            </Link>
-
-                                            <div className="p-5 sm:p-7 flex-1 flex flex-col justify-between">
-                                                <div>
-                                                    <Link href={`/producto/${item.id}`}>
-                                                        <h3 className="font-serif text-lg sm:text-2xl text-stone-100 group-hover:text-amber-300 transition-colors tracking-wide mb-1.5 sm:mb-2 line-clamp-1">
-                                                            {item.name}
-                                                        </h3>
-                                                    </Link>
-                                                    {item.description && (
-                                                        <p className="text-xs text-stone-400 font-sans font-light line-clamp-2 mb-3 sm:mb-4 leading-relaxed">
-                                                            {item.description}
-                                                        </p>
+                                            <div
+                                                className="group shine-effect rounded-3xl bg-stone-900/50 border border-white/10 hover:border-amber-400/50 transition-all duration-300 overflow-hidden flex flex-col justify-between shadow-[0_8px_30px_rgba(0,0,0,0.5)] hover:shadow-[0_12px_40px_rgba(245,158,11,0.15)] h-full"
+                                            >
+                                                <Link href={`/producto/${item.id}`} className="relative aspect-square w-full overflow-hidden bg-stone-950 block">
+                                                    {itemImage ? (
+                                                        <img
+                                                            src={itemImage}
+                                                            alt={`${item.name} - Sol de Oro Joyería`}
+                                                            loading="lazy"
+                                                            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 brightness-95"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center text-stone-600 font-serif">
+                                                            Sin Foto
+                                                        </div>
                                                     )}
-                                                </div>
+                                                    <span className="absolute top-3.5 left-3.5 text-[10px] font-sans bg-stone-950/80 backdrop-blur-md text-amber-300 border border-white/15 px-3 py-1 rounded-full uppercase tracking-wider">
+                                                        {categoryName}
+                                                    </span>
+                                                </Link>
 
-                                                <div className="pt-4 sm:pt-5 border-t border-white/10 flex items-center justify-between gap-2">
+                                                <div className="p-5 sm:p-7 flex-1 flex flex-col justify-between">
                                                     <div>
-                                                        {item.weight_grams && (
-                                                            <span className="text-[10px] font-mono text-stone-400 block uppercase tracking-wider">
-                                                                Peso: {item.weight_grams}g
-                                                            </span>
+                                                        <Link href={`/producto/${item.id}`}>
+                                                            <h3 className="font-serif text-lg sm:text-2xl text-stone-100 group-hover:text-amber-300 transition-colors tracking-wide mb-1.5 sm:mb-2 line-clamp-1">
+                                                                {item.name}
+                                                            </h3>
+                                                        </Link>
+                                                        {item.description && (
+                                                            <p className="text-xs text-stone-400 font-sans font-light line-clamp-2 mb-3 sm:mb-4 leading-relaxed">
+                                                                {item.description}
+                                                            </p>
                                                         )}
-                                                        <span className="text-amber-400 font-bold">
-                                                            {item.price ? (
-                                                                <>
-                                                                    <span className="font-sans text-xs text-amber-500/80 mr-0.5">$</span>
-                                                                    <span className="font-serif text-base sm:text-lg tracking-wide text-amber-300">{item.price.toLocaleString('es-CO')}</span>
-                                                                    <span className="font-sans text-[10px] text-stone-400 ml-1">COP</span>
-                                                                </>
-                                                            ) : (
-                                                                <span className="font-sans text-xs text-amber-400">A consultar</span>
-                                                            )}
-                                                        </span>
                                                     </div>
 
-                                                    <a
-                                                        href={`https://wa.me/${CONFIG.phoneWhatsapp}?text=${encodeURIComponent(whatsappText)}`}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="px-4 sm:px-5 py-2 rounded-full bg-amber-500/10 border border-amber-500/40 text-amber-300 hover:bg-amber-400 hover:text-stone-950 text-xs font-sans font-semibold uppercase tracking-wider transition-all active:scale-[0.97] shrink-0"
-                                                    >
-                                                        Cotizar
-                                                    </a>
+                                                    <div className="pt-4 sm:pt-5 border-t border-white/10 flex items-center justify-between gap-2">
+                                                        <div>
+                                                            {item.weight_grams && (
+                                                                <span className="text-[10px] font-mono text-stone-400 block uppercase tracking-wider">
+                                                                    Peso: {item.weight_grams}g
+                                                                </span>
+                                                            )}
+                                                            <span className="text-amber-400 font-bold">
+                                                                {item.price ? (
+                                                                    <>
+                                                                        <span className="font-sans text-xs text-amber-500/80 mr-0.5">$</span>
+                                                                        <span className="font-serif text-base sm:text-lg tracking-wide text-amber-300">{item.price.toLocaleString('es-CO')}</span>
+                                                                        <span className="font-sans text-[10px] text-stone-400 ml-1">COP</span>
+                                                                    </>
+                                                                ) : (
+                                                                    <span className="font-sans text-xs text-amber-400">A consultar</span>
+                                                                )}
+                                                            </span>
+                                                        </div>
+
+                                                        <a
+                                                            href={`https://wa.me/${CONFIG.phoneWhatsapp}?text=${encodeURIComponent(whatsappText)}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="group/btn shine-effect px-4 sm:px-5 py-2 rounded-full bg-amber-500/10 border border-amber-500/40 text-amber-300 hover:bg-amber-400 hover:text-stone-950 text-xs font-sans font-semibold uppercase tracking-wider transition-all active:scale-[0.97] shrink-0"
+                                                        >
+                                                            Cotizar
+                                                        </a>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </FadeIn>
                                     );
                                 })}
                             </div>
@@ -840,15 +854,15 @@ export default function HomePageClient({
                         </div>
                     )}
 
-                    <div className="mt-8 sm:mt-14 text-center reveal-init">
+                    <FadeIn delay={0.2} className="mt-8 sm:mt-14 text-center">
                         <Link
                             href="/catalogo"
-                            className="inline-flex items-center gap-3 px-8 py-3.5 rounded-full bg-stone-900/80 border border-white/15 text-stone-200 hover:text-amber-300 hover:border-amber-400/50 text-xs font-sans transition-all font-semibold uppercase tracking-wider backdrop-blur-xl active:scale-[0.98] shadow-md group"
+                            className="group shine-effect inline-flex items-center gap-3 px-8 py-3.5 rounded-full bg-stone-900/80 border border-white/15 text-stone-200 hover:text-amber-300 hover:border-amber-400/50 text-xs font-sans transition-all font-semibold uppercase tracking-wider backdrop-blur-xl active:scale-[0.98] shadow-md"
                         >
                             <span>Ver todas las piezas del catálogo</span>
                             <ArrowRight className="w-4 h-4 text-stone-400 group-hover:text-amber-300 group-hover:translate-x-1 transition-all" strokeWidth={1.5} />
                         </Link>
-                    </div>
+                    </FadeIn>
                 </div>
             </section>
 
@@ -871,88 +885,94 @@ export default function HomePageClient({
 
                 {/* 2. CONTENIDO CENTRADO CON GARANTÍAS Y ACORDEÓN DE TRANSPARENCIA (100% VISIBLE) */}
                 <div className="max-w-4xl mx-auto relative z-10">
-                    <div className="text-center mb-8 sm:mb-12">
-                        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-stone-900/80 border border-amber-500/30 text-amber-300 text-[10px] uppercase tracking-[0.25em] font-medium mb-3 backdrop-blur-md shadow-lg">
-                            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                            <span>Transparencia & Seguridad // Garantía Certificada</span>
+                    <FadeIn>
+                        <div className="text-center mb-8 sm:mb-12">
+                            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-stone-900/80 border border-amber-500/30 text-amber-300 text-[10px] uppercase tracking-[0.25em] font-medium mb-3 backdrop-blur-md shadow-lg">
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                                <span>Transparencia & Seguridad // Garantía Certificada</span>
+                            </div>
+                            <h2 className="font-serif text-3xl sm:text-5xl text-stone-100 tracking-tight mb-3">Transparencia Garantizada</h2>
+                            <p className="text-stone-300 text-xs sm:text-sm font-sans font-light max-w-xl mx-auto">
+                                Comercio formal, pesaje analítico a la vista de nuestros clientes y respaldo directo en nuestra sede física.
+                            </p>
                         </div>
-                        <h2 className="font-serif text-3xl sm:text-5xl text-stone-100 tracking-tight mb-3">Transparencia Garantizada</h2>
-                        <p className="text-stone-300 text-xs sm:text-sm font-sans font-light max-w-xl mx-auto">
-                            Comercio formal, pesaje analítico a la vista de nuestros clientes y respaldo directo en nuestra sede física.
-                        </p>
-                    </div>
+                    </FadeIn>
 
                     {/* 3 PILARES DE SEGURIDAD Y CONFIANZA */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4 mb-8 sm:mb-12">
-                        <div className="p-4 sm:p-5 rounded-2xl bg-stone-900/75 border border-white/10 backdrop-blur-xl flex items-start gap-3.5 shadow-lg">
-                            <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
-                                <Scale className="w-4 h-4 text-amber-400" strokeWidth={1.5} />
+                    <FadeIn delay={0.1}>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4 mb-8 sm:mb-12">
+                            <div className="p-4 sm:p-5 rounded-2xl bg-stone-900/75 border border-white/10 backdrop-blur-xl flex items-start gap-3.5 shadow-lg">
+                                <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                                    <Scale className="w-4 h-4 text-amber-400" strokeWidth={1.5} />
+                                </div>
+                                <div>
+                                    <h4 className="text-xs sm:text-sm font-serif text-stone-100 font-semibold tracking-wide mb-1">
+                                        Balanzas Analíticas
+                                    </h4>
+                                    <p className="text-[11px] text-stone-400 font-sans font-light leading-relaxed">
+                                        Pesaje milimétrico frente a ti con calibración certificada. Cero aproximaciones.
+                                    </p>
+                                </div>
                             </div>
-                            <div>
-                                <h4 className="text-xs sm:text-sm font-serif text-stone-100 font-semibold tracking-wide mb-1">
-                                    Balanzas Analíticas
-                                </h4>
-                                <p className="text-[11px] text-stone-400 font-sans font-light leading-relaxed">
-                                    Pesaje milimétrico frente a ti con calibración certificada. Cero aproximaciones.
-                                </p>
-                            </div>
-                        </div>
 
-                        <div className="p-4 sm:p-5 rounded-2xl bg-stone-900/75 border border-white/10 backdrop-blur-xl flex items-start gap-3.5 shadow-lg">
-                            <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
-                                <FlaskConical className="w-4 h-4 text-amber-400" strokeWidth={1.5} />
+                            <div className="p-4 sm:p-5 rounded-2xl bg-stone-900/75 border border-white/10 backdrop-blur-xl flex items-start gap-3.5 shadow-lg">
+                                <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                                    <FlaskConical className="w-4 h-4 text-amber-400" strokeWidth={1.5} />
+                                </div>
+                                <div>
+                                    <h4 className="text-xs sm:text-sm font-serif text-stone-100 font-semibold tracking-wide mb-1">
+                                        Prueba Química en Vivo
+                                    </h4>
+                                    <p className="text-[11px] text-stone-400 font-sans font-light leading-relaxed">
+                                        Verificación instantánea con ácido de pureza Ley 750 (18K) ante tus ojos.
+                                    </p>
+                                </div>
                             </div>
-                            <div>
-                                <h4 className="text-xs sm:text-sm font-serif text-stone-100 font-semibold tracking-wide mb-1">
-                                    Prueba Química en Vivo
-                                </h4>
-                                <p className="text-[11px] text-stone-400 font-sans font-light leading-relaxed">
-                                    Verificación instantánea con ácido de pureza Ley 750 (18K) ante tus ojos.
-                                </p>
-                            </div>
-                        </div>
 
-                        <div className="p-4 sm:p-5 rounded-2xl bg-stone-900/75 border border-white/10 backdrop-blur-xl flex items-start gap-3.5 shadow-lg">
-                            <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
-                                <FileText className="w-4 h-4 text-amber-400" strokeWidth={1.5} />
-                            </div>
-                            <div>
-                                <h4 className="text-xs sm:text-sm font-serif text-stone-100 font-semibold tracking-wide mb-1">
-                                    Garantía Escrita
-                                </h4>
-                                <p className="text-[11px] text-stone-400 font-sans font-light leading-relaxed">
-                                    Certificado físico que respalda la autenticidad y pureza de tu joya de por vida.
-                                </p>
+                            <div className="p-4 sm:p-5 rounded-2xl bg-stone-900/75 border border-white/10 backdrop-blur-xl flex items-start gap-3.5 shadow-lg">
+                                <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                                    <FileText className="w-4 h-4 text-amber-400" strokeWidth={1.5} />
+                                </div>
+                                <div>
+                                    <h4 className="text-xs sm:text-sm font-serif text-stone-100 font-semibold tracking-wide mb-1">
+                                        Garantía Escrita
+                                    </h4>
+                                    <p className="text-[11px] text-stone-400 font-sans font-light leading-relaxed">
+                                        Certificado físico que respalda la autenticidad y pureza de tu joya de por vida.
+                                    </p>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </FadeIn>
 
                     {/* ACORDEÓN DE PREGUNTAS FRECUENTES */}
-                    <div className="rounded-3xl bg-stone-900/75 border border-white/15 backdrop-blur-xl p-5 sm:p-10 shadow-[0_20px_60px_rgba(0,0,0,0.8)] divide-y divide-white/10">
-                        {FAQS.map((faq, idx) => (
-                            <div
-                                key={idx}
-                                className="py-5 sm:py-6 first:pt-0 last:pb-0"
-                            >
-                                <button
-                                    onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-                                    className="w-full text-left font-serif text-stone-100 hover:text-amber-300 flex items-center justify-between gap-4 text-base sm:text-xl tracking-wide transition-colors group"
+                    <FadeIn delay={0.2}>
+                        <div className="rounded-3xl bg-stone-900/75 border border-white/15 backdrop-blur-xl p-5 sm:p-10 shadow-[0_20px_60px_rgba(0,0,0,0.8)] divide-y divide-white/10">
+                            {FAQS.map((faq, idx) => (
+                                <div
+                                    key={idx}
+                                    className="py-5 sm:py-6 first:pt-0 last:pb-0"
                                 >
-                                    <span>{faq.q}</span>
-                                    <span className={`w-8 h-8 rounded-full border border-white/20 flex items-center justify-center text-amber-400 text-base transition-transform duration-300 shrink-0 ${
-                                        openFaq === idx ? 'rotate-45 bg-amber-400/15 border-amber-500/50' : 'group-hover:border-amber-400/40 bg-stone-900/50'
-                                    }`}>
-                                        +
-                                    </span>
-                                </button>
-                                {openFaq === idx && (
-                                    <div className="text-stone-300 text-xs sm:text-sm font-sans font-light leading-relaxed pt-3.5 max-w-3xl animate-fadeIn">
-                                        {faq.a}
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-                    </div>
+                                    <button
+                                        onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
+                                        className="w-full text-left font-serif text-stone-100 hover:text-amber-300 flex items-center justify-between gap-4 text-base sm:text-xl tracking-wide transition-colors group"
+                                    >
+                                        <span>{faq.q}</span>
+                                        <span className={`w-8 h-8 rounded-full border border-white/20 flex items-center justify-center text-amber-400 text-base transition-transform duration-300 shrink-0 ${
+                                            openFaq === idx ? 'rotate-45 bg-amber-400/15 border-amber-500/50' : 'group-hover:border-amber-400/40 bg-stone-900/50'
+                                        }`}>
+                                            +
+                                        </span>
+                                    </button>
+                                    {openFaq === idx && (
+                                        <div className="text-stone-300 text-xs sm:text-sm font-sans font-light leading-relaxed pt-3.5 max-w-3xl animate-fadeIn">
+                                            {faq.a}
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </FadeIn>
                 </div>
             </section>
 
@@ -960,62 +980,65 @@ export default function HomePageClient({
             <section id="ubicacion" className="py-28 sm:py-36 px-6 border-t border-white/10 bg-gradient-to-b from-stone-950 via-stone-900/20 to-stone-950 relative">
                 <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 items-stretch">
                     {/* Tarjeta de Local Físico */}
-                    <div className="p-8 sm:p-10 rounded-3xl bg-stone-900/60 border border-white/15 backdrop-blur-xl shadow-2xl flex flex-col justify-between reveal-init">
-                        <div>
-                            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-300 text-[10px] uppercase tracking-[0.25em] font-medium mb-3 backdrop-blur-sm">
-                                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                                <span>Atención Directa // Encuéntranos</span>
-                            </div>
-                            <h2 className="font-serif text-3xl sm:text-4xl text-stone-100 tracking-tight mb-4">Nuestro Local Físico</h2>
-                            <p className="text-stone-300 text-xs sm:text-sm font-sans font-light mb-8 leading-relaxed">
-                                Te invitamos a conocer nuestras piezas en vivo, realizar avalúos presenciales de tu oro y recibir asesoría orfebre directa.
-                            </p>
+                    <FadeIn className="h-full">
+                        <div className="p-8 sm:p-10 rounded-3xl bg-stone-900/60 border border-white/15 backdrop-blur-xl shadow-2xl flex flex-col justify-between h-full">
+                            <div>
+                                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-300 text-[10px] uppercase tracking-[0.25em] font-medium mb-3 backdrop-blur-sm">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                                    <span>Atención Directa // Encuéntranos</span>
+                                </div>
+                                <h2 className="font-serif text-3xl sm:text-4xl text-stone-100 tracking-tight mb-4">Nuestro Local Físico</h2>
+                                <p className="text-stone-300 text-xs sm:text-sm font-sans font-light mb-8 leading-relaxed">
+                                    Te invitamos a conocer nuestras piezas en vivo, realizar avalúos presenciales de tu oro y recibir asesoría orfebre directa.
+                                </p>
 
-                            <div className="space-y-6 text-xs text-stone-300 mb-8">
-                                <div className="flex items-start gap-4">
-                                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        </svg>
+                                <div className="space-y-6 text-xs text-stone-300 mb-8">
+                                    <div className="flex items-start gap-4">
+                                        <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            </svg>
+                                        </div>
+                                        <div className="font-sans">
+                                            <strong className="block text-stone-100 font-sans uppercase tracking-wider text-[11px] mb-0.5">Dirección:</strong>
+                                            <span className="text-stone-300">{CONFIG.address}</span>
+                                            <span className="block text-stone-400">{CONFIG.city}</span>
+                                        </div>
                                     </div>
-                                    <div className="font-sans">
-                                        <strong className="block text-stone-100 font-sans uppercase tracking-wider text-[11px] mb-0.5">Dirección:</strong>
-                                        <span className="text-stone-300">{CONFIG.address}</span>
-                                        <span className="block text-stone-400">{CONFIG.city}</span>
+
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                            </svg>
+                                        </div>
+                                        <div className="font-sans">
+                                            <strong className="block text-stone-100 font-sans uppercase tracking-wider text-[11px] mb-0.5">Atención WhatsApp:</strong>
+                                            <a href={`https://wa.me/${CONFIG.phoneWhatsapp}`} target="_blank" rel="noopener noreferrer" className="text-amber-300 hover:underline">
+                                                +{CONFIG.phoneWhatsapp}
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
-
-                                <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                        </svg>
-                                    </div>
-                                    <div className="font-sans">
-                                        <strong className="block text-stone-100 font-sans uppercase tracking-wider text-[11px] mb-0.5">Atención WhatsApp:</strong>
-                                        <a href={`https://wa.me/${CONFIG.phoneWhatsapp}`} target="_blank" rel="noopener noreferrer" className="text-amber-300 hover:underline">
-                                            +{CONFIG.phoneWhatsapp}
-                                        </a>
-                                    </div>
-                                </div>
                             </div>
+
+                            <a
+                                href={CONFIG.googleMapsUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="group shine-effect w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-full bg-stone-900 border border-amber-500/40 text-amber-300 font-sans text-xs hover:bg-amber-400 hover:text-stone-950 transition-all font-semibold uppercase tracking-wider active:scale-[0.98] shadow-md text-center"
+                            >
+                                <span>Abrir en Google Maps (Cómo llegar)</span>
+                                <ArrowRight className="w-4 h-4 text-amber-400 group-hover:text-stone-950 group-hover:translate-x-1 transition-all" strokeWidth={1.5} />
+                            </a>
                         </div>
-
-                        <a
-                            href={CONFIG.googleMapsUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-full bg-stone-900 border border-amber-500/40 text-amber-300 font-sans text-xs hover:bg-amber-400 hover:text-stone-950 transition-all font-semibold uppercase tracking-wider active:scale-[0.98] shadow-md text-center group"
-                        >
-                            <span>Abrir en Google Maps (Cómo llegar)</span>
-                            <ArrowRight className="w-4 h-4 text-amber-400 group-hover:text-stone-950 group-hover:translate-x-1 transition-all" strokeWidth={1.5} />
-                        </a>
-                    </div>
+                    </FadeIn>
 
                     {/* Redes y Comunidad */}
-                    <div className="flex flex-col justify-between p-8 sm:p-10 rounded-3xl bg-stone-900/40 border border-white/10 backdrop-blur-xl reveal-init delay-stagger-2">
-                        <div>
+                    <FadeIn delay={0.15} className="h-full">
+                        <div className="flex flex-col justify-between p-8 sm:p-10 rounded-3xl bg-stone-900/40 border border-white/10 backdrop-blur-xl h-full">
+                            <div>
                             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-300 text-[10px] uppercase tracking-[0.25em] font-medium mb-3 backdrop-blur-sm">
                                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
                                 <span>Comunidad Digital</span>
@@ -1088,6 +1111,7 @@ export default function HomePageClient({
                             </a>
                         </div>
                     </div>
+                    </FadeIn>
                 </div>
             </section>
 

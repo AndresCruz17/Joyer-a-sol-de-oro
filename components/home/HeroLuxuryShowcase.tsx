@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import GoldDustParticles from '@/components/ui/GoldDustParticles';
+import FadeIn from '@/components/ui/FadeIn';
 
 import { GoldPriceData } from '@/lib/gold/gold-types';
 
@@ -106,23 +107,17 @@ export default function HeroLuxuryShowcase({
             <div className="relative z-10 w-full max-w-4xl mx-auto flex flex-col items-center text-center my-auto py-6 sm:py-10">
 
                 {/* Eyebrow Técnico Minimalista */}
-                <div
-                    className={`inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-stone-900/70 border border-white/20 backdrop-blur-xl shadow-[0_4px_20px_rgba(0,0,0,0.5)] mb-6 transition-all duration-700 ease-spring ${
-                        mounted ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0'
-                    }`}
-                >
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" />
-                    <span className="text-[10px] sm:text-[11px] font-sans font-semibold tracking-[0.25em] uppercase text-amber-300">
-                        Joyería & Compraventa // Oro 18K Ley 750
-                    </span>
-                </div>
+                <FadeIn delay={0.05}>
+                    <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-stone-900/70 border border-white/20 backdrop-blur-xl shadow-[0_4px_20px_rgba(0,0,0,0.5)] mb-6 transition-all hover:border-amber-400/40">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" />
+                        <span className="text-[10px] sm:text-[11px] font-sans font-semibold tracking-[0.25em] uppercase text-amber-300">
+                            Joyería & Compraventa // Oro 18K Ley 750
+                        </span>
+                    </div>
+                </FadeIn>
 
                 {/* Titular Monumental Esculpido en Bodoni Moda con Sello de Pureza */}
-                <div
-                    className={`flex flex-col items-center transition-all duration-700 delay-150 ease-spring ${
-                        mounted ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-                    }`}
-                >
+                <FadeIn delay={0.15}>
                     <h1 className="font-serif text-6xl sm:text-8xl md:text-9xl lg:text-[115px] font-light tracking-tight text-stone-100 leading-[0.92] drop-shadow-[0_20px_50px_rgba(0,0,0,0.95)]">
                         <span>Sol de </span>
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-yellow-500 font-light">
@@ -135,13 +130,17 @@ export default function HeroLuxuryShowcase({
                             </span>
                         </span>
                     </h1>
+                </FadeIn>
 
-                    {/* Párrafo Editorial de Prestigio (Respiro y Claridad) */}
+                {/* Párrafo Editorial de Prestigio (Respiro y Claridad) */}
+                <FadeIn delay={0.25}>
                     <p className="mt-6 sm:mt-7 text-stone-200 text-sm sm:text-base md:text-lg font-light font-sans max-w-2xl leading-relaxed text-balance drop-shadow-[0_2px_12px_rgba(0,0,0,0.85)]">
                         Compramos tu oro con pesaje de precisión y pago inmediato al precio más competitivo del mercado. Joyas exclusivas en Oro Nacional forjado a mano e importación italiana Ley 750.
                     </p>
+                </FadeIn>
 
-                    {/* Cápsula Minimalista de Frases Dinámicas con Blur-Fade */}
+                {/* Cápsula Minimalista de Frases Dinámicas con Blur-Fade */}
+                <FadeIn delay={0.35}>
                     <div className="mt-6 inline-flex items-center gap-3 px-5 py-2 rounded-full bg-stone-900/65 border border-white/15 backdrop-blur-xl shadow-lg hover:border-amber-400/40 transition-colors">
                         <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shadow-[0_0_6px_#fbbf24]" />
                         <span
@@ -152,13 +151,15 @@ export default function HeroLuxuryShowcase({
                             {phrases[phraseIndex]}
                         </span>
                     </div>
+                </FadeIn>
 
-                    {/* Acciones Hápticas Principales (Píldoras Elegantes y Livianas) */}
+                {/* Acciones Hápticas Principales (Píldoras Elegantes y Livianas) */}
+                <FadeIn delay={0.45}>
                     <div className="mt-8 sm:mt-9 flex flex-wrap items-center justify-center gap-4">
-                        {/* Botón Primario con Destello Líquido */}
+                        {/* Botón Primario con Destello Líquido y Shine Effect */}
                         <a
                             href="#cotizador"
-                            className="relative overflow-hidden group inline-flex items-center justify-between gap-4 pl-7 pr-2.5 py-2.5 rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-stone-950 font-bold text-xs font-sans tracking-wider uppercase shadow-[0_0_30px_rgba(245,158,11,0.4)] hover:shadow-[0_0_50px_rgba(245,158,11,0.65)] hover:brightness-105 active:scale-[0.98] transition-all duration-200 ease-spring"
+                            className="relative overflow-hidden group shine-effect inline-flex items-center justify-between gap-4 pl-7 pr-2.5 py-2.5 rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-stone-950 font-bold text-xs font-sans tracking-wider uppercase shadow-[0_0_30px_rgba(245,158,11,0.4)] hover:shadow-[0_0_50px_rgba(245,158,11,0.65)] hover:brightness-105 active:scale-[0.98] transition-all duration-200 ease-spring"
                         >
                             <span className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none animate-liquid-sweep" />
                             <span className="relative z-10 font-bold">Cotizar / Vender Oro</span>
@@ -183,8 +184,10 @@ export default function HeroLuxuryShowcase({
                             <span>Explorar Joyería</span>
                         </Link>
                     </div>
+                </FadeIn>
 
-                    {/* Fila Minimalista de Pilares de Confianza */}
+                {/* Fila Minimalista de Pilares de Confianza */}
+                <FadeIn delay={0.55}>
                     <div className="mt-12 flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-xs font-sans text-stone-300">
                         <div className="flex items-center gap-2">
                             <span className="text-amber-400">✦</span>
@@ -199,8 +202,7 @@ export default function HeroLuxuryShowcase({
                             <span className="tracking-wide">Pago Inmediato en Efectivo o Banco</span>
                         </div>
                     </div>
-                </div>
-
+                </FadeIn>
             </div>
 
             {/* 3. BASE DEL HERO: MICRO-TICKER HAIRLINE & INDICADOR DE SCROLL */}

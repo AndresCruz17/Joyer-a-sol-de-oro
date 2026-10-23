@@ -7,6 +7,7 @@ import ProductGallery from '@/components/product/ProductGallery';
 import ProductSchema from '@/components/seo/ProductSchema';
 import { getWhatsAppUrl, SITE_CONFIG } from '@/lib/config';
 import LuxuryNavbar from '@/components/ui/LuxuryNavbar';
+import FadeIn from '@/components/ui/FadeIn';
 import { MapPin, ShieldCheck, Scale, Truck, ArrowRight, MessageCircle } from 'lucide-react';
 
 // REVALIDACIÓN INCREMENTAL (ISR) CADA 60 SEGUNDOS
@@ -311,7 +312,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                                 href={whatsappUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-stone-950 font-sans font-bold uppercase tracking-wider text-xs sm:text-sm transition-all shadow-[0_0_30px_rgba(245,158,11,0.25)] hover:shadow-[0_0_45px_rgba(245,158,11,0.4)] flex items-center justify-center gap-3 active:scale-[0.98]"
+                                className="group shine-effect w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-stone-950 font-sans font-bold uppercase tracking-wider text-xs sm:text-sm transition-all shadow-[0_0_30px_rgba(245,158,11,0.25)] hover:shadow-[0_0_45px_rgba(245,158,11,0.4)] flex items-center justify-center gap-3 active:scale-[0.98]"
                             >
                                 <MessageCircle className="w-4 h-4 text-stone-950 shrink-0" strokeWidth={2} />
                                 <span>Cotizar esta joya por WhatsApp</span>
@@ -378,69 +379,70 @@ export default async function ProductDetailPage({ params }: PageProps) {
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                            {relatedProducts.map((rel) => {
+                            {relatedProducts.map((rel, idx) => {
                                 const relPrice = rel.price ? `$${rel.price.toLocaleString('es-CO')} COP` : 'A consultar';
                                 const relWeight = rel.weight_grams ? `${rel.weight_grams}g` : null;
 
                                 return (
-                                    <div
-                                        key={rel.id}
-                                        className="group rounded-3xl bg-stone-900/40 border border-white/10 hover:border-amber-400/50 transition-all duration-300 overflow-hidden flex flex-col justify-between shadow-[0_8px_30px_rgba(0,0,0,0.5)] hover:shadow-[0_12px_40px_rgba(245,158,11,0.15)] backdrop-blur-xl"
-                                    >
-                                        <Link href={`/producto/${rel.id}`} className="relative aspect-square w-full overflow-hidden bg-stone-950 block">
-                                            {rel.image_url ? (
-                                                <img
-                                                    src={rel.image_url}
-                                                    alt={rel.name}
-                                                    loading="lazy"
-                                                    className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 brightness-95"
-                                                />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-stone-600 font-serif">
-                                                    Sin Foto
-                                                </div>
-                                            )}
-                                            <span className="absolute top-3.5 left-3.5 text-[10px] font-sans bg-stone-950/80 backdrop-blur-md text-amber-300 border border-white/15 px-3 py-1 rounded-full uppercase tracking-wider">
-                                                Oro 18K
-                                            </span>
-                                        </Link>
-
-                                        <div className="p-5 flex-1 flex flex-col justify-between">
-                                            <div>
-                                                <Link href={`/producto/${rel.id}`}>
-                                                    <h4 className="font-serif text-lg text-stone-100 group-hover:text-amber-300 transition-colors tracking-wide mb-2 line-clamp-1">
-                                                        {rel.name}
-                                                    </h4>
-                                                </Link>
-                                                {relWeight && (
-                                                    <span className="text-[10px] font-mono text-stone-400 block uppercase tracking-wider mb-3">
-                                                        Peso aprox: {relWeight}
-                                                    </span>
+                                    <FadeIn key={rel.id} delay={(idx % 3) * 0.08} className="h-full">
+                                        <div
+                                            className="group shine-effect rounded-3xl bg-stone-900/40 border border-white/10 hover:border-amber-400/50 transition-all duration-300 overflow-hidden flex flex-col justify-between shadow-[0_8px_30px_rgba(0,0,0,0.5)] hover:shadow-[0_12px_40px_rgba(245,158,11,0.15)] backdrop-blur-xl h-full"
+                                        >
+                                            <Link href={`/producto/${rel.id}`} className="relative aspect-square w-full overflow-hidden bg-stone-950 block">
+                                                {rel.image_url ? (
+                                                    <img
+                                                        src={rel.image_url}
+                                                        alt={rel.name}
+                                                        loading="lazy"
+                                                        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 brightness-95"
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-stone-600 font-serif">
+                                                        Sin Foto
+                                                    </div>
                                                 )}
-                                            </div>
-
-                                            <div className="pt-3 border-t border-white/10 flex items-center justify-between">
-                                                <span className="text-amber-400 font-bold">
-                                                    {rel.price ? (
-                                                        <>
-                                                            <span className="font-sans text-xs text-amber-500/80 mr-0.5">$</span>
-                                                            <span className="font-serif text-base tracking-wide text-amber-300">{rel.price.toLocaleString('es-CO')}</span>
-                                                            <span className="font-sans text-[10px] text-stone-400 ml-1">COP</span>
-                                                        </>
-                                                    ) : (
-                                                        <span className="font-sans text-xs text-amber-400">A consultar</span>
-                                                    )}
+                                                <span className="absolute top-3.5 left-3.5 text-[10px] font-sans bg-stone-950/80 backdrop-blur-md text-amber-300 border border-white/15 px-3 py-1 rounded-full uppercase tracking-wider">
+                                                    Oro 18K
                                                 </span>
+                                            </Link>
 
-                                                <Link
-                                                    href={`/producto/${rel.id}`}
-                                                    className="px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/40 text-amber-300 hover:bg-amber-400 hover:text-stone-950 text-[11px] font-sans font-semibold uppercase tracking-wider transition-all"
-                                                >
-                                                    Ver Joya
-                                                </Link>
+                                            <div className="p-5 flex-1 flex flex-col justify-between">
+                                                <div>
+                                                    <Link href={`/producto/${rel.id}`}>
+                                                        <h4 className="font-serif text-lg text-stone-100 group-hover:text-amber-300 transition-colors tracking-wide mb-2 line-clamp-1">
+                                                            {rel.name}
+                                                        </h4>
+                                                    </Link>
+                                                    {relWeight && (
+                                                        <span className="text-[10px] font-mono text-stone-400 block uppercase tracking-wider mb-3">
+                                                            Peso aprox: {relWeight}
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                <div className="pt-3 border-t border-white/10 flex items-center justify-between">
+                                                    <span className="text-amber-400 font-bold">
+                                                        {rel.price ? (
+                                                            <>
+                                                                <span className="font-sans text-xs text-amber-500/80 mr-0.5">$</span>
+                                                                <span className="font-serif text-base tracking-wide text-amber-300">{rel.price.toLocaleString('es-CO')}</span>
+                                                                <span className="font-sans text-[10px] text-stone-400 ml-1">COP</span>
+                                                            </>
+                                                        ) : (
+                                                            <span className="font-sans text-xs text-amber-400">A consultar</span>
+                                                        )}
+                                                    </span>
+
+                                                    <Link
+                                                        href={`/producto/${rel.id}`}
+                                                        className="group/btn shine-effect px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/40 text-amber-300 hover:bg-amber-400 hover:text-stone-950 text-[11px] font-sans font-semibold uppercase tracking-wider transition-all"
+                                                    >
+                                                        Ver Joya
+                                                    </Link>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </FadeIn>
                                 );
                             })}
                         </div>

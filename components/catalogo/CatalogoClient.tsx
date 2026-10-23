@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 import { SITE_CONFIG, getWhatsAppUrl } from '@/lib/config';
 import LuxuryNavbar from '@/components/ui/LuxuryNavbar';
+import FadeIn from '@/components/ui/FadeIn';
 import { Search, Gem } from 'lucide-react';
 
 export interface Category {
@@ -257,7 +258,7 @@ function CatalogoContent({ initialCategories, initialProducts }: CatalogoClientP
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredProducts.map((item) => {
+            {filteredProducts.map((item, idx) => {
               const categoryName = (Array.isArray(item.categories) ? item.categories[0]?.name : item.categories?.name) || 'Joyería';
               const itemWeight = item.weight_grams ? `${item.weight_grams}g` : 'A consultar';
               const itemPrice = item.price ? `$${item.price.toLocaleString('es-CO')} COP` : 'A consultar';
@@ -277,77 +278,78 @@ function CatalogoContent({ initialCategories, initialProducts }: CatalogoClientP
               const whatsappUrl = getWhatsAppUrl(whatsappText);
 
               return (
-                <div
-                  key={item.id}
-                  className="group rounded-3xl bg-stone-900/40 border border-white/10 hover:border-amber-400/50 transition-all duration-300 overflow-hidden flex flex-col justify-between shadow-[0_8px_30px_rgba(0,0,0,0.5)] hover:shadow-[0_12px_40px_rgba(245,158,11,0.15)] backdrop-blur-xl"
-                >
-                  {/* Foto Clickeable */}
-                  <Link href={`/producto/${item.id}`} className="relative aspect-square w-full overflow-hidden bg-stone-950 block">
-                    {item.image_url ? (
-                      <img
-                        src={item.image_url}
-                        alt={item.name}
-                        loading="lazy"
-                        className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 brightness-95"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-stone-600 font-serif">
-                        Sin Foto
-                      </div>
-                    )}
-                    <span className="absolute top-3.5 left-3.5 text-[10px] font-sans bg-stone-950/80 backdrop-blur-md text-amber-300 border border-white/15 px-3 py-1 rounded-full uppercase tracking-wider">
-                      {categoryName}
-                    </span>
-                  </Link>
-
-                  {/* Ficha e Información */}
-                  <div className="p-6 sm:p-7 flex-1 flex flex-col justify-between">
-                    <div>
-                      <Link href={`/producto/${item.id}`}>
-                        <h3 className="font-serif text-xl sm:text-2xl text-stone-100 group-hover:text-amber-300 transition-colors tracking-wide mb-2">
-                          {item.name}
-                        </h3>
-                      </Link>
-
-                      {item.description && (
-                        <p className="text-xs text-stone-400 font-sans font-light line-clamp-2 mb-4 leading-relaxed">
-                          {item.description}
-                        </p>
+                <FadeIn key={item.id} delay={(idx % 6) * 0.05} className="h-full">
+                  <div
+                    className="group shine-effect rounded-3xl bg-stone-900/40 border border-white/10 hover:border-amber-400/50 transition-all duration-300 overflow-hidden flex flex-col justify-between shadow-[0_8px_30px_rgba(0,0,0,0.5)] hover:shadow-[0_12px_40px_rgba(245,158,11,0.15)] backdrop-blur-xl h-full"
+                  >
+                    {/* Foto Clickeable */}
+                    <Link href={`/producto/${item.id}`} className="relative aspect-square w-full overflow-hidden bg-stone-950 block">
+                      {item.image_url ? (
+                        <img
+                          src={item.image_url}
+                          alt={item.name}
+                          loading="lazy"
+                          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 brightness-95"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-stone-600 font-serif">
+                          Sin Foto
+                        </div>
                       )}
-                    </div>
+                      <span className="absolute top-3.5 left-3.5 text-[10px] font-sans bg-stone-950/80 backdrop-blur-md text-amber-300 border border-white/15 px-3 py-1 rounded-full uppercase tracking-wider">
+                        {categoryName}
+                      </span>
+                    </Link>
 
-                    <div className="pt-4 border-t border-white/10 flex items-center justify-between">
+                    {/* Ficha e Información */}
+                    <div className="p-6 sm:p-7 flex-1 flex flex-col justify-between">
                       <div>
-                        {item.weight_grams && (
-                          <span className="text-[10px] font-mono text-stone-400 block uppercase tracking-wider">
-                            Peso: {item.weight_grams}g
-                          </span>
+                        <Link href={`/producto/${item.id}`}>
+                          <h3 className="font-serif text-xl sm:text-2xl text-stone-100 group-hover:text-amber-300 transition-colors tracking-wide mb-2">
+                            {item.name}
+                          </h3>
+                        </Link>
+
+                        {item.description && (
+                          <p className="text-xs text-stone-400 font-sans font-light line-clamp-2 mb-4 leading-relaxed">
+                            {item.description}
+                          </p>
                         )}
-                        {/* Renderizado de precio */}
-                        <span className="text-amber-400 font-bold">
-                          {item.price ? (
-                            <>
-                              <span className="font-sans text-xs text-amber-500/80 mr-0.5">$</span>
-                              <span className="font-serif text-lg tracking-wide text-amber-300">{item.price.toLocaleString('es-CO')}</span>
-                              <span className="font-sans text-[10px] text-stone-400 ml-1">COP</span>
-                            </>
-                          ) : (
-                            <span className="font-sans text-xs text-amber-400">A consultar</span>
-                          )}
-                        </span>
                       </div>
 
-                      <a
-                        href={whatsappUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-5 py-2 rounded-full bg-amber-500/10 border border-amber-500/40 text-amber-300 hover:bg-amber-400 hover:text-stone-950 text-xs font-sans font-semibold uppercase tracking-wider transition-all active:scale-[0.97]"
-                      >
-                        Cotizar
-                      </a>
+                      <div className="pt-4 border-t border-white/10 flex items-center justify-between">
+                        <div>
+                          {item.weight_grams && (
+                            <span className="text-[10px] font-mono text-stone-400 block uppercase tracking-wider">
+                              Peso: {item.weight_grams}g
+                            </span>
+                          )}
+                          {/* Renderizado de precio */}
+                          <span className="text-amber-400 font-bold">
+                            {item.price ? (
+                              <>
+                                <span className="font-sans text-xs text-amber-500/80 mr-0.5">$</span>
+                                <span className="font-serif text-lg tracking-wide text-amber-300">{item.price.toLocaleString('es-CO')}</span>
+                                <span className="font-sans text-[10px] text-stone-400 ml-1">COP</span>
+                              </>
+                            ) : (
+                              <span className="font-sans text-xs text-amber-400">A consultar</span>
+                            )}
+                          </span>
+                        </div>
+
+                        <a
+                          href={whatsappUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="group/btn shine-effect px-5 py-2 rounded-full bg-amber-500/10 border border-amber-500/40 text-amber-300 hover:bg-amber-400 hover:text-stone-950 text-xs font-sans font-semibold uppercase tracking-wider transition-all active:scale-[0.97]"
+                        >
+                          Cotizar
+                        </a>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </FadeIn>
               );
             })}
           </div>
